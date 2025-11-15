@@ -1,0 +1,106 @@
+{
+  "name": "uplim",
+  "displayName": "UPLim Language Support",
+  "description": "Official language support for UPLim - The Human Programming Language",
+  "version": "0.1.0",
+  "publisher": "uplim",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "uplim",
+    "programming language",
+    "compiler",
+    "wasm",
+    "native"
+  ],
+  "icon": "icons/uplim.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Huliichuk/UPLim"
+  },
+  "activationEvents": [
+    "onLanguage:uplim"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "uplim",
+        "aliases": ["UPLim", "uplim"],
+        "extensions": [".upl", ".uplim"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/uplim.png",
+          "dark": "./icons/uplim.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "uplim",
+        "scopeName": "source.uplim",
+        "path": "./syntaxes/uplim.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "UPLim",
+      "properties": {
+        "uplim.lsp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable UPLim Language Server"
+        },
+        "uplim.lsp.trace": {
+          "type": "string",
+          "enum": ["off", "messages", "verbose"],
+          "default": "off",
+          "description": "Trace communication between VS Code and LSP server"
+        },
+        "uplim.analysis.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable static analysis"
+        },
+        "uplim.security.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable security scanning"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "uplim.restartLsp",
+        "title": "UPLim: Restart Language Server"
+      },
+      {
+        "command": "uplim.analyzeProject",
+        "title": "UPLim: Analyze Project"
+      },
+      {
+        "command": "uplim.showEngineReport",
+        "title": "UPLim: Show Engine Report"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "uplim-language-support",
+  "displayName": "UPLim",
+  "description": "Syntax highlighting and language support for UPLim",
+  "version": "1.0.0",
+  "publisher": "uplim",
+  "engines": { "vscode": "^1.60.0" },
+  "contributes": {
+    "languages": [
+      {
+        "id": "upl",
+        "aliases": ["UPLim", "upl"],
+        "extensions": [".upl"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "upl",
+        "scopeName": "source.upl",
+        "path": "./syntaxes/UPLim.tmLanguage.json"
+      }
+    ]
+  }
+}

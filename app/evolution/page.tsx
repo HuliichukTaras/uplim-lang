@@ -14,6 +14,49 @@ export default function EvolutionPage() {
   const [proposals, setProposals] = useState<EvolutionProposal[]>([]);
   const [error, setError] = useState('');
 
+  const evolutionHistory = [
+    {
+      version: '0.3.0',
+      date: '2024-01-15',
+      title: 'Pattern Matching System',
+      description: 'Added comprehensive pattern matching with match/case syntax',
+      impact: 'high',
+      examples: ['match value do\n  case Some(x): say x\n  case None: say "empty"\nend']
+    },
+    {
+      version: '0.2.5',
+      date: '2024-01-10',
+      title: 'Result Type Enhancement',
+      description: 'Improved error handling with Result<T, E> type',
+      impact: 'high',
+      examples: ['func divide(a: Int, b: Int) -> Result<Int, String>']
+    },
+    {
+      version: '0.2.0',
+      date: '2024-01-05',
+      title: 'Async/Await Support',
+      description: 'Added async functions and await keyword for concurrent operations',
+      impact: 'medium',
+      examples: ['async func fetch_data() -> Data {\n  let response be await http.get(url)\n  return response\n}']
+    },
+    {
+      version: '0.1.8',
+      date: '2023-12-20',
+      title: 'Trait System',
+      description: 'Implemented trait-based polymorphism for better code reuse',
+      impact: 'high',
+      examples: ['trait Display {\n  func show(self) -> String\n}']
+    },
+    {
+      version: '0.1.5',
+      date: '2023-12-15',
+      title: 'Memory Safety Improvements',
+      description: 'Enhanced ownership and borrowing system',
+      impact: 'critical',
+      examples: ['func process(data: &String) -> Int']
+    }
+  ];
+
   const generateProposal = async () => {
     if (!context.trim()) {
       setError('Please provide context for evolution');
@@ -201,6 +244,58 @@ export default function EvolutionPage() {
               </Card>
             ))
           )}
+        </div>
+
+        {/* Evolution History section */}
+        <div className="space-y-6 mt-16">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Evolution History</h2>
+            <Badge variant="outline" className="text-xs">
+              Recent language improvements and changes
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            {evolutionHistory.map((entry, idx) => (
+              <Card key={idx}>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline">v{entry.version}</Badge>
+                        <Badge 
+                          variant={
+                            entry.impact === 'critical' ? 'destructive' : 
+                            entry.impact === 'high' ? 'default' : 
+                            'secondary'
+                          }
+                        >
+                          {entry.impact} impact
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">{entry.date}</span>
+                      </div>
+                      <CardTitle className="text-xl">{entry.title}</CardTitle>
+                      <CardDescription className="mt-2">{entry.description}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {entry.examples.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-sm">Example Usage</h4>
+                      <div className="space-y-2">
+                        {entry.examples.map((example, exIdx) => (
+                          <div key={exIdx} className="rounded-md bg-muted p-3 font-mono text-sm whitespace-pre-wrap">
+                            {example}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>

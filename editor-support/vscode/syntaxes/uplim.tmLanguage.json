@@ -1,0 +1,156 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "UPLim",
+  "scopeName": "source.uplim",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#types" },
+    { "include": "#functions" },
+    { "include": "#operators" },
+    { "include": "#constants" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.uplim",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.uplim",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.uplim",
+          "match": "\\b(let|make|when|do|end|return|match|case|if|else|for|while|break|continue|async|await|spawn)\\b"
+        },
+        {
+          "name": "keyword.other.uplim",
+          "match": "\\b(type|impl|trait|module|import|export|extern|unsafe|pub)\\b"
+        },
+        {
+          "name": "storage.modifier.uplim",
+          "match": "\\b(mut|const|static)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.uplim",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.uplim",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.uplim",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.uplim",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.uplim",
+          "match": "\\b0x[0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.uplim",
+          "match": "\\b0b[01]+\\b"
+        },
+        {
+          "name": "constant.numeric.float.uplim",
+          "match": "\\b\\d+\\.\\d+([eE][+-]?\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.uplim",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.primitive.uplim",
+          "match": "\\b(Int|Float|Bool|String|Char|Unit|Array|Option|Result|Map|Set)\\b"
+        },
+        {
+          "name": "support.type.sized.uplim",
+          "match": "\\b(i8|i16|i32|i64|u8|u16|u32|u64|f32|f64|usize|isize)\\b"
+        },
+        {
+          "name": "entity.name.type.uplim",
+          "match": "\\b[A-Z][a-zA-Z0-9]*\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.uplim",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*(?=\\s*\\()"
+        },
+        {
+          "name": "support.function.builtin.uplim",
+          "match": "\\b(say|print|println|panic|assert|len|clone|copy)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.uplim",
+          "match": "(\\+|-|\\*|/|%|\\*\\*)"
+        },
+        {
+          "name": "keyword.operator.comparison.uplim",
+          "match": "(==|!=|<|>|<=|>=)"
+        },
+        {
+          "name": "keyword.operator.logical.uplim",
+          "match": "(&&|\\|\\||!)"
+        },
+        {
+          "name": "keyword.operator.assignment.uplim",
+          "match": "(=|\\+=|-=|\\*=|/=|%=)"
+        },
+        {
+          "name": "keyword.operator.other.uplim",
+          "match": "(->|=>|\\||&|\\?|::|\\.\\.)"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.uplim",
+          "match": "\\b(true|false|None|Some|Ok|Err)\\b"
+        },
+        {
+          "name": "variable.language.uplim",
+          "match": "\\b(self|Self)\\b"
+        }
+      ]
+    }
+  }
+}

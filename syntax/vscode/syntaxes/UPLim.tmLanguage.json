@@ -1,0 +1,72 @@
+{
+  "scopeName": "source.upl",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#functions" },
+    { "include": "#numbers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.upl",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.upl",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "name": "string.quoted.single.upl",
+          "begin": "'",
+          "end": "'"
+        },
+        {
+          "name": "string.quoted.multiline.upl",
+          "begin": "\"\"\"",
+          "end": "\"\"\""
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.upl",
+          "match": "\\b(module|import|export|type|fn|let|const|var|async|await|return|if|else|match|for|while|loop|break|continue|true|false|null|use|from|implements|extends|trait|interface|yield|struct|enum|public|private|protected|static|inline|external)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.upl",
+          "match": "\\b(Int|Float|String|Bool|Any|List|Map|Path|Result|Option|Id)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.upl",
+          "match": "\\bfn\\s+([A-Za-z_][A-Za-z0-9_]*)"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.upl",
+          "match": "\\b([0-9]+(\\.[0-9]+)?)\\b"
+        }
+      ]
+    }
+  }
+}

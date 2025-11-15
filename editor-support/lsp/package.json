@@ -1,0 +1,19 @@
+{
+  "name": "uplim-lsp",
+  "version": "0.1.0",
+  "description": "Language Server Protocol implementation for UPLim",
+  "main": "out/server.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "test": "node ./out/test.js"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver-textdocument": "^1.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { PlayIcon, CodeIcon } from 'lucide-react';
 import Link from 'next/link';
-import { UPLimCompiler } from '@/lib/uplim-compiler';
 
 export default function PlaygroundPage() {
   const [code, setCode] = useState(`let greeting be "Hello"
@@ -16,16 +15,29 @@ say greeting plus " " plus name`);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
-  const runCode = () => {
+  const runCode = async () => {
     setIsRunning(true);
+    setOutput('Running...');
+    
     try {
-      const compiler = new UPLimCompiler('simple');
-      const result = compiler.execute(code);
-      setOutput(result);
+      const response = await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setOutput(data.output);
+      } else {
+        setOutput(`Error: ${data.error}`);
+      }
     } catch (error) {
       setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRunning(false);
     }
-    setIsRunning(false);
   };
 
   return (
@@ -107,16 +119,16 @@ say greeting plus " " plus name`);
               <Button
                 variant="outline"
                 className="w-full justify-start font-mono text-sm"
-                onClick={() => setCode(`let name be "UPLim"\nwhen name equals "UPLim" do\n  say "Welcome!"\nend`)}
+                onClick={() => setCode(`let name be "UPLim"\nwhen name equals "UPLim" do say "Welcome!"`)}
               >
                 Conditionals
               </Button>
               <Button
                 variant="outline"
                 className="w-full justify-start font-mono text-sm"
-                onClick={() => setCode(`make greet(name) do\n  return "Hello" plus name\nend\n\nsay greet("World")`)}
+                onClick={() => setCode(`let a = 100\nlet b = 50\nsay "a + b =" plus a + b\nwhen a greater than b do say "a is greater!"`)}
               >
-                Functions
+                Math Operations
               </Button>
             </CardContent>
           </Card>

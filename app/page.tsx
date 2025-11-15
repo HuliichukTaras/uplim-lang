@@ -11,16 +11,34 @@ import Link from 'next/link';
 export default function HomePage() {
   const [code, setCode] = useState(`let x = 10
 say "Hello UPLim!"
-say "x is" x`);
+say "x is " plus x
+when x greater than 5 do say "x is large!"`);
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
-  const runCode = () => {
+  const runCode = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      setOutput('Hello UPLim!\nx is 10');
+    setOutput('Running...');
+    
+    try {
+      const response = await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setOutput(data.output);
+      } else {
+        setOutput(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
       setIsRunning(false);
-    }, 500);
+    }
   };
 
   return (
