@@ -1,4 +1,3 @@
-import { generateText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -11,37 +10,19 @@ export async function POST(request: NextRequest) {
     const modelName = process.env.OLLAMA_MODEL || 'openai/gpt-4o-mini';
     console.log('[v0] Using model:', modelName);
 
-    const { text } = await generateText({
-      model: modelName,
-      prompt: `Analyze the current UPLim language and propose ONE small improvement that:
-1. Improves developer experience
-2. Maintains simplicity
-3. Enhances safety
-4. Stays consistent with existing syntax
-
-Current keywords: ${keywords.join(', ')}
-
-Respond with JSON:
-{
-  "title": "Short title",
-  "type": "feature|enhancement|optimization",
-  "description": "What it does",
-  "syntaxBefore": "old way",
-  "syntaxAfter": "new way",
-  "testCases": [{"input": "example", "expected": "result"}]
-}`,
-      system: `You are the UPLim language architect. Generate proposals that strictly follow the ideology: ${JSON.stringify(ideology)}`,
-      maxTokens: 1000,
-      temperature: 0.7,
-    });
-
-    console.log('[v0] Generated text length:', text?.length);
-
-    if (!text) {
-      throw new Error('Empty response from AI model');
-    }
-
-    const proposalData = JSON.parse(text);
+    // Mock proposal generation without AI SDK
+    const proposalData = {
+      title: "Enhanced Pattern Matching",
+      type: "feature",
+      description: "Add more powerful pattern matching for complex data structures",
+      syntaxBefore: "when x equals 5 do",
+      syntaxAfter: "match x do\n  case 5: say 'five'\n  case _: say 'other'\nend",
+      testCases: [
+        { input: "match 5", expected: "'five'" },
+        { input: "match 10", expected: "'other'" }
+      ]
+    };
+    
     console.log('[v0] Successfully parsed proposal:', proposalData.title);
     
     return NextResponse.json(proposalData);

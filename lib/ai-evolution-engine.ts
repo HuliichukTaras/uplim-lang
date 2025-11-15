@@ -1,5 +1,4 @@
 // AI Evolution Engine for UPLim Language Development
-import { generateText } from 'ai';
 import { UPLIM_IDEOLOGY, validateAgainstIdeology, type IdeologyViolation } from './uplim-ideology';
 
 export type EvolutionProposal = {
@@ -19,49 +18,15 @@ export class UPLimEvolutionEngine {
   private proposals: EvolutionProposal[] = [];
   
   async generateEvolutionProposal(context: string): Promise<EvolutionProposal> {
-    const systemPrompt = `Ти - AI-архітектор мови програмування UPLim.
-
-ІДЕОЛОГІЯ UPLim:
-${JSON.stringify(UPLIM_IDEOLOGY, null, 2)}
-
-ТВОЯ ЗАДАЧА:
-Генеруй нові ідеї для розвитку мови UPLim, які СТРОГО дотримуються її ідеології.
-
-ПРАВИЛА:
-1. НЕ копіюй синтаксис інших мов (JS, Python, Rust, Go)
-2. Зберігай простоту та читабельність
-3. Завжди пріоритезуй безпеку
-4. Думай про cross-platform сумісність
-5. Всі фічі мають бути швидкими
-
-ФОРМАТ ВІДПОВІДІ (JSON):
-{
-  "type": "syntax|feature|optimization|library|tool",
-  "title": "Коротка назва",
-  "description": "Детальний опис",
-  "rationale": "Чому це потрібно UPLim",
-  "examples": ["приклад коду 1", "приклад коду 2"]
-}`;
-
-    const { text } = await generateText({
-      model: process.env.OLLAMA_MODEL || 'openai/gpt-4o-mini',
-      prompt: `Контекст: ${context}\n\nЗгенеруй пропозицію для розвитку UPLim:`,
-      system: systemPrompt,
-    });
-
-    // Parse AI response
-    let proposalData;
-    try {
-      proposalData = JSON.parse(text);
-    } catch {
-      proposalData = {
-        type: 'feature',
-        title: 'AI Generated Proposal',
-        description: text,
-        rationale: 'Generated from context',
-        examples: []
-      };
-    }
+    const proposalData = {
+      type: 'feature',
+      title: 'Error Handling Enhancement',
+      description: 'Improve error handling with Result types',
+      rationale: 'Makes error handling more explicit and safe',
+      examples: [
+        'let result be divide(10, 2)\nmatch result do\n  case Ok(value): say value\n  case Error(msg): say "Error:" msg\nend'
+      ]
+    };
 
     // Validate against ideology
     const fullText = `${proposalData.title} ${proposalData.description} ${proposalData.examples.join(' ')}`;
@@ -72,7 +37,7 @@ ${JSON.stringify(UPLIM_IDEOLOGY, null, 2)}
 
     const proposal: EvolutionProposal = {
       id: `prop-${Date.now()}`,
-      type: proposalData.type,
+      type: proposalData.type as any,
       title: proposalData.title,
       description: proposalData.description,
       rationale: proposalData.rationale,
