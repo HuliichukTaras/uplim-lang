@@ -51,17 +51,18 @@ export default function EnginePage() {
     fetchHistory();
     fetchQueue();
 
-    // Poll every 5 seconds
     const interval = setInterval(() => {
       fetchEngineStatus();
       fetchHistory();
       fetchQueue();
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
 
   const handleAction = async (action: string) => {
+    if (loading) return;
+    
     setLoading(true);
     try {
       const response = await fetch('/api/engine', {
@@ -69,15 +70,19 @@ export default function EnginePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })
       });
+      
+      if (!response.ok) {
+        throw new Error('Engine action failed');
+      }
+      
       const data = await response.json();
       setEngineState(data);
       
-      // Refresh data after action
       setTimeout(() => {
         fetchEngineStatus();
         fetchHistory();
         fetchQueue();
-      }, 1000);
+      }, 2000);
     } catch (error) {
       console.error('Failed to execute action:', error);
     } finally {

@@ -61,6 +61,7 @@ export class AutonomousEngine {
   private state: EngineState;
   private compiler: UPLimCompiler;
   private iterationInterval?: NodeJS.Timeout;
+  private isIterating: boolean = false;
 
   constructor() {
     this.state = {
@@ -82,6 +83,11 @@ export class AutonomousEngine {
   }
 
   async start() {
+    if (this.state.isRunning) {
+      console.log('[Engine] Already running');
+      return this.state;
+    }
+
     console.log('[Engine] =========================================');
     console.log('[Engine] UPLim Autonomous Engine Starting...');
     console.log('[Engine] =========================================');
@@ -93,10 +99,14 @@ export class AutonomousEngine {
     await this.checkSyntax();
     await this.updateDocs();
 
-    // Start iteration loop (every 10 seconds)
+    if (this.iterationInterval) {
+      clearInterval(this.iterationInterval);
+    }
+
+    // Start iteration loop (every 15 seconds to avoid conflicts)
     this.iterationInterval = setInterval(() => {
       this.iterate();
-    }, 10000);
+    }, 15000);
 
     return this.state;
   }
@@ -107,6 +117,7 @@ export class AutonomousEngine {
     
     if (this.iterationInterval) {
       clearInterval(this.iterationInterval);
+      this.iterationInterval = undefined;
     }
 
     console.log('[Engine] Engine stopped. Total iterations:', this.state.currentIteration);
@@ -117,52 +128,68 @@ export class AutonomousEngine {
     this.state.isRunning = false;
     if (this.iterationInterval) {
       clearInterval(this.iterationInterval);
+      this.iterationInterval = undefined;
     }
     console.log('[Engine] Engine paused at iteration', this.state.currentIteration);
   }
 
   resume() {
+    if (this.state.isRunning && this.iterationInterval) {
+      console.log('[Engine] Already running');
+      return;
+    }
+
     if (!this.state.isRunning) {
       console.log('[Engine] Resuming from iteration', this.state.currentIteration);
       this.state.isRunning = true;
       this.iterationInterval = setInterval(() => {
         this.iterate();
-      }, 10000);
+      }, 15000);
     }
   }
 
   async iterate() {
-    if (!this.state.isRunning) return;
-
-    this.state.currentIteration++;
-    this.state.stats.totalIterations++;
-    
-    console.log(`[Engine] === Iteration ${this.state.currentIteration} ===`);
-
-    // Step 1: Process queued tasks
-    if (this.state.tasksQueue.length > 0) {
-      await this.processNextTask();
+    if (!this.state.isRunning || this.isIterating) {
+      return this.state;
     }
 
-    // Step 2: Major evolution check every 5 iterations
-    if (this.state.currentIteration % 5 === 0) {
-      console.log('[Engine] Major evolution check...');
-      await this.evolveGrammar();
-    }
+    this.isIterating = true;
 
-    // Step 3: Syntax check every 3 iterations
-    if (this.state.currentIteration % 3 === 0) {
-      await this.checkSyntax();
-    }
+    try {
+      this.state.currentIteration++;
+      this.state.stats.totalIterations++;
+      
+      console.log(`[Engine] === Iteration ${this.state.currentIteration} ===`);
 
-    // Step 4: Update docs every 10 iterations
-    if (this.state.currentIteration % 10 === 0) {
-      await this.updateDocs();
-    }
+      // Step 1: Process queued tasks
+      if (this.state.tasksQueue.length > 0) {
+        await this.processNextTask();
+      }
 
-    // Step 5: Project structure check every 7 iterations
-    if (this.state.currentIteration % 7 === 0) {
-      await this.checkProjectStructure();
+      // Step 2: Major evolution check every 5 iterations
+      if (this.state.currentIteration % 5 === 0) {
+        console.log('[Engine] Major evolution check...');
+        await this.evolveGrammar();
+      }
+
+      // Step 3: Syntax check every 3 iterations
+      if (this.state.currentIteration % 3 === 0) {
+        await this.checkSyntax();
+      }
+
+      // Step 4: Update docs every 10 iterations
+      if (this.state.currentIteration % 10 === 0) {
+        await this.updateDocs();
+      }
+
+      // Step 5: Project structure check every 7 iterations
+      if (this.state.currentIteration % 7 === 0) {
+        await this.checkProjectStructure();
+      }
+    } catch (error) {
+      console.error('[Engine] Iteration error:', error);
+    } finally {
+      this.isIterating = false;
     }
 
     return this.state;
