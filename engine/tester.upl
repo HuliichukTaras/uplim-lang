@@ -1,0 +1,141 @@
+// Testing Module
+// Generates and runs tests for language features
+
+let testSuite be {
+  total: 0,
+  passed: 0,
+  failed: 0,
+  failures: []
+}
+
+make generateTests(proposal) do
+  say "[Tester] Generating tests for:" proposal.title
+  
+  let tests be []
+  
+  // Generate tests from proposal test cases
+  for each testCase in proposal.testCases do
+    tests.push({
+      name: proposal.title + " - " + testCase.input,
+      input: testCase.input,
+      expected: testCase.expected,
+      proposal: proposal.id
+    })
+  end
+  
+  // Generate edge case tests
+  tests = tests.concat(generateEdgeCaseTests(proposal))
+  
+  say "[Tester] Generated" tests.length "tests"
+  return tests
+end
+
+make generateEdgeCaseTests(proposal) do
+  let edgeCases be []
+  
+  // Test with empty input
+  edgeCases.push({
+    name: proposal.title + " - empty input",
+    input: "",
+    expected: "Error: Empty input"
+  })
+  
+  // Test with invalid syntax
+  edgeCases.push({
+    name: proposal.title + " - invalid syntax",
+    input: "invalid syntax here",
+    expected: "Error: Syntax error"
+  })
+  
+  return edgeCases
+end
+
+make runTests(tests) do
+  say "[Tester] Running" tests.length "tests..."
+  
+  testSuite.total = tests.length
+  testSuite.passed = 0
+  testSuite.failed = 0
+  testSuite.failures = []
+  
+  for each test in tests do
+    let result be runSingleTest(test)
+    
+    when result.passed equals true do
+      testSuite.passed = testSuite.passed + 1
+      say "[Tester] ✓" test.name
+    else
+      testSuite.failed = testSuite.failed + 1
+      testSuite.failures.push(result)
+      say "[Tester] ✗" test.name
+      say "[Tester]   Expected:" test.expected
+      say "[Tester]   Got:" result.actual
+    end
+  end
+  
+  say "[Tester] Results:" testSuite.passed "/" testSuite.total "passed"
+  return testSuite
+end
+
+make runSingleTest(test) do
+  try
+    let actual be executeCode(test.input)
+    let passed be actual equals test.expected
+    
+    return {
+      passed: passed,
+      actual: actual,
+      expected: test.expected,
+      test: test.name
+    }
+  catch error
+    return {
+      passed: false,
+      actual: error.message,
+      expected: test.expected,
+      test: test.name,
+      stackTrace: error.stack
+    }
+  end
+end
+
+make executeCode(code) do
+  // Mock implementation - should use actual UPLim interpreter
+  say "[Tester] Executing:" code
+  return "mock_result"
+end
+
+make runAllTests() do
+  say "[Tester] Running comprehensive test suite..."
+  
+  let allTests be [
+    ...loadSyntaxTests(),
+    ...loadFeatureTests(),
+    ...loadIntegrationTests()
+  ]
+  
+  return runTests(allTests)
+end
+
+make loadSyntaxTests() do
+  return [
+    { name: "Variable declaration", input: "let x = 5", expected: "5" },
+    { name: "Function definition", input: "make add(a,b) do return a+b end", expected: "function" },
+    { name: "Conditional", input: "when true do say 'yes' end", expected: "yes" }
+  ]
+end
+
+make loadFeatureTests() do
+  return [
+    { name: "Array operations", input: "[1,2,3].map(x => x*2)", expected: "[2,4,6]" },
+    { name: "String interpolation", input: "say 'Hello' plus 'World'", expected: "HelloWorld" }
+  ]
+end
+
+make loadIntegrationTests() do
+  return [
+    { name: "Full program", input: "let x=5\nsay x", expected: "5" }
+  ]
+end
+
+export { generateTests, runTests, runAllTests }

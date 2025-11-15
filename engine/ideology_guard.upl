@@ -1,0 +1,153 @@
+// Ideology Guard Module
+// Validates proposals against UPLim core principles
+
+let coreIdeology be {
+  readability: {
+    weight: 10,
+    rules: [
+      "Natural language syntax preferred",
+      "Avoid cryptic symbols",
+      "Self-documenting code",
+      "Maximum nesting depth: 4"
+    ]
+  },
+  safety: {
+    weight: 10,
+    rules: [
+      "No null or undefined",
+      "Use Option<T> for nullable values",
+      "Use Result<T,E> for errors",
+      "Memory-safe by default",
+      "No unsafe blocks without explicit annotation"
+    ]
+  },
+  portability: {
+    weight: 9,
+    rules: [
+      "Platform-agnostic by default",
+      "Compile to WebAssembly, LLVM, JavaScript",
+      "No platform-specific code in core",
+      "Cross-platform standard library"
+    ]
+  },
+  performance: {
+    weight: 8,
+    rules: [
+      "Zero-cost abstractions",
+      "Minimal runtime overhead",
+      "Fast compilation",
+      "Efficient memory usage"
+    ]
+  },
+  ergonomics: {
+    weight: 9,
+    rules: [
+      "Developer-friendly APIs",
+      "Predictable behavior",
+      "Good error messages",
+      "Type inference where possible"
+    ]
+  }
+}
+
+make validateAgainstIdeology(proposal) do
+  say "[IdeologyGuard] Validating proposal:" proposal.title
+  
+  let violations be []
+  let score be 0
+  let maxScore be 0
+  
+  // Check each principle
+  for each principle, config in coreIdeology do
+    let principleScore be proposal.ideologyAlignment[principle]
+    let weight be config.weight
+    
+    score = score + (principleScore * weight)
+    maxScore = maxScore + (10 * weight)
+    
+    // Check if score is below threshold
+    when principleScore less than 6 do
+      violations.push({
+        principle: principle,
+        score: principleScore,
+        reason: "Score below minimum threshold (6/10)"
+      })
+    end
+  end
+  
+  let alignmentPercentage be (score / maxScore) * 100
+  
+  say "[IdeologyGuard] Alignment:" alignmentPercentage + "%"
+  
+  // Check for specific violations
+  violations = violations.concat(checkReadability(proposal))
+  violations = violations.concat(checkSafety(proposal))
+  violations = violations.concat(checkPortability(proposal))
+  
+  let approved be violations.length equals 0 and alignmentPercentage greater than 70
+  
+  return {
+    approved: approved,
+    score: alignmentPercentage,
+    violations: violations,
+    reason: approved ? "Approved" : "Violations found: " + violations.length
+  }
+end
+
+make checkReadability(proposal) do
+  let violations be []
+  
+  // Check syntax complexity
+  when proposal.syntaxComplexity greater than 7 do
+    violations.push({
+      principle: "readability",
+      reason: "Syntax too complex (complexity: " + proposal.syntaxComplexity + ")"
+    })
+  end
+  
+  // Check for cryptic symbols
+  let crypticSymbols be ["@", "$", "~", "`", "^"]
+  for each symbol in crypticSymbols do
+    when proposal.syntaxAfter.includes(symbol) do
+      violations.push({
+        principle: "readability",
+        reason: "Contains cryptic symbol: " + symbol
+      })
+    end
+  end
+  
+  return violations
+end
+
+make checkSafety(proposal) do
+  let violations be []
+  
+  // Check for unsafe patterns
+  let unsafePatterns be ["null", "undefined", "unsafe", "pointer", "throw"]
+  for each pattern in unsafePatterns do
+    when proposal.syntaxAfter.includes(pattern) do
+      violations.push({
+        principle: "safety",
+        reason: "Introduces unsafe pattern: " + pattern
+      })
+    end
+  end
+  
+  return violations
+end
+
+make checkPortability(proposal) do
+  let violations be []
+  
+  // Check for platform-specific code
+  when proposal.platformSpecific equals true do
+    violations.push({
+      principle: "portability",
+      reason: "Platform-specific implementation"
+    })
+  end
+  
+  return violations
+end
+
+export { validateAgainstIdeology, coreIdeology }

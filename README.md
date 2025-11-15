@@ -23,7 +23,7 @@ It targets **WebAssembly**, **native code** and enables powerful tooling out of 
 
 ## 🚀 Quick Example
 
-```upl
+\`\`\`upl
 let x = 10
 say "Hello Uplim!"
 when x > 5 do

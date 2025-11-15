@@ -1,0 +1,88 @@
+// Changelog Management Module
+// Maintains version history
+
+let changelog be []
+
+make addEntry(entry) do
+  say "[ChangeLogger] Adding changelog entry:" entry.title
+  
+  changelog.push({
+    version: entry.version,
+    type: entry.type,
+    title: entry.title,
+    description: entry.description,
+    date: entry.date,
+    timestamp: Date.now()
+  })
+  
+  // Write to changelog file
+  saveChangelog()
+end
+
+make saveChangelog() do
+  let content be generateChangelogMarkdown()
+  writeFile("docs/changelog.md", content)
+  say "[ChangeLogger] Changelog saved"
+end
+
+make generateChangelogMarkdown() do
+  let md be "# UPLim Changelog\n\n"
+  md = md + "All notable changes to UPLim will be documented in this file.\n\n"
+  md = md + "The format is based on [Keep a Changelog](https://keepachangelog.com/).\n\n"
+  
+  // Group by version
+  let versions be groupByVersion(changelog)
+  
+  for each version, entries in versions do
+    md = md + "## [" + version + "]\n\n"
+    
+    let added be entries.filter(e => e.type equals "feature")
+    let changed be entries.filter(e => e.type equals "enhancement")
+    let fixed be entries.filter(e => e.type equals "bug_fix")
+    
+    when added.length greater than 0 do
+      md = md + "### Added\n\n"
+      for each entry in added do
+        md = md + "- " + entry.title + ": " + entry.description + "\n"
+      end
+      md = md + "\n"
+    end
+    
+    when changed.length greater than 0 do
+      md = md + "### Changed\n\n"
+      for each entry in changed do
+        md = md + "- " + entry.title + ": " + entry.description + "\n"
+      end
+      md = md + "\n"
+    end
+    
+    when fixed.length greater than 0 do
+      md = md + "### Fixed\n\n"
+      for each entry in fixed do
+        md = md + "- " + entry.title + ": " + entry.description + "\n"
+      end
+      md = md + "\n"
+    end
+  end
+  
+  return md
+end
+
+make groupByVersion(entries) do
+  let grouped be {}
+  
+  for each entry in entries do
+    when grouped[entry.version] equals undefined do
+      grouped[entry.version] = []
+    end
+    grouped[entry.version].push(entry)
+  end
+  
+  return grouped
+end
+
+make getHistory() do
+  return changelog
+end
+
+export { addEntry, saveChangelog, getHistory }
