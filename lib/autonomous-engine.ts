@@ -62,6 +62,7 @@ export class AutonomousEngine {
   private compiler: UPLimCompiler;
   private iterationInterval?: NodeJS.Timeout;
   private isIterating: boolean = false;
+  private operationLock: boolean = false;
 
   constructor() {
     this.state = {
@@ -83,35 +84,54 @@ export class AutonomousEngine {
   }
 
   async start() {
+    if (this.operationLock) {
+      console.log('[Engine] Operation in progress, skipping start');
+      return this.state;
+    }
+    
     if (this.state.isRunning) {
       console.log('[Engine] Already running');
       return this.state;
     }
 
-    console.log('[Engine] =========================================');
-    console.log('[Engine] UPLim Autonomous Engine Starting...');
-    console.log('[Engine] =========================================');
-    
-    this.state.isRunning = true;
-    this.state.currentIteration = 0;
+    this.operationLock = true;
 
-    // Initial checks
-    await this.checkSyntax();
-    await this.updateDocs();
+    try {
+      console.log('[Engine] =========================================');
+      console.log('[Engine] UPLim Autonomous Engine Starting...');
+      console.log('[Engine] =========================================');
+      
+      this.state.isRunning = true;
+      this.state.currentIteration = 0;
 
-    if (this.iterationInterval) {
-      clearInterval(this.iterationInterval);
+      await this.checkSyntax();
+      await this.updateDocs();
+
+      if (this.iterationInterval) {
+        clearInterval(this.iterationInterval);
+      }
+
+      this.iterationInterval = setInterval(() => {
+        if (!this.operationLock) {
+          this.iterate();
+        }
+      }, 20000);
+
+      console.log('[Engine] Engine started successfully');
+    } finally {
+      this.operationLock = false;
     }
-
-    // Start iteration loop (every 15 seconds to avoid conflicts)
-    this.iterationInterval = setInterval(() => {
-      this.iterate();
-    }, 15000);
 
     return this.state;
   }
 
   stop() {
+    if (this.operationLock) {
+      console.log('[Engine] Waiting for current operation to finish...');
+      setTimeout(() => this.stop(), 1000);
+      return this.state;
+    }
+
     console.log('[Engine] Stopping autonomous engine...');
     this.state.isRunning = false;
     
@@ -125,6 +145,12 @@ export class AutonomousEngine {
   }
 
   pause() {
+    if (this.operationLock) {
+      console.log('[Engine] Waiting for current operation to finish...');
+      setTimeout(() => this.pause(), 1000);
+      return;
+    }
+
     this.state.isRunning = false;
     if (this.iterationInterval) {
       clearInterval(this.iterationInterval);
@@ -134,6 +160,11 @@ export class AutonomousEngine {
   }
 
   resume() {
+    if (this.operationLock) {
+      console.log('[Engine] Operation in progress, skipping resume');
+      return;
+    }
+    
     if (this.state.isRunning && this.iterationInterval) {
       console.log('[Engine] Already running');
       return;
@@ -143,17 +174,21 @@ export class AutonomousEngine {
       console.log('[Engine] Resuming from iteration', this.state.currentIteration);
       this.state.isRunning = true;
       this.iterationInterval = setInterval(() => {
-        this.iterate();
-      }, 15000);
+        if (!this.operationLock) {
+          this.iterate();
+        }
+      }, 20000);
     }
   }
 
   async iterate() {
-    if (!this.state.isRunning || this.isIterating) {
+    if (!this.state.isRunning || this.isIterating || this.operationLock) {
+      console.log('[Engine] Skipping iteration - busy or stopped');
       return this.state;
     }
 
     this.isIterating = true;
+    this.operationLock = true;
 
     try {
       this.state.currentIteration++;
@@ -161,35 +196,35 @@ export class AutonomousEngine {
       
       console.log(`[Engine] === Iteration ${this.state.currentIteration} ===`);
 
-      // Step 1: Process queued tasks
       if (this.state.tasksQueue.length > 0) {
         await this.processNextTask();
       }
 
-      // Step 2: Major evolution check every 5 iterations
       if (this.state.currentIteration % 5 === 0) {
         console.log('[Engine] Major evolution check...');
         await this.evolveGrammar();
       }
 
-      // Step 3: Syntax check every 3 iterations
       if (this.state.currentIteration % 3 === 0) {
         await this.checkSyntax();
       }
 
-      // Step 4: Update docs every 10 iterations
       if (this.state.currentIteration % 10 === 0) {
         await this.updateDocs();
       }
 
-      // Step 5: Project structure check every 7 iterations
       if (this.state.currentIteration % 7 === 0) {
         await this.checkProjectStructure();
       }
+
+      console.log('[Engine] Iteration completed successfully');
     } catch (error) {
       console.error('[Engine] Iteration error:', error);
     } finally {
       this.isIterating = false;
+      setTimeout(() => {
+        this.operationLock = false;
+      }, 1000);
     }
 
     return this.state;

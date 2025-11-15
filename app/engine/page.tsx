@@ -55,13 +55,16 @@ export default function EnginePage() {
       fetchEngineStatus();
       fetchHistory();
       fetchQueue();
-    }, 10000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, []);
 
   const handleAction = async (action: string) => {
-    if (loading) return;
+    if (loading) {
+      console.log('[UI] Action already in progress');
+      return;
+    }
     
     setLoading(true);
     try {
@@ -82,11 +85,11 @@ export default function EnginePage() {
         fetchEngineStatus();
         fetchHistory();
         fetchQueue();
-      }, 2000);
+      }, 3000);
     } catch (error) {
       console.error('Failed to execute action:', error);
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 2000);
     }
   };
 
