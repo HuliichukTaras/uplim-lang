@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { SparklesIcon, CheckCircleIcon, XCircleIcon, AlertCircleIcon } from 'lucide-react';
 import { evolutionEngine, type EvolutionProposal } from '@/lib/ai-evolution-engine';
 
 export default function EvolutionPage() {
@@ -108,8 +107,7 @@ export default function EvolutionPage() {
       <div className="container py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold tracking-tight mb-4">
-            <SparklesIcon className="inline h-10 w-10 text-primary mr-2" />
-            UPLim Evolution Engine
+            ✨ UPLim Evolution Engine
           </h1>
           <p className="text-lg text-muted-foreground text-balance">
             AI-powered system for automatic language development while preserving UPLim ideology
@@ -133,13 +131,11 @@ export default function EvolutionPage() {
             />
             {error && (
               <div className="text-sm text-destructive flex items-center gap-2">
-                <AlertCircleIcon className="h-4 w-4" />
-                {error}
+                ⚠️ {error}
               </div>
             )}
             <Button onClick={generateProposal} disabled={isGenerating} className="gap-2">
-              <SparklesIcon className="h-4 w-4" />
-              {isGenerating ? 'Generating...' : 'Generate Proposal'}
+              ✨ {isGenerating ? 'Generating...' : 'Generate Proposal'}
             </Button>
           </CardContent>
         </Card>
@@ -198,8 +194,7 @@ export default function EvolutionPage() {
                   {proposal.violations.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-2 flex items-center gap-2">
-                        <AlertCircleIcon className="h-4 w-4 text-destructive" />
-                        Ideology Violations
+                        ⚠️ Ideology Violations
                       </h4>
                       <div className="space-y-2">
                         {proposal.violations.map((violation, idx) => (
@@ -227,16 +222,14 @@ export default function EvolutionPage() {
                         disabled={proposal.violations.some(v => v.severity === 'critical')}
                         className="gap-2"
                       >
-                        <CheckCircleIcon className="h-4 w-4" />
-                        Approve
+                        ✓ Approve
                       </Button>
                       <Button
                         onClick={() => rejectProposal(proposal.id)}
                         variant="destructive"
                         className="gap-2"
                       >
-                        <XCircleIcon className="h-4 w-4" />
-                        Reject
+                        ✗ Reject
                       </Button>
                     </div>
                   )}

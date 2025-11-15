@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { PlayIcon, CodeIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function PlaygroundPage() {
@@ -79,8 +78,7 @@ say greeting plus " " plus name`);
               />
               <div className="flex gap-2">
                 <Button onClick={runCode} disabled={isRunning} className="gap-2">
-                  <PlayIcon className="h-4 w-4" />
-                  {isRunning ? 'Running...' : 'Run Code'}
+                  ▶ {isRunning ? 'Running...' : 'Run Code'}
                 </Button>
                 <Button variant="outline" onClick={() => setCode('')}>
                   Clear

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PlayIcon, SparklesIcon, CodeIcon, ShieldCheckIcon, ZapIcon, GlobeIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -64,7 +63,7 @@ when x greater than 5 do say "x is large!"`);
             </Link>
             <Link href="/engine">
               <Button size="sm" className="gap-2">
-                <CodeIcon className="h-4 w-4" />
+                {'</>'}
                 Start Coding
               </Button>
             </Link>
@@ -76,8 +75,7 @@ when x greater than 5 do say "x is large!"`);
       <section className="container py-24 md:py-32">
         <div className="mx-auto max-w-5xl text-center">
           <Badge className="mb-4 text-xs font-medium" variant="secondary">
-            <SparklesIcon className="mr-1 h-3 w-3" />
-            Universal. Compiled. AI-Powered.
+            ✨ Universal. Compiled. AI-Powered.
           </Badge>
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance md:text-7xl">
             The Human Programming Language
@@ -88,14 +86,12 @@ when x greater than 5 do say "x is large!"`);
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" className="gap-2" asChild>
               <Link href="#playground">
-                <PlayIcon className="h-5 w-5" />
-                Try It Now
+                ▶ Try It Now
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="gap-2" asChild>
               <Link href="/engine">
-                <CodeIcon className="h-5 w-5" />
-                View Engine
+                {'</>'} View Engine
               </Link>
             </Button>
           </div>
@@ -143,7 +139,7 @@ when x greater than 5 do say "x is large!"`);
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
-                <GlobeIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">🌍</div>
                 <CardTitle>Universal Compilation</CardTitle>
                 <CardDescription>
                   Compile to WebAssembly for browsers, LLVM IR for native performance, or JavaScript for legacy compatibility. One codebase, any platform.
@@ -153,7 +149,7 @@ when x greater than 5 do say "x is large!"`);
 
             <Card>
               <CardHeader>
-                <ShieldCheckIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">🛡️</div>
                 <CardTitle>Safe by Default</CardTitle>
                 <CardDescription>
                   No null, no undefined, no crashes. Memory-safe and thread-safe with compiler-enforced guarantees and Result/Option types.
@@ -163,7 +159,7 @@ when x greater than 5 do say "x is large!"`);
 
             <Card>
               <CardHeader>
-                <ZapIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">⚡</div>
                 <CardTitle>Extremely Fast</CardTitle>
                 <CardDescription>
                   Always compiled, never just interpreted. Zero-cost abstractions, minimal runtime, cold start under 20ms.
@@ -173,7 +169,7 @@ when x greater than 5 do say "x is large!"`);
 
             <Card>
               <CardHeader>
-                <CodeIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">💻</div>
                 <CardTitle>Simple to Use</CardTitle>
                 <CardDescription>
                   Natural language syntax. Read code like sentences. No computer science degree required. Perfect for beginners and experts.
@@ -183,7 +179,7 @@ when x greater than 5 do say "x is large!"`);
 
             <Card>
               <CardHeader>
-                <SparklesIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">✨</div>
                 <CardTitle>AI-Native</CardTitle>
                 <CardDescription>
                   Optional AI integration for advanced analysis and suggestions. Self-improving engine for language evolution. You stay in control.
@@ -193,7 +189,7 @@ when x greater than 5 do say "x is large!"`);
 
             <Card>
               <CardHeader>
-                <ZapIcon className="h-10 w-10 text-primary mb-2" />
+                <div className="h-10 w-10 text-4xl mb-2">🔗</div>
                 <CardTitle>Full Interoperability</CardTitle>
                 <CardDescription>
                   FFI bridges to C, JavaScript, JVM, and .NET. Embed UPLim anywhere or call existing libraries seamlessly.
@@ -231,8 +227,7 @@ when x greater than 5 do say "x is large!"`);
                 />
                 <div className="mt-4 flex gap-2">
                   <Button onClick={runCode} disabled={isRunning} className="gap-2">
-                    <PlayIcon className="h-4 w-4" />
-                    {isRunning ? 'Running...' : 'Run Code'}
+                    ▶ {isRunning ? 'Running...' : 'Run Code'}
                   </Button>
                   <Button variant="outline" onClick={() => setOutput('')}>
                     Clear Output
