@@ -9,15 +9,25 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Invalid code provided' }, { status: 400 });
     }
 
-    const projectRoot = process.cwd();
-    const engine = new UPLimEngine(projectRoot);
+    // Proxy to Render backend
+    const renderResponse = await fetch('https://uplim-lang.onrender.com/run', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
 
-    const outputLines = engine.execute(code);
-    const output = outputLines.join('\n');
+    if (!renderResponse.ok) {
+       const errorText = await renderResponse.text();
+       throw new Error(`Render API error: ${renderResponse.status} ${errorText}`);
+    }
+
+    const data = await renderResponse.json();
 
     return Response.json({
       success: true,
-      output: output,
+      output: data.result || data.error || 'No output', 
       timestamp: new Date().toISOString()
     });
 

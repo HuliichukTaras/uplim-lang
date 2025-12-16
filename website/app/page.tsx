@@ -20,7 +20,7 @@ when x greater than 5 do say "x is large!"`);
     setOutput('Running...');
     
     try {
-      const response = await fetch('/api/execute', {
+      const response = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
