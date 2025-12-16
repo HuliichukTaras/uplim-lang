@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
-    "analyze": "tsx src/cli.ts analyze"
+    "analyze": "tsx src/cli.ts analyze",
+    "test": "python3 test_uplim.py"
   },
   "dependencies": {
     "chalk": "^4.1.2",

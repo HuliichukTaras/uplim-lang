@@ -26,11 +26,16 @@ Deployment instructions for the UPLim language interpreter API on Render.
     ```
 
 3.  **Test**:
-    ```bash
-    curl -X POST -H "Content-Type: application/json" \
-         -d '{"code": "say 1 + 2"}' \
-         http://localhost:10000/run
-    ```
+    - Run the automated suite (uses the CLI via `npx tsx`):
+      ```bash
+      npm test
+      ```
+    - Or invoke the API directly:
+      ```bash
+      curl -X POST -H "Content-Type: application/json" \
+           -d '{"code": "say 1 + 2"}' \
+           http://localhost:10000/run
+      ```
 
 ## Deploy to Render
 
