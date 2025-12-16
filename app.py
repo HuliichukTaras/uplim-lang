@@ -1,15 +1,8 @@
 from flask import Flask, request, jsonify
-import subprocess
 import os
-import tempfile
+from src import interpreter
 
 app = Flask(__name__)
-
-# Path to the TypeScript CLI
-# In Docker, we will setup the path correctly.
-# Locally, it's relative to CWD.
-BASE_DIR = os.getcwd()
-CLI_PATH = os.path.join(BASE_DIR, 'src', 'cli.ts')
 
 @app.route('/run', methods=['POST'])
 def run_code():
@@ -19,38 +12,10 @@ def run_code():
 
     code = data['code']
     
-    # Create temp file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.upl', delete=False) as tmp:
-        tmp.write(code)
-        tmp_path = tmp.name
-
-    try:
-        # Execute using npx tsx
-        # We assume Node/npm/tsx are installed in the environment
-        result = subprocess.run(
-            ['npx', 'tsx', CLI_PATH, 'run', tmp_path],
-            capture_output=True,
-            text=True,
-            cwd=BASE_DIR
-        )
-        
-        stdout = result.stdout
-        stderr = result.stderr
-        
-        # If exit code is not 0, treating as error/exception
-        if result.returncode != 0:
-             return jsonify({
-                'result': stdout, 
-                'error': stderr or "Unknown runtime error"
-            })
-
-        return jsonify({'result': stdout, 'error': None})
-
-    except Exception as e:
-        return jsonify({'result': None, 'error': str(e)}), 500
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
+    # Use the interpreter wrapper
+    response = interpreter.run(code)
+    
+    return jsonify(response)
 
 @app.route('/health', methods=['GET'])
 def health():
