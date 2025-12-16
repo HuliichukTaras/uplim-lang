@@ -2,7 +2,10 @@
 
 import { Command } from 'commander'
 import { UPLimEngine } from './engine'
+import { UPLimParser } from './parser'
+import * as fs from 'fs'
 import * as path from 'path'
+import { Compiler } from './compiler'
 
 const program = new Command()
 
@@ -86,4 +89,93 @@ program
     }
   })
 
-program.parse()
+program
+  .command('run')
+  .description('Run a UPLim file')
+  .argument('<file>', 'File to run')
+  .action(async (filePath: string) => {
+    try {
+      if (!fs.existsSync(filePath)) {
+        console.error(`File not found: ${filePath}`)
+        process.exit(1)
+      }
+
+      const source = fs.readFileSync(filePath, 'utf-8')
+      const engine = new UPLimEngine(process.cwd()) // Added required projectRoot argument
+      engine.execute(source)
+    } catch (error: any) {
+      console.error(error.message)
+      process.exit(1)
+    }
+  })
+
+program
+  .command('compile <file>')
+  .description('Compile a .upl file to JavaScript')
+  .option('-o, --output <output>', 'Output JavaScript file')
+  .action((file, options) => {
+    const filePath = path.resolve(process.cwd(), file)
+    if (!fs.existsSync(filePath)) {
+      console.error(`File not found: ${file}`)
+      process.exit(1)
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const parser = new UPLimParser()
+    const result = parser.parse(content, filePath)
+    
+    if (result.errors.length > 0) {
+      console.error('Compilation failed with errors:')
+      result.errors.forEach(err => console.error(err))
+      process.exit(1)
+    }
+
+    const compiler = new Compiler()
+    const jsCode = compiler.compile(result.ast)
+    
+    const outputPath = options.output || file.replace(/\.upl$/, '.js')
+    fs.writeFileSync(outputPath, jsCode)
+    console.log(`Compiled to ${outputPath}`)
+  })
+
+program
+  .command('ai <prompt>')
+  .description('Ask local AI (Ollama) for help with UPLim code')
+  .option('-m, --model <model>', 'Ollama model to use', 'codellama:13b')
+  .action(async (prompt, options) => {
+    const model = options.model
+    const url = 'http://localhost:11434/api/generate'
+    
+    console.log(`🤖 Asking ${model}: "${prompt}"...`)
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: model,
+          prompt: `You are an expert UPLim programmer. ${prompt}`,
+          stream: false
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ollama API error: ${response.statusText}`)
+      }
+
+      const data = await response.json() as any
+      console.log('\nResult:\n')
+      console.log(data.response)
+      
+    } catch (error: any) {
+        if (error.code === 'ECONNREFUSED') {
+            console.error('Error: Could not connect to Ollama. Is it running at http://localhost:11434?')
+        } else {
+            console.error('Error talking to AI:', error.message)
+        }
+    }
+  })
+
+program.parse(process.argv)

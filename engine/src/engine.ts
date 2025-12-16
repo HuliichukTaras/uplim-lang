@@ -2,7 +2,8 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { UPLimParser } from './parser'
+import { UPLimParser, Program } from './parser'
+import { Interpreter } from './interpreter'
 import { Analyzer, Diagnostic, CodeMetrics } from './analysis'
 import { SecurityAnalyzer, SecurityIssue } from './security'
 import { Storage } from './storage'
@@ -34,6 +35,7 @@ export interface Summary {
 
 export class UPLimEngine {
   private parser = new UPLimParser()
+  private interpreter = new Interpreter()
   private analyzer = new Analyzer()
   private securityAnalyzer = new SecurityAnalyzer()
   private aiAnalyzer = new AIAnalyzer()
@@ -78,6 +80,14 @@ export class UPLimEngine {
 
     return report
   }
+  
+  execute(source: string): string[] {
+      const parseResult = this.parser.parse(source, 'exec.upl')
+      if (parseResult.errors.length > 0) {
+          throw new Error(`Parse Error: ${parseResult.errors[0].message}`)
+      }
+      return this.interpreter.evaluate(parseResult.ast)
+  }
 
   private analyzeFile(filepath: string): FileReport {
     const source = fs.readFileSync(filepath, 'utf-8')
@@ -89,6 +99,7 @@ export class UPLimEngine {
     const analysisResult = this.analyzer.analyze(parseResult, source, filepath)
     
     // Security scan
+    // Note: Security analyzer expects ASTNode but Program is compatible
     const securityReport = this.securityAnalyzer.analyze(parseResult.ast, source, filepath)
 
     return {
@@ -109,16 +120,20 @@ export class UPLimEngine {
         const fullPath = path.join(dir, entry.name)
         
         if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          traverse(fullPath)
+            try {
+              traverse(fullPath)
+            } catch (e) {
+                // Ignore errors accessing restricted directories
+            }
         } else if (entry.isFile() && entry.name.endsWith('.upl')) {
           files.push(fullPath)
         }
       }
     }
 
-    if (fs.statSync(targetPath).isDirectory()) {
+    if (fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory()) {
       traverse(targetPath)
-    } else if (targetPath.endsWith('.upl')) {
+    } else if (targetPath.endsWith('.upl') && fs.existsSync(targetPath)) {
       files.push(targetPath)
     }
 
