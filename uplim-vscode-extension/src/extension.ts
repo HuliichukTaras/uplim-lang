@@ -11,7 +11,7 @@ let client: LanguageClient;
 
 export function activate(context: vscode.ExtensionContext) {
   const serverModule = context.asAbsolutePath(
-    path.join('..', '..', 'lsp', 'out', 'server.js')
+    path.join('..', 'uplim-lsp', 'out', 'server.js')
   );
 
   const serverOptions: ServerOptions = {
