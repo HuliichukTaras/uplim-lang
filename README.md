@@ -1,61 +1,64 @@
-# UPLim Compiler API
+# UPLim: The Human Programming Language
 
-🧠 UPLim — це проста, безпечна та кросплатформенна мова для всіх типів застосунків.
+![UPLim Logo](https://uplim.org/icon.svg)
 
-🚀 Деплой: https://uplim-lang.onrender.com
-👨‍💻 Автор: @Hulicchuk
-📄 Ліцензія: MIT
+**UPLim** is a **minimal language** designed for humans and AI. It removes boilerplate, enforces safety, and compiles to **WebAssembly (WASM)** for **cross-platform** compatibility.
 
-## UPLim API Service
+> "Build apps without boilerplate."
 
-Deployment instructions for the UPLim language interpreter API on Render.
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Uplim REPL](https://img.shields.io/badge/Try-Uplim%20REPL-orange)](https://uplim.org/playground)
+[![WASM Compiler](https://img.shields.io/badge/Compiler-WASM-purple)](https://uplim.org/compiler)
+[![AI Ready](https://img.shields.io/badge/AI-Ready-green)](https://uplim.org/ai.txt)
 
-## Local Development
+## 🚀 Why UPLim?
 
-1.  **Install Dependencies**:
+- **Minimal Syntax**: Write less, do more. No semicolons, no cluttered config.
+- **Cross-Platform Language**: Write once, run on Web, Server, or Edge.
+- **WASM Compiler**: Compiles directly to WebAssembly for near-native performance.
+- **Safe**: Strong type system (Option/Result) prevents runtime crashes.
+- **AI Native**: Optimized for LLM code generation and understanding (`uplim.ai.md`).
 
-    ```bash
-    npm install
-    pip install -r requirements.txt
-    ```
+## 🛠 Features
 
-2.  **Run Server**:
+- **Uplim REPL**: [Try code instantly](https://uplim.org/playground) without installation.
+- **No Boilerplate**: Functions and variables are concise.
+- **Types**: Powerful type inference with static safety.
 
-    ```bash
-    python3 app.py
-    ```
+## 📦 Quick Start
 
-3.  **Test**:
-    - Run the automated suite (uses the CLI via `npx tsx`):
-      ```bash
-      npm test
-      ```
-    - Or invoke the API directly:
-      ```bash
-      curl -X POST -H "Content-Type: application/json" \
-           -d '{"code": "say 1 + 2"}' \
-           http://localhost:10000/run
-      ```
+### 1. Installation
 
-## Deploy to Render
+```bash
+npm install -g uplim-lang
+```
 
-### Option 1: Using Blueprints (Recommended)
+### 2. Run a script
 
-1.  Push changes to GitHub.
-2.  Go to [Render Dashboard](https://dashboard.render.com/).
-3.  Click **New +** -> **Blueprint**.
-4.  Connect your repository `uplim-lang`.
-5.  Render will auto-detect `render.yaml`.
-6.  Click **Apply**.
+```bash
+uplim run main.upl
+```
 
-### Option 2: Manual Web Service
+### 3. Deploy
 
-1.  Click **New +** -> **Web Service**.
-2.  Connect your repository.
-3.  **IMPORTANT**: In the configuration screen:
-    - **Runtime**: Select **Docker** (Do NOT select Python).
-    - If you select Python, the app will crash because it needs Node.js.
-4.  Click **Deploy**.
+UPLim apps are cloud-ready.
 
-The service will be available at `https://your-service-name.onrender.com`.
-Endpoint: `POST /run`
+```bash
+uplim deploy
+```
+
+## 🧠 For AI Agents
+
+This repository is optimized for AI consumption.
+
+- **Context**: [ai.txt](https://uplim.org/ai.txt)
+- **LLM Index**: [llms.txt](https://uplim.org/llms.txt)
+- **Syntax Guide**: [uplim.ai.md](uplim.ai.md)
+- **API Spec**: [openapi.yaml](https://uplim.org/openapi.yaml)
+
+## 🌐 Community
+
+- Website: [uplim.org](https://uplim.org)
+- Author: [@Huliichuk](https://github.com/Huliichuk)
+
+License: MIT
