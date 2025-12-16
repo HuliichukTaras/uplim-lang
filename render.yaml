@@ -2,7 +2,7 @@ services:
   - type: web
     name: uplim-engine-api
     env: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.render
     plan: free
     region: frankfurt
     branch: main

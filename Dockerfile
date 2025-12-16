@@ -1,7 +1,7 @@
 # Hybrid Image: Python + Node.js
 FROM python:3.11-slim
 
-# Install Node.js (Required for executing the TypeScript CLI)
+# Install Node.js
 RUN apt-get update && apt-get install -y \
     curl \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -27,4 +27,4 @@ ENV PORT=10000
 EXPOSE 10000
 
 # Command
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+CMD ["gunicorn", "server:app", "--bind", "0.0.0.0:10000"]
