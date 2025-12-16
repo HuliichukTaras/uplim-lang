@@ -1,4 +1,12 @@
-# UPLim API Service
+# UPLim Compiler API
+
+🧠 UPLim — це проста, безпечна та кросплатформенна мова для всіх типів застосунків.
+
+🚀 Деплой: https://uplim-lang.onrender.com
+👨‍💻 Автор: @Hulicchuk
+📄 Ліцензія: MIT
+
+## UPLim API Service
 
 Deployment instructions for the UPLim language interpreter API on Render.
 
