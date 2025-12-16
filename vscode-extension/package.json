@@ -1,0 +1,26 @@
+{
+  "name": "uplim-vscode",
+  "displayName": "UPLim Language Support",
+  "description": "Language support for UPLim - Simple. Fast. Safe.",
+  "version": "0.1.0",
+  "publisher": "uplim-dev",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "uplim",
+      "aliases": ["UPLim", "uplim"],
+      "extensions": [".upl"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "uplim",
+      "scopeName": "source.uplim",
+      "path": "./syntaxes/uplim.tmLanguage.json"
+    }]
+  }
+}
