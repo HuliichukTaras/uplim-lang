@@ -8,6 +8,7 @@ import { Analyzer, Diagnostic, CodeMetrics } from './analysis'
 import { SecurityAnalyzer, SecurityIssue } from './security'
 import { Storage } from './storage'
 import { AIAnalyzer, AIAnalysis } from './ai'
+import { Either, left, right } from 'fp-ts/Either'
 
 export interface EngineReport {
   timestamp: string
@@ -81,13 +82,18 @@ export class UPLimEngine {
     return report
   }
   
-  execute(source: string): string[] {
-      const parseResult = this.parser.parse(source, 'exec.upl')
-      if (parseResult.errors.length > 0) {
-          const err = parseResult.errors[0]
-          throw new Error(`Parse Error: ${err.message} at line ${err.line}:${err.column}`)
+  execute(source: string): Either<Error, string[]> {
+      try {
+          const parseResult = this.parser.parse(source, 'exec.upl')
+          if (parseResult.errors.length > 0) {
+              const err = parseResult.errors[0]
+              return left(new Error(`Parse Error: ${err.message} at line ${err.line}:${err.column}`))
+          }
+          const result = this.interpreter.evaluate(parseResult.ast)
+          return right(result)
+      } catch (error: any) {
+          return left(error instanceof Error ? error : new Error(String(error)))
       }
-      return this.interpreter.evaluate(parseResult.ast)
   }
 
   private analyzeFile(filepath: string): FileReport {

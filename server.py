@@ -1,8 +1,16 @@
 from flask import Flask, request, jsonify
-import os
 from src import interpreter
+import os
 
 app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        'status': 'online',
+        'service': 'UPLim Interpreter API',
+        'version': '0.1.0'
+    })
 
 @app.route('/run', methods=['POST'])
 def run_code():
