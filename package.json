@@ -1,6 +1,10 @@
 {
   "name": "uplim-engine",
   "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "website"
+  ],
   "description": "UPLim Language Analysis Engine",
   "main": "dist/index.js",
   "bin": {
