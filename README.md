@@ -1,6 +1,6 @@
 # UPLim: The Human Programming Language
 
-![UPLim Logo](https://uplim.org/icon.svg)
+![UPLim Logo](https://uplim.org/icon.nsvg)
 
 **UPLim** is a **minimal language** designed for humans and AI. It removes boilerplate, enforces safety, and compiles to **WebAssembly (WASM)** for **cross-platform** compatibility.
 
