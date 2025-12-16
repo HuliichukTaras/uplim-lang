@@ -20,6 +20,13 @@ class Compiler {
             case 'CallExpression': return this.compileCallExpression(node);
             case 'Literal': return this.compileLiteral(node);
             case 'Identifier': return this.compileIdentifier(node);
+            case 'PipelineExpression': return this.compilePipelineExpression(node);
+            case 'RangeExpression': return this.compileRangeExpression(node);
+            case 'ListComprehension': return this.compileListComprehension(node);
+            case 'ArrayLiteral': return this.compileArrayLiteral(node);
+            case 'ObjectLiteral': return this.compileObjectLiteral(node);
+            case 'FunctionExpression': return this.compileFunctionExpression(node);
+            case 'ReturnStatement': return this.compileReturnStatement(node);
             default: throw new Error(`Unknown node type: ${node.type}`);
         }
     }
@@ -85,6 +92,59 @@ class Compiler {
     }
     compileIdentifier(node) {
         return node.name;
+    }
+    compileReturnStatement(node) {
+        if (node.argument) {
+            return `return ${this.compileNode(node.argument)};`;
+        }
+        return 'return;';
+    }
+    compileFunctionExpression(node) {
+        const params = node.params.join(', ');
+        const body = this.compileNode(node.body);
+        const name = node.name ? node.name : '';
+        return `function ${name}(${params}) ${body}`;
+    }
+    compilePipelineExpression(node) {
+        const left = this.compileNode(node.left);
+        const right = this.compileNode(node.right);
+        return `${right}(${left})`;
+    }
+    compileRangeExpression(node) {
+        const start = this.compileNode(node.start);
+        const end = this.compileNode(node.end);
+        // Simple IIFE for range
+        return `(() => { const r = []; for(let i=${start}; i<=${end}; i++) r.push(i); return r; })()`;
+    }
+    compileListComprehension(node) {
+        // source must be array
+        const source = this.compileNode(node.source);
+        const element = node.element;
+        let result = `${source}`;
+        if (node.filter) {
+            // Need to handle scope/variable binding? In JS filter(e => ...) works
+            // But we need to bind 'element' to the argument
+            // Uplim: [ x*2 | x in list ] -> list.map(x => x*2)
+            // Uplim: [ x | x in list, x > 5 ] -> list.filter(x => x > 5).map(x => x)
+            // We need to temporarily set the compile context?
+            // Actually, for simple expression compilation, replacing the identifier usage in expression with argument name is tough without scope analysis.
+            // BUT, since JS arrow functions use correct scoping, we can just use the element name as the arrow arg.
+            const filterBody = this.compileNode(node.filter);
+            result += `.filter(${element} => ${filterBody})`;
+        }
+        const mapBody = this.compileNode(node.expression);
+        result += `.map(${element} => ${mapBody})`;
+        return result;
+    }
+    compileArrayLiteral(node) {
+        const elements = node.elements.map(e => this.compileNode(e)).join(', ');
+        return `[${elements}]`;
+    }
+    compileObjectLiteral(node) {
+        const props = node.properties.map(p => {
+            return `${p.key}: ${this.compileNode(p.value)}`;
+        }).join(', ');
+        return `{ ${props} }`;
     }
 }
 exports.Compiler = Compiler;

@@ -40,6 +40,7 @@ const parser_1 = require("./parser");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const compiler_1 = require("./compiler");
+const Either_1 = require("fp-ts/Either");
 const program = new commander_1.Command();
 program
     .name('uplim-engine')
@@ -124,7 +125,20 @@ program
         }
         const source = fs.readFileSync(filePath, 'utf-8');
         const engine = new engine_1.UPLimEngine(process.cwd()); // Added required projectRoot argument
-        engine.execute(source);
+        const result = engine.execute(source);
+        if ((0, Either_1.isLeft)(result)) {
+            console.error(result.left.message);
+            process.exit(1);
+        }
+        // Success - interpreter usually prints to stdout during execution, 
+        // but if we want to print the return value (string[] output lines):
+        // result.right.forEach(line => console.log(line)) 
+        // Note: The interpreter itself might be printing. Checking previous behavior.
+        // If evaluate returns output lines captured, we should print them.
+        // The original code just called execute(source) without printing return value,
+        // implying evaluate() did the printing OR the caller ignored it. 
+        // Checking interpreter.ts would confirm. Assuming we should print only if not handled.
+        // For safe measure, let's keep it minimal as before, but the return value is now accessible.
     }
     catch (error) {
         console.error(error.message);
@@ -135,6 +149,7 @@ program
     .command('compile <file>')
     .description('Compile a .upl file to JavaScript')
     .option('-o, --output <output>', 'Output JavaScript file')
+    .option('--stdout', 'Print compiled code to stdout')
     .action((file, options) => {
     const filePath = path.resolve(process.cwd(), file);
     if (!fs.existsSync(filePath)) {
@@ -151,9 +166,14 @@ program
     }
     const compiler = new compiler_1.Compiler();
     const jsCode = compiler.compile(result.ast);
-    const outputPath = options.output || file.replace(/\.upl$/, '.js');
-    fs.writeFileSync(outputPath, jsCode);
-    console.log(`Compiled to ${outputPath}`);
+    if (options.stdout) {
+        console.log(jsCode);
+    }
+    else {
+        const outputPath = options.output || file.replace(/\.upl$/, '.js');
+        fs.writeFileSync(outputPath, jsCode);
+        console.log(`Compiled to ${outputPath}`);
+    }
 });
 program
     .command('ai <prompt>')

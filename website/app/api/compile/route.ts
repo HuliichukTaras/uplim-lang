@@ -4,20 +4,24 @@ const UPLIM_API_URL = process.env.UPLIM_API_URL || 'https://uplim-lang.onrender.
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json();
+    const body = await request.json();
+    const { code } = body;
 
     if (!code || typeof code !== 'string') {
       return Response.json({ error: 'Invalid code provided' }, { status: 400 });
     }
 
-        });
-    } catch (e: any) {
-         return Response.json({
-            success: false,
-            error: e.message,
-            timestamp: new Date().toISOString()
-        });
-    }
+    const response = await fetch(`${UPLIM_API_URL}/compile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    const data = await response.json();
+    return Response.json(data, { status: response.status });
+
   } catch (error) {
     return Response.json({
       success: false,

@@ -1,6 +1,7 @@
 import { Diagnostic, CodeMetrics } from './analysis';
 import { SecurityIssue } from './security';
 import { AIAnalysis } from './ai';
+import { Either } from 'fp-ts/Either';
 export interface EngineReport {
     timestamp: string;
     projectPath: string;
@@ -33,7 +34,7 @@ export declare class UPLimEngine {
     analyze(targetPath: string, options?: {
         ai?: boolean;
     }): Promise<EngineReport>;
-    execute(source: string): string[];
+    execute(source: string): Either<Error, string[]>;
     private analyzeFile;
     private findUPLimFiles;
     private generateSummary;
