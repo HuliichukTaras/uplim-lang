@@ -148,9 +148,7 @@ export class Lexer {
       
       // Single-char tokens
       switch (char) {
-        case '=': tokens.push(this.createToken(TokenType.ASSIGN, '=')); break
-        case ':': tokens.push(this.createToken(TokenType.COLON, ':')); break
-        case '.': tokens.push(this.createToken(TokenType.DOT, '.')); break
+
         case '(': tokens.push(this.createToken(TokenType.LPAREN, '(')); break
         case ')': tokens.push(this.createToken(TokenType.RPAREN, ')')); break
         case '=': 

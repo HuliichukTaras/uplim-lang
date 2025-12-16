@@ -12,11 +12,27 @@ export interface Program extends ASTNode {
   body: ASTNode[]
 }
 
+export type Pattern = Identifier | ObjectPattern | ArrayPattern
+
+export interface ObjectPattern extends ASTNode {
+    type: 'ObjectPattern'
+    properties: { key: string, value: string }[] // value is variable name to bind to
+}
+
+export interface ArrayPattern extends ASTNode {
+    type: 'ArrayPattern'
+    elements: string[] // variable names
+}
+
 export interface VariableDeclaration extends ASTNode {
   type: 'VariableDeclaration'
-  name: string
+  pattern: Pattern
   value: Expression
 }
+
+// ... existing code ...
+
+
 
 export interface FunctionDeclaration extends ASTNode {
   type: 'FunctionDeclaration'
@@ -40,6 +56,11 @@ export interface IfStatement extends ASTNode {
     test: Expression
     consequent: BlockStatement
     alternate?: BlockStatement
+}
+
+export interface ReturnStatement extends ASTNode {
+  type: 'ReturnStatement'
+  argument?: Expression
 }
 
 export interface ExpressionStatement extends ASTNode {
@@ -184,14 +205,51 @@ export class UPLimParser {
     if (token.type === TokenType.LBRACE) {
         return this.parseBlock()
     }
+    if (token.type === TokenType.RETURN) {
+        return this.parseReturnStatement()
+    }
 
     return this.parseExpressionStatement()
   }
 
   private parseVariableDeclaration(): VariableDeclaration {
     const startToken = this.consume(TokenType.LET)
-    const name = this.consume(TokenType.IDENTIFIER, "Expected variable name").value
-    this.consume(TokenType.ASSIGN, "Expected '=' after variable name")
+    
+    let pattern: Pattern
+    
+    if (this.match(TokenType.LBRACE)) {
+        // Object Destructuring { a, b }
+        const properties: { key: string, value: string }[] = []
+        if (this.current().type !== TokenType.RBRACE) {
+            do {
+                const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
+                // For now simple { a, b } support (shorthand)
+                // If we want { a: b }, we need check for COLON
+                let value = key
+                if (this.match(TokenType.COLON)) {
+                    value = this.consume(TokenType.IDENTIFIER, "Expected variable name").value
+                }
+                properties.push({ key, value })
+            } while (this.match(TokenType.COMMA))
+        }
+        this.consume(TokenType.RBRACE, "Expected '}'")
+        pattern = { type: 'ObjectPattern', properties, location: startToken }
+    } else if (this.match(TokenType.LBRACKET)) {
+        // Array Destructuring [ a, b ]
+        const elements: string[] = []
+        if (this.current().type !== TokenType.RBRACKET) {
+            do {
+                elements.push(this.consume(TokenType.IDENTIFIER, "Expected variable name").value)
+            } while (this.match(TokenType.COMMA))
+        }
+        this.consume(TokenType.RBRACKET, "Expected ']'")
+        pattern = { type: 'ArrayPattern', elements, location: startToken }
+    } else {
+        const name = this.consume(TokenType.IDENTIFIER, "Expected variable name").value
+        pattern = { type: 'Identifier', name, location: startToken }
+    }
+
+    this.consume(TokenType.ASSIGN, "Expected '=' after variable declaration")
     const value = this.parseExpression()
     // Optional semicolon
     if (this.current().type === TokenType.SEMICOLON) {
@@ -199,11 +257,25 @@ export class UPLimParser {
     }
     return {
       type: 'VariableDeclaration',
-      name,
+      pattern,
       value,
       location: { line: startToken.line, column: startToken.column }
     }
   }
+
+  private parseReturnStatement(): ReturnStatement {
+      const token = this.consume(TokenType.RETURN)
+      let argument: Expression | undefined
+      if (this.current().type !== TokenType.SEMICOLON && this.current().type !== TokenType.RBRACE) {
+          argument = this.parseExpression()
+      }
+      if (this.match(TokenType.SEMICOLON)) {
+          // consumed
+      }
+      return { type: 'ReturnStatement', argument, location: token }
+  }
+
+
   
   private parseFunctionDeclaration(): FunctionDeclaration {
       const startToken = this.advance() // func or make
@@ -318,12 +390,7 @@ export class UPLimParser {
   private parseExpression(): Expression {
     return this.parseBinaryExpression(0)
   }
-  
-  private parseBinaryExpression(minPrecedence: number): Expression {
-      let left = this.parsePrimary()
-      
-      while (true) {
-          const token = this.current()
+
   private getPrecedence(type: TokenType): number {
     switch (type) {
         case TokenType.PIPE_OP:
@@ -346,8 +413,6 @@ export class UPLimParser {
 
   private parseBinaryExpression(minPrecedence: number): Expression {
     let left = this.parsePrimary()
-    
-    // Check for Range Expression (.. is handled in precedence but we might need special handling if it's not a binary op in typical sense, but precedence climbing works)
     
     while (true) {
         const token = this.current()

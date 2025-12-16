@@ -10,7 +10,9 @@ import {
     BinaryExpression, 
     CallExpression, 
     Literal, 
-    Identifier 
+    Identifier,
+    ObjectPattern,
+    ArrayPattern
 } from './parser'
 
 export class Compiler {
@@ -39,8 +41,19 @@ export class Compiler {
     }
 
     private compileVariableDeclaration(node: VariableDeclaration): string {
-        const value = this.compileNode(node.value)
-        return `let ${node.name} = ${value};`
+        const val = this.compileNode(node.value)
+        if (node.pattern.type === 'Identifier') {
+            return `let ${node.pattern.name} = ${val};`
+        } else if (node.pattern.type === 'ObjectPattern') {
+            const props = node.pattern.properties.map(p => {
+                return p.key === p.value ? p.key : `${p.key}: ${p.value}`
+            }).join(', ')
+            return `let { ${props} } = ${val};`
+        } else if (node.pattern.type === 'ArrayPattern') {
+            const elems = node.pattern.elements.join(', ')
+            return `let [ ${elems} ] = ${val};`
+        }
+        return `// Unknown pattern type`
     }
 
     private compileFunctionDeclaration(node: FunctionDeclaration): string {

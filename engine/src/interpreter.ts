@@ -2,7 +2,9 @@
 import { 
     Program, ASTNode, BinaryExpression, CallExpression, 
     FunctionDeclaration, Identifier, IfStatement, Literal, 
-    VariableDeclaration, SayStatement, BlockStatement, ExpressionStatement
+    VariableDeclaration, SayStatement, BlockStatement, ExpressionStatement,
+    PipelineExpression, RangeExpression, ListComprehension,
+    ArrayLiteral, ObjectLiteral, ObjectPattern, ArrayPattern, ReturnStatement
 } from './parser'
 
 export class Environment {
@@ -61,6 +63,99 @@ export class Interpreter {
                 return this.visitSayStatement(stmt as SayStatement, env)
             case 'IfStatement':
                 return this.visitIfStatement(stmt as IfStatement, env)
+            case 'PipelineExpression': {
+                const pipe = stmt as PipelineExpression
+                const leftVal = this.evaluateExpression(pipe.left, env)
+                // right should be a function Identifier or CallExpression?
+                // If identifier: call it with leftVal
+                // If CallExpr: ??? Typically pipe passes as first arg.
+                // For simplicity v0.1: Right MUST be a function identifier.
+                if (pipe.right.type === 'Identifier') {
+                    const func = env.get((pipe.right as Identifier).name)
+                    // @ts-ignore
+                    // Assuming func is an object with a 'call' method or similar structure
+                    // This part needs careful design based on how native/user-defined functions are represented.
+                    // For now, let's assume it's a callable object or a function definition.
+                    // If it's a user-defined function, we'd need to simulate a call.
+                    // If it's a native function, it might have a direct 'call' method.
+                    // This snippet seems to imply a direct JS function call.
+                    // For consistency with visitCallExpression, we should probably create a dummy CallExpression
+                    // or directly invoke the function logic.
+                    // Let's adapt it to use the existing call mechanism if possible.
+                    if (func && func.type === 'function') {
+                        const funcDecl = func.declaration as FunctionDeclaration
+                        if (funcDecl.params.length !== 1) {
+                            throw new Error(`Function ${funcDecl.name} in pipeline expects 1 argument but got ${funcDecl.params.length}`)
+                        }
+                        const scope = new Environment(func.closure)
+                        scope.define(funcDecl.params[0], leftVal)
+                        return this.executeBlock(funcDecl.body.body, scope)
+                    } else {
+                        throw new Error(`'${(pipe.right as Identifier).name}' is not a function and cannot be used in a pipeline.`)
+                    }
+                }
+                throw new Error("Pipeline right side must be a function identifier")
+            }
+            
+            case 'RangeExpression': {
+                const range = stmt as RangeExpression
+                const start = this.evaluateExpression(range.start, env)
+                const end = this.evaluateExpression(range.end, env)
+                const step = range.step ? this.evaluateExpression(range.step, env) : 1
+                const result = []
+                if (step > 0) {
+                    for (let i = start; i <= end; i += step) result.push(i)
+                } else if (step < 0) {
+                    for (let i = start; i >= end; i += step) result.push(i)
+                } else {
+                    throw new Error("Range step cannot be zero.")
+                }
+                return result
+            }
+            
+            case 'ArrayLiteral': {
+                const arr = stmt as ArrayLiteral
+                return arr.elements.map(e => this.evaluateExpression(e, env))
+            }
+            
+            case 'ObjectLiteral': {
+                const obj = stmt as ObjectLiteral
+                const result: any = {}
+                for (const prop of obj.properties) {
+                    result[prop.key] = this.evaluateExpression(prop.value, env)
+                }
+                return result
+            }
+            
+            case 'ListComprehension': {
+                // [ expr | id in source, filter ]
+                const comp = stmt as ListComprehension
+                const source = this.evaluateExpression(comp.source, env)
+                if (!Array.isArray(source)) throw new Error("Comprehension source must be an array")
+                
+                const result = []
+                const previousEnv = env
+                // Create new scope for comprehension
+                const comprehensionEnv = new Environment(previousEnv)
+                
+                for (const item of source) {
+                    comprehensionEnv.define(comp.element, item)
+                    let include = true
+                    if (comp.filter) {
+                        include = this.evaluateExpression(comp.filter, comprehensionEnv)
+                    }
+                    if (this.isTruthy(include)) {
+                        result.push(this.evaluateExpression(comp.expression, comprehensionEnv))
+                    }
+                }
+                
+                // The original snippet had `this.environment = previousEnv` which is incorrect
+                // as `this.environment` is not a property of Interpreter.
+                // The environment should be passed explicitly.
+                // The result is returned, and the comprehensionEnv will be garbage collected.
+                return result
+            }
+            
             case 'ExpressionStatement':
                 return this.visitExpression(stmt as ExpressionStatement, env)
             case 'BlockStatement':
@@ -70,9 +165,37 @@ export class Interpreter {
         }
     }
     
-    private visitVariableDeclaration(stmt: VariableDeclaration, env: Environment) {
-        const value = this.evaluateExpression(stmt.value, env)
-        env.define(stmt.name, value)
+    private visitVariableDeclaration(node: VariableDeclaration, env: Environment) {
+        const value = this.evaluateExpression(node.value, env)
+        
+        if (node.pattern.type === 'Identifier') {
+            env.define((node.pattern as Identifier).name, value)
+        } else if (node.pattern.type === 'ObjectPattern') {
+            // Assume value is object
+            if (typeof value !== 'object' || value === null) throw new Error("Destructuring error: value is not an object")
+            // @ts-ignore
+            const safeValue = value as Record<string, any>;
+            for (const prop of (node.pattern as ObjectPattern).properties) {
+                // Assuming prop.key is the property name in the object and prop.value is the variable name
+                env.define(prop.value, safeValue[prop.key])
+            }
+        } else if (node.pattern.type === 'ArrayPattern') {
+            if (!Array.isArray(value)) throw new Error("Destructuring error: value is not an array")
+            for (let i = 0; i < (node.pattern as ArrayPattern).elements.length; i++) {
+                const elementPattern = (node.pattern as ArrayPattern).elements[i]
+                if (elementPattern.type === 'Identifier') { // Only handle identifiers for now
+                    if (i < value.length) {
+                        env.define((elementPattern as Identifier).name, value[i])
+                    } else {
+                        env.define((elementPattern as Identifier).name, undefined) // Or null, depending on desired behavior
+                    }
+                } else {
+                    throw new Error(`Unsupported array destructuring element type: ${elementPattern.type}`)
+                }
+            }
+        } else {
+            throw new Error(`Unsupported variable declaration pattern type: ${node.pattern.type}`)
+        }
         return value
     }
     

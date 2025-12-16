@@ -57,5 +57,42 @@ class TestUPLim(unittest.TestCase):
         self.assertEqual(node_result.returncode, 0)
         self.assertIn("Hello Web", node_result.stdout)
 
+    def test_v02_features(self):
+        """Test v0.2 features: Destructuring, Pipeline, Ranges, Comprehensions."""
+        file_path = os.path.abspath('test_v02.upl')
+        # Ensure file exists (I created it in previous step via echo)
+        if not os.path.exists(file_path):
+             with open(file_path, 'w') as f:
+                 f.write("""
+let list = [1, 2, 3]
+say list
+let sq = [ x * x | x in list ]
+say sq
+let r = 1..5
+say r
+func addOne(x) { return x + 1 }
+let p = 10 |> addOne
+say p
+let { a, b } = { a: 100, b: 200 }
+say a
+say b
+                 """)
+        
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        
+        # Verify Output
+        # [1, 2, 3] -> prints [1, 2, 3]
+        self.assertIn("[1, 2, 3]", result.stdout)
+        # [1, 4, 9] -> prints [1, 4, 9]
+        self.assertIn("[1, 4, 9]", result.stdout)
+        # 1..5 -> [1, 2, 3, 4, 5]
+        self.assertIn("[1, 2, 3, 4, 5]", result.stdout)
+        # 10 |> addOne -> 11
+        self.assertIn("11", result.stdout)
+        # Destructuring a, b -> 100, 200
+        self.assertIn("100", result.stdout)
+        self.assertIn("200", result.stdout)
+
 if __name__ == '__main__':
     unittest.main()
