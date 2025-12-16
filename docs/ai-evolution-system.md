@@ -35,9 +35,9 @@ AI-агент, який:
 
 ### 4. Validation Pipeline
 
-\`\`\`
+```
 User Input → AI Generation → Ideology Check → Violation Analysis → Auto-approve/Reject
-\`\`\`
+```
 
 ## Приклади
 

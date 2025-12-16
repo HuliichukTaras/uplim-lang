@@ -1,9 +1,0 @@
-fn greet(name) {
-  say "Hello " + name
-}
-greet("Web")
-
-let x = 10;
-if x > 5 {
-    say "Big number"
-}

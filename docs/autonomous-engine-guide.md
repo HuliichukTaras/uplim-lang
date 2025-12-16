@@ -73,11 +73,11 @@ Query parameters:
 ### POST `/api/engine`
 
 Body:
-\`\`\`json
+```json
 {
   "action": "start|stop|pause|resume|iterate"
 }
-\`\`\`
+```
 
 ## Web Dashboard
 
@@ -93,7 +93,7 @@ Access at `/engine`
 
 ## Starting the Engine
 
-\`\`\`typescript
+```typescript
 import { autonomousEngine } from '@/lib/autonomous-engine';
 
 // Start autonomous evolution
@@ -107,7 +107,7 @@ autonomousEngine.resume();
 
 // Stop engine
 autonomousEngine.stop();
-\`\`\`
+```
 
 ## Safety Mechanisms
 
@@ -138,9 +138,9 @@ Real-time logs show:
 ## Configuration
 
 Environment variables:
-\`\`\`bash
+```bash
 OLLAMA_MODEL=openai/gpt-4o-mini  # AI model for proposals
-\`\`\`
+```
 
 ## Best Practices
 

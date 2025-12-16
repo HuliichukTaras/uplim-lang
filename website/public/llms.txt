@@ -1,7 +1,0 @@
-# UPLim Documentation for LLMs
-
-UPLim is a modern programming language. Use the following files to understand the syntax and semantics:
-
-- **Syntax Guide**: https://uplim.org/uplim.ai.md
-- **Standard Library**: https://uplim.org/docs/stdlib
-- **Compiler API**: https://uplim.org/openapi.yaml

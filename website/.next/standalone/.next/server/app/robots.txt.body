@@ -1,6 +1,0 @@
-User-Agent: *
-Allow: /
-Disallow: /private/
-Disallow: /admin/
-
-Sitemap: https://uplim.org/sitemap.xml

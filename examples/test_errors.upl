@@ -1,4 +1,0 @@
-
-let x = 10
-let res_err = 10 |> x  # Error: x is not a function
-             
