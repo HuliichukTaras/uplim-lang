@@ -17,6 +17,16 @@ def run_code():
     
     return jsonify(response)
 
+@app.route('/compile', methods=['POST'])
+def compile_code():
+    data = request.get_json()
+    if not data or 'code' not in data:
+        return jsonify({'result': None, 'error': 'No code provided'}), 400
+
+    code = data['code']
+    response = interpreter.compile(code)
+    return jsonify(response)
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'}), 200

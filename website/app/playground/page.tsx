@@ -12,7 +12,9 @@ export default function PlaygroundPage() {
 let name be "World"
 say greeting plus " " plus name`);
   const [output, setOutput] = useState('');
+  const [compiledCode, setCompiledCode] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [isCompiling, setIsCompiling] = useState(false);
 
   const runCode = async () => {
     setIsRunning(true);
@@ -36,6 +38,31 @@ say greeting plus " " plus name`);
       setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const compileCode = async () => {
+    setIsCompiling(true);
+    setCompiledCode('Compiling...');
+    
+    try {
+      const response = await fetch('/api/compile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setCompiledCode(data.output);
+      } else {
+        setCompiledCode(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setCompiledCode(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsCompiling(false);
     }
   };
 
@@ -80,6 +107,9 @@ say greeting plus " " plus name`);
                 <Button onClick={runCode} disabled={isRunning} className="gap-2">
                   ▶ {isRunning ? 'Running...' : 'Run Code'}
                 </Button>
+                <Button onClick={compileCode} disabled={isCompiling} variant="secondary" className="gap-2">
+                  ⚙️ {isCompiling ? 'Compiling...' : 'Compile to JS'}
+                </Button>
                 <Button variant="outline" onClick={() => setCode('')}>
                   Clear
                 </Button>
@@ -87,17 +117,31 @@ say greeting plus " " plus name`);
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Output</CardTitle>
-              <CardDescription>Program execution results</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md bg-muted p-4 font-mono text-sm min-h-[400px] whitespace-pre-wrap">
-                {output || <span className="text-muted-foreground">Output will appear here...</span>}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Output</CardTitle>
+                <CardDescription>Program execution results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md bg-muted p-4 font-mono text-sm min-h-[150px] whitespace-pre-wrap">
+                  {output || <span className="text-muted-foreground">Output will appear here...</span>}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Compiled (JavaScript)</CardTitle>
+                <CardDescription>Generated JS code</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md bg-muted p-4 font-mono text-sm min-h-[150px] whitespace-pre-wrap text-xs">
+                  {compiledCode || <span className="text-muted-foreground">Compiled code will appear here...</span>}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="mt-8">

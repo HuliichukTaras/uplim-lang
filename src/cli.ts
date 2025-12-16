@@ -113,6 +113,7 @@ program
   .command('compile <file>')
   .description('Compile a .upl file to JavaScript')
   .option('-o, --output <output>', 'Output JavaScript file')
+  .option('--stdout', 'Print compiled code to stdout')
   .action((file, options) => {
     const filePath = path.resolve(process.cwd(), file)
     if (!fs.existsSync(filePath)) {
@@ -133,9 +134,13 @@ program
     const compiler = new Compiler()
     const jsCode = compiler.compile(result.ast)
     
-    const outputPath = options.output || file.replace(/\.upl$/, '.js')
-    fs.writeFileSync(outputPath, jsCode)
-    console.log(`Compiled to ${outputPath}`)
+    if (options.stdout) {
+      console.log(jsCode)
+    } else {
+      const outputPath = options.output || file.replace(/\.upl$/, '.js')
+      fs.writeFileSync(outputPath, jsCode)
+      console.log(`Compiled to ${outputPath}`)
+    }
   })
 
 program
