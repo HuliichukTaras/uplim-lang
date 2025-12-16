@@ -13,4 +13,11 @@ export declare class Compiler {
     private compileCallExpression;
     private compileLiteral;
     private compileIdentifier;
+    private compileReturnStatement;
+    private compileFunctionExpression;
+    private compilePipelineExpression;
+    private compileRangeExpression;
+    private compileListComprehension;
+    private compileArrayLiteral;
+    private compileObjectLiteral;
 }

@@ -43,6 +43,7 @@ const analysis_1 = require("./analysis");
 const security_1 = require("./security");
 const storage_1 = require("./storage");
 const ai_1 = require("./ai");
+const Either_1 = require("fp-ts/Either");
 class UPLimEngine {
     parser = new parser_1.UPLimParser();
     interpreter = new interpreter_1.Interpreter();
@@ -81,12 +82,18 @@ class UPLimEngine {
         return report;
     }
     execute(source) {
-        const parseResult = this.parser.parse(source, 'exec.upl');
-        if (parseResult.errors.length > 0) {
-            const err = parseResult.errors[0];
-            throw new Error(`Parse Error: ${err.message} at line ${err.line}:${err.column}`);
+        try {
+            const parseResult = this.parser.parse(source, 'exec.upl');
+            if (parseResult.errors.length > 0) {
+                const err = parseResult.errors[0];
+                return (0, Either_1.left)(new Error(`Parse Error: ${err.message} at line ${err.line}:${err.column}`));
+            }
+            const result = this.interpreter.evaluate(parseResult.ast);
+            return (0, Either_1.right)(result);
         }
-        return this.interpreter.evaluate(parseResult.ast);
+        catch (error) {
+            return (0, Either_1.left)(error instanceof Error ? error : new Error(String(error)));
+        }
     }
     analyzeFile(filepath) {
         const source = fs.readFileSync(filepath, 'utf-8');
