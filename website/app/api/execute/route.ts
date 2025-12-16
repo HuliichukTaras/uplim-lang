@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { UPLimEngine } from '@engine/engine';
-import * as path from 'path';
+
+const UPLIM_API_URL = process.env.UPLIM_API_URL || 'https://uplim-lang.onrender.com';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,21 +10,26 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Invalid code provided' }, { status: 400 });
     }
 
-    // Initialize Engine
-    // We pass process.cwd() as projectRoot. In Vercel, this is usually the root of the running lambda.
-    // The engine uses this for storage/reports, which might not be writable in serverless,
-    // but execute() doesn't use storage, so it should be fine.
-    const projectRoot = process.cwd();
-    const engine = new UPLimEngine(projectRoot);
+    // Proxy to Render Backend
+    const backendResponse = await fetch(`${UPLIM_API_URL}/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
 
-    // Execute directly
-    // engine.execute returns string[] of output lines
-    const outputLines = engine.execute(code);
-    const output = outputLines.join('\n');
+    if (!backendResponse.ok) {
+       throw new Error(`Backend responded with ${backendResponse.status}`);
+    }
 
+    const data = await backendResponse.json();
+
+    // Map Backend response { result, error } to Frontend expectation { success, output, error }
     return Response.json({
-      success: true,
-      output: output,
+      success: !data.error,
+      output: data.result || '',
+      error: data.error,
       timestamp: new Date().toISOString()
     });
 
