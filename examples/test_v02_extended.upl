@@ -1,0 +1,19 @@
+
+func add(x) { return x + 1 }
+func double(x) { return x * 2 }
+
+# Chained Pipeline
+let res = 5 |> add |> double
+say res
+
+# Nested Comprehension (List of Lists)
+let matrix = [[1, 2], [3, 4]]
+let nested = [ [ x * 2 | x in row ] | row in matrix ]
+say nested
+
+# Destructuring Undefined
+let { x, y } = { x: 1 }
+say x
+# y should be undefined (or handle gracefully depending on implementation)
+say y
+            

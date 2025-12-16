@@ -1,0 +1,21 @@
+f add(x, y) => x + y
+
+l result = add(10, 20)
+p result
+
+f check(x) {
+  if x > 10 {
+    p "Greater"
+  } e {
+    p "Smaller"
+  }
+}
+
+check(result)
+check(5)
+
+f smartReturn(x) {
+  ret x * 2
+}
+
+p smartReturn(5)
