@@ -52,6 +52,42 @@ export type Expression =
   | Literal 
   | Identifier 
   | CallExpression
+  | PipelineExpression
+  | RangeExpression
+  | ListComprehension
+  | ArrayLiteral
+  | ObjectLiteral
+
+export interface PipelineExpression extends ASTNode {
+  type: 'PipelineExpression'
+  left: Expression
+  right: Expression
+}
+
+export interface RangeExpression extends ASTNode {
+  type: 'RangeExpression'
+  start: Expression
+  end: Expression
+  step?: Expression
+}
+
+export interface ListComprehension extends ASTNode {
+  type: 'ListComprehension'
+  expression: Expression
+  element: string // identifier name
+  source: Expression
+  filter?: Expression
+}
+
+export interface ArrayLiteral extends ASTNode {
+    type: 'ArrayLiteral'
+    elements: Expression[]
+}
+
+export interface ObjectLiteral extends ASTNode {
+    type: 'ObjectLiteral'
+    properties: { key: string, value: Expression }[]
+}
 
 export interface BinaryExpression extends ASTNode {
   type: 'BinaryExpression'
@@ -59,6 +95,7 @@ export interface BinaryExpression extends ASTNode {
   left: Expression
   right: Expression
 }
+
 
 export interface CallExpression extends ASTNode {
   type: 'CallExpression'
@@ -135,7 +172,7 @@ export class UPLimParser {
     if (token.type === TokenType.LET) {
       return this.parseVariableDeclaration()
     }
-    if (token.type === TokenType.FN || token.type === TokenType.MAKE) {
+    if (token.type === TokenType.FUNC || token.type === TokenType.MAKE) {
         return this.parseFunctionDeclaration()
     }
     if (token.type === TokenType.SAY) {
@@ -169,7 +206,7 @@ export class UPLimParser {
   }
   
   private parseFunctionDeclaration(): FunctionDeclaration {
-      const startToken = this.advance() // fn or make
+      const startToken = this.advance() // func or make
       const name = this.consume(TokenType.IDENTIFIER, "Expected function name").value
       
       this.consume(TokenType.LPAREN, "Expected '(' after function name")
@@ -183,13 +220,12 @@ export class UPLimParser {
       
       let body: BlockStatement
       
-      if (startToken.type === TokenType.MAKE) {
-           this.consume(TokenType.ARROW, "Expected '=>' for make function")
+      if (this.match(TokenType.ARROW)) {
            const expr = this.parseExpression()
-           // Wrap expression in return statement inside block
+           // Implicit return block for short syntax
            body = {
                type: 'BlockStatement',
-               location: startToken, // approximate
+               location: { line: startToken.line, column: startToken.column },
                body: [{
                    type: 'ExpressionStatement', // In a real lang this might be explicit return, simplifying for now
                    expression: expr,
@@ -288,71 +324,189 @@ export class UPLimParser {
       
       while (true) {
           const token = this.current()
-          const precedence = this.getPrecedence(token.type)
-          
-          if (precedence < minPrecedence) break
-          
-          this.advance()
-          const right = this.parseBinaryExpression(precedence + 1)
-          left = {
-              type: 'BinaryExpression',
-              operator: token.value,
-              left,
-              right,
-              location: left.location
-          }
-      }
-      
-      return left
-  }
-  
   private getPrecedence(type: TokenType): number {
-      switch (type) {
-          case TokenType.LT:
-          case TokenType.GT:
-            return 1
-          case TokenType.PLUS:
-          case TokenType.MINUS:
-            return 2
-          case TokenType.MULTIPLY:
-          case TokenType.DIVIDE:
-            return 3
-          default:
-            return -1
-      }
+    switch (type) {
+        case TokenType.PIPE_OP:
+          return 1
+        case TokenType.LT:
+        case TokenType.GT:
+          return 2
+        case TokenType.PLUS:
+        case TokenType.MINUS:
+          return 3
+        case TokenType.MULTIPLY:
+        case TokenType.DIVIDE:
+          return 4
+        case TokenType.DOT_DOT:
+          return 5
+        default:
+          return -1
+    }
+  }
+
+  private parseBinaryExpression(minPrecedence: number): Expression {
+    let left = this.parsePrimary()
+    
+    // Check for Range Expression (.. is handled in precedence but we might need special handling if it's not a binary op in typical sense, but precedence climbing works)
+    
+    while (true) {
+        const token = this.current()
+        const precedence = this.getPrecedence(token.type)
+        
+        if (precedence < minPrecedence) break
+        
+        this.advance()
+        
+        // Handle Range special case for 'by'
+        if (token.type === TokenType.DOT_DOT) {
+             const end = this.parseBinaryExpression(precedence + 1)
+             let step: Expression | undefined
+             if (this.match(TokenType.BY)) {
+                 step = this.parseExpression()
+             }
+             left = {
+                 type: 'RangeExpression',
+                 start: left,
+                 end,
+                 step,
+                 location: left.location
+             } as RangeExpression
+             continue
+        }
+        
+        // Handle Pipeline
+        if (token.type === TokenType.PIPE_OP) {
+            const right = this.parseBinaryExpression(precedence + 1)
+            left = {
+                type: 'PipelineExpression',
+                left,
+                right,
+                location: left.location
+            } as PipelineExpression
+            continue
+        }
+
+        const right = this.parseBinaryExpression(precedence + 1)
+        left = {
+            type: 'BinaryExpression',
+            operator: token.value,
+            left,
+            right,
+            location: left.location
+        }
+    }
+    
+    return left
   }
 
   private parsePrimary(): Expression {
-      const token = this.current()
-      
-      if (token.type === TokenType.NUMBER) {
-          this.advance()
-          return { type: 'Literal', value: Number(token.value), raw: token.value, location: token }
-      }
-      
-      if (token.type === TokenType.STRING) {
-          this.advance()
-          return { type: 'Literal', value: token.value, raw: token.value, location: token }
-      }
-      
-      if (token.type === TokenType.IDENTIFIER) {
-          this.advance()
-          // Check for call
-          if (this.current().type === TokenType.LPAREN) {
-             return this.finishCall({ type: 'Identifier', name: token.value, location: token })
-          }
-          return { type: 'Identifier', name: token.value, location: token }
-      }
-      
-      if (token.type === TokenType.LPAREN) {
-          this.advance()
-          const expr = this.parseExpression()
-          this.consume(TokenType.RPAREN, "Expected ')'")
-          return expr
-      }
-      
-      throw new Error(`Unexpected token: ${token.type} (${token.value})`)
+    const token = this.current()
+    
+    if (token.type === TokenType.NUMBER) {
+        this.advance()
+        return { type: 'Literal', value: Number(token.value), raw: token.value, location: token }
+    }
+    
+    if (token.type === TokenType.STRING) {
+        this.advance()
+        return { type: 'Literal', value: token.value, raw: token.value, location: token }
+    }
+    
+    if (token.type === TokenType.IDENTIFIER) {
+        this.advance()
+        // Check for call
+        if (this.current().type === TokenType.LPAREN) {
+           return this.finishCall({ type: 'Identifier', name: token.value, location: token })
+        }
+        return { type: 'Identifier', name: token.value, location: token }
+    }
+    
+    if (token.type === TokenType.LBRACKET) {
+        return this.parseArrayOrComprehension()
+    }
+    
+    if (token.type === TokenType.LBRACE) {
+       // Object literal syntax not fully defined in v0.1 spec but good to have
+       // For now, assume Block if in statement context, but here we are in Expression context.
+       // However, parser calls parseBlock for LBRACE in parseStatement.
+       // We need to verify if we support Object Literals in parser.
+       // Simple implementation for now.
+       return this.parseObjectLiteral()
+    }
+
+    if (token.type === TokenType.LPAREN) {
+        this.advance()
+        const expr = this.parseExpression()
+        this.consume(TokenType.RPAREN, "Expected ')'")
+        return expr
+    }
+    
+    throw new Error(`Unexpected token: ${token.type} (${token.value})`)
   }
+
+  private parseArrayOrComprehension(): Expression {
+      const start = this.consume(TokenType.LBRACKET)
+      // Check for empty array
+      if (this.match(TokenType.RBRACKET)) {
+          return { type: 'ArrayLiteral', elements: [], location: start }
+      }
+      
+      const firstExpr = this.parseExpression()
+      
+      // Check for Comprehension: [ x * x | x in list ... ]
+      // We look for PIPE token
+      if (this.match(TokenType.PIPE)) {
+           // It is a comprehension
+           // Syntax: [ expression | identifier in source (, condition)? ]
+           // Current we have parsed 'expression'
+           const id = this.consume(TokenType.IDENTIFIER, "Expected identifier after '|' in comprehension").value
+           this.consume(TokenType.IN, "Expected 'in' keyword")
+           const source = this.parseExpression()
+           
+           let filter: Expression | undefined
+           if (this.match(TokenType.COMMA)) {
+               filter = this.parseExpression()
+           }
+           this.consume(TokenType.RBRACKET, "Expected ']'")
+           
+           return {
+               type: 'ListComprehension',
+               expression: firstExpr,
+               element: id,
+               source: source,
+               filter,
+               location: start
+           }
+      }
+      
+      // Array Literal
+      const elements: Expression[] = [firstExpr]
+      while (this.match(TokenType.COMMA)) {
+          if (this.current().type === TokenType.RBRACKET) break; // trailing comma
+          elements.push(this.parseExpression())
+      }
+      this.consume(TokenType.RBRACKET, "Expected ']'")
+      
+      return { type: 'ArrayLiteral', elements, location: start }
+  }
+
+  private parseObjectLiteral(): ObjectLiteral {
+       const start = this.consume(TokenType.LBRACE)
+       const properties: { key: string, value: Expression }[] = []
+       
+       if (this.current().type !== TokenType.RBRACE) {
+           do {
+               const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
+               this.consume(TokenType.COLON, "Expected ':'")
+               const value = this.parseExpression()
+               properties.push({ key, value })
+           } while (this.match(TokenType.COMMA))
+       }
+       
+       this.consume(TokenType.RBRACE, "Expected '}'")
+       return { type: 'ObjectLiteral', properties, location: start }
+  }
+
   
   private finishCall(callee: Identifier): CallExpression {
       this.consume(TokenType.LPAREN)
@@ -405,7 +559,7 @@ export class UPLimParser {
       
       switch (this.current().type) {
         case TokenType.LET:
-        case TokenType.FN:
+        case TokenType.FUNC:
         case TokenType.IF:
         case TokenType.WHILE:
         case TokenType.RETURN:
@@ -415,3 +569,4 @@ export class UPLimParser {
     }
   }
 }
+

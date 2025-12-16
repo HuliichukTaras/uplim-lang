@@ -42,6 +42,10 @@ export enum TokenType {
   COLON = 'COLON',   // :
   DOT = 'DOT',       // .
   DOUBLE_COLON = 'DOUBLE_COLON', // ::
+  DOT_DOT = 'DOT_DOT', // ..
+  ELLIPSIS = 'ELLIPSIS', // ...
+  PIPE = 'PIPE',     // |
+  PIPE_OP = 'PIPE_OP', // |>
   LPAREN = 'LPAREN', // (
   RPAREN = 'RPAREN', // )
   LBRACE = 'LBRACE', // {
@@ -59,6 +63,8 @@ export enum TokenType {
   GT = 'GT', // >
   LT = 'LT', // <
   
+  BY = 'BY', // by
+
   EOF = 'EOF'
 }
 
@@ -147,6 +153,39 @@ export class Lexer {
         case '.': tokens.push(this.createToken(TokenType.DOT, '.')); break
         case '(': tokens.push(this.createToken(TokenType.LPAREN, '(')); break
         case ')': tokens.push(this.createToken(TokenType.RPAREN, ')')); break
+        case '=': 
+          if (this.peek() === '>') {
+             this.advance(); tokens.push(this.createToken(TokenType.ARROW, '=>'))
+          } else {
+             tokens.push(this.createToken(TokenType.ASSIGN, '='))
+          }
+          break
+        case '|': 
+          if (this.peek() === '>') {
+             this.advance(); tokens.push(this.createToken(TokenType.PIPE_OP, '|>')) 
+          } else {
+             tokens.push(this.createToken(TokenType.PIPE, '|'))
+          }
+          break
+        case '.':
+          if (this.peek() === '.') {
+             this.advance()
+             if (this.peek() === '.') {
+                 this.advance(); tokens.push(this.createToken(TokenType.ELLIPSIS, '...'))
+             } else {
+                 tokens.push(this.createToken(TokenType.DOT_DOT, '..'))
+             }
+          } else {
+             tokens.push(this.createToken(TokenType.DOT, '.'))
+          }
+          break
+        case ':':
+          if (this.peek() === ':') {
+             this.advance(); tokens.push(this.createToken(TokenType.DOUBLE_COLON, '::'))
+          } else {
+             tokens.push(this.createToken(TokenType.COLON, ':'))
+          }
+          break
         case '{': tokens.push(this.createToken(TokenType.LBRACE, '{')); break
         case '}': tokens.push(this.createToken(TokenType.RBRACE, '}')); break
         case '[': tokens.push(this.createToken(TokenType.LBRACKET, '[')); break
@@ -245,6 +284,7 @@ export class Lexer {
       case 'for': return TokenType.FOR
       case 'in': return TokenType.IN
       case 'break': return TokenType.BREAK
+      case 'by': return TokenType.BY
       
       case 'match':
       case 'm': return TokenType.MATCH

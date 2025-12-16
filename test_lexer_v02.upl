@@ -1,0 +1,1 @@
+let x = 1..10 by 2; let y = 5 |> double;
