@@ -1,0 +1,143 @@
+### =====================================
+### UPLim New Features Demo v0.2
+### =====================================
+### Цей приклад демонструє ключові нові можливості мови UPLim.
+### Кожна фіча винесена в окрему функцію для зручності.
+### =====================================
+
+
+### --- 1. Destructuring Assignment ---
+# Деструктуризація об'єктів і масивів
+func demo_destructuring(): Void {
+  let person = { name: "Alice", age: 30, role: "Developer" }
+  let { name, age } = person
+  print("Name: \(name), Age: \(age)")
+
+  let coords = [10, 20, 30]
+  let [x, y, z] = coords
+  print("Coordinates: \(x), \(y), \(z)")
+}
+
+
+### --- 2. List Comprehensions ---
+# Вирази, що створюють нові списки з фільтрацією/трансформацією
+func demo_list_comprehension(): Void {
+  let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  let squares = [x * x | x in numbers, x % 2 == 0]
+  print("Squares of even numbers: \(squares)")
+}
+
+
+### --- 3. Map Comprehensions ---
+# Генерація словників за аналогією з Python
+func demo_map_comprehension(): Void {
+  let users = [
+    { id: 1, name: "Alice" },
+    { id: 2, name: "Bob" },
+    { id: 3, name: "Charlie" }
+  ]
+  let userMap = { user.id: user.name | user in users }
+  print("User map: \(userMap)")
+}
+
+
+### --- 4. Range Expressions with Step ---
+# Гнучкі діапазони з кроком
+func demo_ranges(): Void {
+  let evens = 2..11 by 2       # [2, 4, 6, 8, 10]
+  let countdown = 10..0 by -1  # [10, 9, ..., 1]
+  print("Even numbers: \(evens)")
+  print("Countdown: \(countdown)")
+}
+
+
+### --- 5. Pipeline Operator (|>) ---
+# Послідовна передача значень через функції (як в Elixir)
+func double(x: Int): Int { x * 2 }
+func addOne(x: Int): Int { x + 1 }
+
+func demo_pipeline(): Void {
+  let result = 5 |> double |> addOne  # = addOne(double(5))
+  print("Pipeline result: \(result)")
+}
+
+
+### --- 6. Enhanced Pattern Matching with Guards ---
+# Потужний match з умовами (guards), типами та структурою
+func describe(value: Any): String {
+  match value {
+    n: Int if n > 10 => "Large number",
+    n: Int if n > 0 => "Positive number",
+    0 => "Zero",
+    n: Int if n < 0 => "Negative number",
+    "hello" => "Greeting",
+    { name: String, age: Int } => "Person named \(name), aged \(age)",
+    [x, y] => "Point at \(x), \(y)",
+    _ => "Unknown value",
+  }
+}
+
+func demo_pattern_matching(): Void {
+  print(describe(15))
+  print(describe(5))
+  print(describe(0))
+  print(describe(-5))
+  print(describe("hello"))
+  print(describe({ name: "Dave", age: 35 }))
+  print(describe([3, 4]))
+}
+
+
+### --- 7. Rest Parameters ---
+# Приймає довільну кількість аргументів
+func sum(...numbers: List<Int>): Int {
+  let total = 0
+  for n in numbers {
+    total = total + n
+  }
+  return total
+}
+
+func demo_rest_params(): Void {
+  print("Sum: \(sum(1, 2, 3, 4, 5))")
+}
+
+
+### --- 8. Enhanced Enums with Parameters ---
+# Як алгебраїчні типи в Rust, з параметрами
+enum Shape {
+  Circle(radius: Float),
+  Rectangle(width: Float, height: Float),
+  Triangle(base: Float, height: Float)
+}
+
+func area(shape: Shape): Float {
+  match shape {
+    Shape::Circle(radius) => 3.14 * radius * radius,
+    Shape::Rectangle(width, height) => width * height,
+    Shape::Triangle(base, height) => 0.5 * base * height,
+    _ => 0.0,
+  }
+}
+
+func demo_enums(): Void {
+  let circle = Shape::Circle(5.0)
+  let rectangle = Shape::Rectangle(4.0, 3.0)
+  print("Circle area: \(area(circle))")
+  print("Rectangle area: \(area(rectangle))")
+}
+
+
+### --- Main Entry Point ---
+func main(): Void {
+  print("🔹 UPLim New Features Demo 🔹")
+  demo_destructuring()
+  demo_list_comprehension()
+  demo_map_comprehension()
+  demo_ranges()
+  demo_pipeline()
+  demo_pattern_matching()
+  demo_rest_params()
+  demo_enums()
+  print("✅ All demos completed successfully.")
+}

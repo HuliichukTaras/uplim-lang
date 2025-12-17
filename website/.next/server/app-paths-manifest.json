@@ -1,0 +1,21 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/compile/route": "app/api/compile/route.js",
+  "/api/execute/route": "app/api/execute/route.js",
+  "/cli/page": "app/cli/page.js",
+  "/api/run/route": "app/api/run/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/engine/page": "app/engine/page.js",
+  "/evolution/page": "app/evolution/page.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js",
+  "/api/format/route": "app/api/format/route.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
+  "/playground/page": "app/playground/page.js",
+  "/robots.txt/route": "app/robots.txt/route.js",
+  "/docs/examples/page": "app/docs/examples/page.js",
+  "/docs/page": "app/docs/page.js",
+  "/page": "app/page.js",
+  "/docs/stdlib/page": "app/docs/stdlib/page.js",
+  "/docs/getting-started/page": "app/docs/getting-started/page.js",
+  "/docs/syntax/page": "app/docs/syntax/page.js"
+}

@@ -1,0 +1,320 @@
+// UPLim Autonomous Self-Improving Engine v1.0
+// Main control file for language evolution
+
+import Analyzer from "./analyzer.upl"
+import Tester from "./tester.upl"
+import GrammarEvolver from "./grammar_evolver.upl"
+import DocSync from "./docsync.upl"
+import ChangeLogger from "./changelog.upl"
+
+// Engine state
+let engineState be {
+  version: "0.1.0",
+  isRunning: false,
+  currentIteration: 0,
+  tasksQueue: [],
+  evolutionHistory: []
+}
+
+// Core principles guard
+let coreIdeology be {
+  readability: "Natural language syntax, human-friendly",
+  safety: "No null, Option/Result, memory-safe",
+  portability: "WebAssembly, LLVM, multi-platform",
+  performance: "Fast execution, zero-cost abstractions",
+  ergonomics: "Developer-friendly, predictable types",
+  testFirst: "TDD approach, validate before deploy"
+}
+
+// Main scheduler - checks language state periodically
+make checkSyntax() do
+  say "[Engine] Analyzing current syntax tree..."
+  let issues be Analyzer.scanSyntax()
+  
+  when issues.length greater than 0 do
+    say "[Engine] Found" issues.length "inconsistencies"
+    for each issue in issues do
+      addToQueue({
+        type: "syntax_fix",
+        priority: issue.severity,
+        description: issue.description,
+        proposal: issue.suggestedFix
+      })
+    end
+  else
+    say "[Engine] Syntax is consistent ✓"
+  end
+  
+  return issues
+end
+
+// Evolve grammar based on proposals
+make evolveGrammar() do
+  say "[Engine] Generating evolution proposals..."
+  
+  let proposals be GrammarEvolver.generateProposals({
+    ideology: coreIdeology,
+    currentSyntax: Analyzer.getCurrentSyntax(),
+    constraints: {
+      backwardCompatible: true,
+      testFirst: true,
+      documentRequired: true
+    }
+  })
+  
+  for each proposal in proposals do
+    when validateProposal(proposal) equals true do
+      say "[Engine] Approved:" proposal.title
+      implementProposal(proposal)
+    else
+      say "[Engine] Rejected:" proposal.title
+      say "  Reason:" proposal.rejectionReason
+    end
+  end
+end
+
+// Validate proposal against ideology
+make validateProposal(proposal) do
+  let violations be []
+  
+  // Check readability
+  when proposal.syntaxComplexity greater than 7 do
+    violations.push("Too complex, violates readability principle")
+  end
+  
+  // Check safety
+  when proposal.introducesUnsafety equals true do
+    violations.push("Introduces unsafe patterns")
+  end
+  
+  // Check portability
+  when proposal.platformSpecific equals true do
+    violations.push("Platform-specific, violates portability")
+  end
+  
+  // Check backward compatibility
+  when proposal.breaksCompatibility equals true do
+    when proposal.versionBump equals "major" do
+      say "[Warning] Breaking change requires major version bump"
+    else
+      violations.push("Breaking change without version bump")
+    end
+  end
+  
+  when violations.length equals 0 do
+    return true
+  else
+    proposal.rejectionReason = violations.join(", ")
+    return false
+  end
+end
+
+// Implement approved proposal
+make implementProposal(proposal) do
+  say "[Engine] Implementing:" proposal.title
+  
+  // Step 1: Generate tests first (TDD)
+  let tests be Tester.generateTests(proposal)
+  Tester.runTests(tests)
+  
+  // Step 2: Implement the feature
+  GrammarEvolver.applyChanges(proposal)
+  
+  // Step 3: Run all tests
+  let allTestsPass be Tester.runAllTests()
+  
+  when allTestsPass equals false do
+    say "[Engine] Tests failed! Rolling back..."
+    GrammarEvolver.rollback(proposal)
+    return false
+  end
+  
+  // Step 4: Update documentation
+  DocSync.updateDocs(proposal)
+  
+  // Step 5: Log to changelog
+  ChangeLogger.addEntry({
+    version: engineState.version,
+    type: proposal.type,
+    title: proposal.title,
+    description: proposal.description,
+    date: Date.now()
+  })
+  
+  // Step 6: Update evolution history
+  engineState.evolutionHistory.push({
+    iteration: engineState.currentIteration,
+    proposal: proposal,
+    timestamp: Date.now(),
+    status: "implemented"
+  })
+  
+  say "[Engine] ✓ Successfully implemented:" proposal.title
+  return true
+end
+
+// Test all features
+make testAll() do
+  say "[Engine] Running comprehensive test suite..."
+  let results be Tester.runAllTests()
+  
+  when results.failed greater than 0 do
+    say "[Engine] ✗" results.failed "tests failed"
+    say "[Engine] Analyzing failures..."
+    
+    for each failure in results.failures do
+      addToQueue({
+        type: "bug_fix",
+        priority: "high",
+        description: failure.description,
+        stackTrace: failure.stackTrace
+      })
+    end
+  else
+    say "[Engine] ✓ All" results.total "tests passed"
+  end
+  
+  return results
+end
+
+// Update documentation
+make updateDocs() do
+  say "[Engine] Synchronizing documentation..."
+  DocSync.generateFromCode()
+  DocSync.validateExamples()
+  say "[Engine] ✓ Documentation updated"
+end
+
+// Add task to queue
+make addToQueue(task) do
+  task.id = generateId()
+  task.addedAt = Date.now()
+  engineState.tasksQueue.push(task)
+  
+  // Sort by priority
+  engineState.tasksQueue = engineState.tasksQueue.sortBy("priority")
+end
+
+// Process next task in queue
+make processNextTask() do
+  when engineState.tasksQueue.length equals 0 do
+    say "[Engine] Queue is empty"
+    return null
+  end
+  
+  let task be engineState.tasksQueue.shift()
+  say "[Engine] Processing task:" task.description
+  
+  match task.type do
+    case "syntax_fix":
+      handleSyntaxFix(task)
+    case "bug_fix":
+      handleBugFix(task)
+    case "feature_request":
+      handleFeatureRequest(task)
+    case "optimization":
+      handleOptimization(task)
+    default:
+      say "[Engine] Unknown task type:" task.type
+  end
+end
+
+// Main iteration loop
+make iterate() do
+  when engineState.isRunning equals false do
+    return
+  end
+  
+  engineState.currentIteration = engineState.currentIteration + 1
+  say "[Engine] === Iteration" engineState.currentIteration "==="
+  
+  // Step 1: Analyze current state
+  let issues be checkSyntax()
+  
+  // Step 2: Process queued tasks
+  when engineState.tasksQueue.length greater than 0 do
+    processNextTask()
+  end
+  
+  // Step 3: Propose and implement improvements
+  when engineState.currentIteration modulo 5 equals 0 do
+    say "[Engine] Major evolution check..."
+    evolveGrammar()
+  end
+  
+  // Step 4: Run tests
+  when engineState.currentIteration modulo 3 equals 0 do
+    testAll()
+  end
+  
+  // Step 5: Update docs
+  when engineState.currentIteration modulo 10 equals 0 do
+    updateDocs()
+  end
+  
+  // Schedule next iteration
+  setTimeout(iterate, 5000) // Every 5 seconds
+end
+
+// Start the engine
+make start() do
+  say "[Engine] ========================================="
+  say "[Engine] UPLim Autonomous Engine v1.0 Starting..."
+  say "[Engine] ========================================="
+  say "[Engine] Core Ideology:"
+  for each key, value in coreIdeology do
+    say "[Engine]  -" key ":" value
+  end
+  say "[Engine] ========================================="
+  
+  engineState.isRunning = true
+  engineState.currentIteration = 0
+  
+  // Initial checks
+  checkSyntax()
+  testAll()
+  updateDocs()
+  
+  // Start iteration loop
+  iterate()
+end
+
+// Stop the engine
+make stop() do
+  say "[Engine] Stopping autonomous engine..."
+  engineState.isRunning = false
+  
+  // Save state
+  saveEngineState()
+  
+  say "[Engine] Engine stopped. Total iterations:" engineState.currentIteration
+end
+
+// Pause the engine
+make pause() do
+  engineState.isRunning = false
+  say "[Engine] Engine paused at iteration" engineState.currentIteration
+end
+
+// Resume the engine
+make resume() do
+  when engineState.isRunning equals false do
+    say "[Engine] Resuming from iteration" engineState.currentIteration
+    engineState.isRunning = true
+    iterate()
+  end
+end
+
+// Generate unique ID
+make generateId() do
+  return "task_" + Date.now() + "_" + Math.random()
+end
+
+// Save engine state to file
+make saveEngineState() do
+  let stateJson be JSON.stringify(engineState)
+  writeFile("engine/state.json", stateJson)
+end
+
+// Export public API
+export { start, stop, pause, resume, checkSyntax, evolveGrammar, testAll, updateDocs }

@@ -1,0 +1,17 @@
+{
+    "schema_version": "v1",
+    "name_for_human": "UPLim Language",
+    "name_for_model": "uplim",
+    "description_for_human": "Official plugin for the UPLim programming language.",
+    "description_for_model": "Plugin for compiling, running, and analyzing UPLim code. Use this to verify UPLim syntax or execute simple scripts.",
+    "auth": {
+      "type": "none"
+    },
+    "api": {
+      "type": "openapi",
+      "url": "https://uplim.org/openapi.yaml"
+    },
+    "logo_url": "https://uplim.org/icon.svg",
+    "contact_email": "support@uplim.org",
+    "legal_info_url": "https://uplim.org/legal"
+  }

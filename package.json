@@ -1,0 +1,31 @@
+{
+  "name": "uplim-engine",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "website",
+    "uplim-lsp",
+    "vscode-extension"
+  ],
+  "description": "UPLim Language Analysis Engine",
+  "main": "dist/index.js",
+  "bin": {
+    "uplim-engine": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "analyze": "tsx src/cli.ts analyze",
+    "test": "python3 test_uplim.py"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fp-ts": "^2.16.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

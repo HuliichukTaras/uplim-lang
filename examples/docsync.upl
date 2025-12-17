@@ -1,0 +1,139 @@
+// Documentation Synchronization Module
+// Generates and validates documentation
+
+make updateDocs(proposal) do
+  say "[DocSync] Updating documentation for:" proposal.title
+  
+  // Generate documentation page
+  let docContent be generateDocPage(proposal)
+  
+  // Write to docs folder
+  let filename be "docs/features/" + slugify(proposal.title) + ".md"
+  writeFile(filename, docContent)
+  
+  // Update index
+  updateDocsIndex(proposal)
+  
+  say "[DocSync] Documentation updated at" filename
+end
+
+make generateDocPage(proposal) do
+  let doc be ""
+  
+  doc = doc + "# " + proposal.title + "\n\n"
+  doc = doc + "**Version:** " + proposal.versionBump + "\n"
+  doc = doc + "**Type:** " + proposal.type + "\n\n"
+  doc = doc + "## Description\n\n"
+  doc = doc + proposal.description + "\n\n"
+  doc = doc + "## Syntax\n\n"
+  doc = doc + "### Before\n\n"
+  doc = doc + "```uplim\n" + proposal.syntaxBefore + "\n```\n\n"
+  doc = doc + "### After\n\n"
+  doc = doc + "```uplim\n" + proposal.syntaxAfter + "\n```\n\n"
+  doc = doc + "## Examples\n\n"
+  
+  for each testCase in proposal.testCases do
+    doc = doc + "```uplim\n" + testCase.input + "\n```\n\n"
+    doc = doc + "**Output:** `" + testCase.expected + "`\n\n"
+  end
+  
+  doc = doc + "## Ideology Alignment\n\n"
+  for each key, value in proposal.ideologyAlignment do
+    doc = doc + "- **" + capitalize(key) + ":** " + value + "/10\n"
+  end
+  
+  return doc
+end
+
+make generateFromCode() do
+  say "[DocSync] Generating documentation from code..."
+  
+  // Scan all .upl files
+  let files be scanUplFiles()
+  
+  for each file in files do
+    let docs be extractDocComments(file)
+    when docs.length greater than 0 do
+      let docFile be generateApiDoc(file, docs)
+      writeFile("docs/api/" + file.name + ".md", docFile)
+    end
+  end
+  
+  say "[DocSync] Generated API documentation"
+end
+
+make validateExamples() do
+  say "[DocSync] Validating code examples in docs..."
+  
+  let docFiles be loadMarkdownFiles("docs/")
+  let errors be []
+  
+  for each file in docFiles do
+    let codeBlocks be extractCodeBlocks(file.content)
+    
+    for each block in codeBlocks do
+      when block.language equals "uplim" do
+        try
+          executeCode(block.code)
+        catch error
+          errors.push({
+            file: file.path,
+            error: error.message,
+            code: block.code
+          })
+        end
+      end
+    end
+  end
+  
+  when errors.length greater than 0 do
+    say "[DocSync] ✗ Found" errors.length "invalid examples"
+    for each error in errors do
+      say "[DocSync]   " + error.file + ":" error.error
+    end
+  else
+    say "[DocSync] ✓ All examples are valid"
+  end
+  
+  return errors
+end
+
+make updateDocsIndex(proposal) do
+  // Add to docs/index.md
+  say "[DocSync] Updated documentation index"
+end
+
+make slugify(text) do
+  return text.toLowerCase().replace(/\s+/g, "-")
+end
+
+make capitalize(text) do
+  return text.charAt(0).toUpperCase() + text.slice(1)
+end
+
+make scanUplFiles() do
+  // Mock implementation
+  return []
+end
+
+make extractDocComments(file) do
+  // Mock implementation
+  return []
+end
+
+make generateApiDoc(file, docs) do
+  // Mock implementation
+  return "# API Documentation\n"
+end
+
+make loadMarkdownFiles(dir) do
+  // Mock implementation
+  return []
+end
+
+make extractCodeBlocks(content) do
+  // Mock implementation
+  return []
+end
+
+export { updateDocs, generateFromCode, validateExamples }

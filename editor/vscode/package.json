@@ -1,0 +1,66 @@
+{
+  "name": "uplim-vscode",
+  "displayName": "UPLim Language Support",
+  "description": "Official VS Code extension for UPLim programming language",
+  "version": "0.1.0",
+  "publisher": "uplim",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "uplim",
+        "aliases": ["UPLim", "uplim"],
+        "extensions": [".upl"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "uplim",
+        "scopeName": "source.uplim",
+        "path": "./syntaxes/uplim.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "UPLim",
+      "properties": {
+        "uplim.compilerPath": {
+          "type": "string",
+          "default": "uplim",
+          "description": "Path to UPLim compiler"
+        },
+        "uplim.engine.enableAI": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable AI-powered suggestions"
+        },
+        "uplim.engine.aiProvider": {
+          "type": "string",
+          "default": "openai",
+          "enum": ["openai"],
+          "description": "AI provider for suggestions"
+        },
+        "uplim.engine.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for AI provider"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  }
+}
