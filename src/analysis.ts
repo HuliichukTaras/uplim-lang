@@ -1,6 +1,8 @@
+
 // Static Analysis Module
 
 import { ASTNode, ParseResult } from './parser'
+import { UPLIM_RULES } from './rules'
 
 export interface Diagnostic {
   type: 'error' | 'warning' | 'info'
@@ -43,46 +45,24 @@ export class Analyzer {
 
     // Analyze code patterns
     const lines = source.split('\n')
-    
+
     lines.forEach((line, index) => {
       const lineNum = index + 1
-      const trimmed = line.trim()
+      const context = { path: filename }
 
-      // Check for unsafe patterns
-      if (trimmed.includes('unsafe')) {
-        diagnostics.push({
-          type: 'warning',
-          message: 'Unsafe block detected - ensure this is necessary',
-          file: filename,
-          line: lineNum,
-          column: trimmed.indexOf('unsafe') + 1,
-          rule: 'safety.unsafe-block'
-        })
-      }
-
-      // Check for TODO comments
-      if (trimmed.includes('TODO') || trimmed.includes('FIXME')) {
-        diagnostics.push({
-          type: 'info',
-          message: 'TODO comment found',
-          file: filename,
-          line: lineNum,
-          column: 1,
-          rule: 'quality.todo'
-        })
-      }
-
-      // Check for long lines
-      if (line.length > 100) {
-        diagnostics.push({
-          type: 'info',
-          message: 'Line exceeds 100 characters',
-          file: filename,
-          line: lineNum,
-          column: 100,
-          rule: 'style.line-length'
-        })
-      }
+      // Apply Registered Rules
+      UPLIM_RULES.forEach(rule => {
+          if (rule.check(line, context)) {
+              diagnostics.push({
+                  type: rule.severity === 'info' ? 'info' : rule.severity === 'warning' ? 'warning' : 'error',
+                  message: rule.message,
+                  file: filename,
+                  line: lineNum,
+                  column: 1,
+                  rule: rule.id
+              })
+          }
+      })
     })
 
     // Calculate metrics

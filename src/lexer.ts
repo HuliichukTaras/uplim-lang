@@ -23,6 +23,7 @@ export enum TokenType {
   AWAIT = 'AWAIT',
   SPAWN = 'SPAWN',
   BREAK = 'BREAK',
+  POLICY = 'POLICY',
   
   // Type Keywords (Basic)
   TYPE_INT = 'TYPE_INT',
@@ -285,6 +286,7 @@ export class Lexer {
       case 'in': return TokenType.IN
       case 'break': return TokenType.BREAK
       case 'by': return TokenType.BY
+      case 'policy': return TokenType.POLICY
       
       case 'match':
       case 'm': return TokenType.MATCH

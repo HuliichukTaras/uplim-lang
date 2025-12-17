@@ -5,8 +5,10 @@ import {
     VariableDeclaration, SayStatement, BlockStatement, ExpressionStatement,
     PipelineExpression, RangeExpression, ListComprehension,
     ArrayLiteral, ObjectLiteral, ObjectPattern, ArrayPattern, ReturnStatement,
-    FunctionExpression
+    FunctionExpression, MemberExpression, AssignmentExpression,
+    StructDeclaration, EnumDeclaration, PolicyDeclaration, MatchExpression, MatchCase
 } from './parser'
+import * as http from 'http'
 
 export class Environment {
     private values = new Map<string, any>()
@@ -52,7 +54,82 @@ export class Interpreter {
     private output: string[] = [] // Capture output for testing
 
     constructor() {
-        // Define native functions if needed
+        // Define native functions
+        this.globalEnv.define('serve', {
+            type: 'native_function',
+            call: (args: any[], env: Environment) => {
+                if (args.length !== 2) throw new Error("serve(port, handler) expects 2 arguments")
+                const port = args[0]
+                const handler = args[1] // Function object
+                
+                if (typeof port !== 'number') throw new Error("serve: port must be a number")
+                
+                // We're inside a sync execution, but server is async. 
+                // UPLim CLI will likely exit if we don't keep event loop alive.
+                // createServer keeps it alive.
+                
+                const server = http.createServer((req, res) => {
+                     // Prepare request object for UPLim
+                     const reqObj = {
+                         method: req.method || 'GET',
+                         url: req.url || '/',
+                         headers: req.headers
+                     }
+                     
+                     // Helper to send response
+                     const sendResponse = (body: string, status = 200) => {
+                         res.writeHead(status, { 'Content-Type': 'text/html' })
+                         res.end(body)
+                     }
+                     
+                     try {
+                         // Call the UPLim handler function
+                         // We need to re-use the visitCallExpression logic or manually call it.
+                         // But we are in a callback, providing 'handler' logic.
+                         
+                         if (handler.type !== 'function') {
+                             throw new Error("serve: handler must be a function")
+                         }
+                         
+                         const funcDecl = handler.declaration as FunctionDeclaration
+                         if (funcDecl.params.length !== 1) {
+                             // Handler should accept (request)
+                             throw new Error("serve: handler function must accept 1 argument (request)")
+                         }
+                         
+                         const scope = new Environment(handler.closure)
+                         scope.define(funcDecl.params[0], reqObj)
+                         
+                         // Execute body
+                         let result = ""
+                         try {
+                              // We need access to 'this.executeBlock', but 'this' is Interpreter instance.
+                              // We are inside arrow function so 'this' is preserved.
+                              // CAUTION: 'executeBlock' is private. But we are inside the class.
+                              result = this.executeBlock(funcDecl.body.body, scope)
+                         } catch (e: any) {
+                              if (e instanceof ReturnException) {
+                                  result = e.value
+                              } else {
+                                  throw e
+                              }
+                         }
+                         
+                         sendResponse(String(result))
+                         
+                     } catch (e: any) {
+                         console.error("Handler error:", e)
+                         sendResponse("Internal Server Error: " + e.message, 500)
+                     }
+                })
+                
+                server.listen(port, () => {
+                    console.log(`UPLim Server running on http://localhost:${port}`)
+                })
+                
+                return "Server started"
+            }
+        })
     }
     
     evaluate(program: Program): string[] {
@@ -89,6 +166,12 @@ export class Interpreter {
                  if (rs.argument) val = this.evaluateExpression(rs.argument, env)
                  throw new ReturnException(val)
             }
+            case 'StructDeclaration':
+                return this.visitStructDeclaration(stmt as StructDeclaration, env)
+            case 'EnumDeclaration':
+                return this.visitEnumDeclaration(stmt as EnumDeclaration, env)
+            case 'PolicyDeclaration':
+                return this.visitPolicyDeclaration(stmt as PolicyDeclaration, env)
             default:
                 throw new Error(`Unknown statement type: ${stmt.type}`)
         }
@@ -150,6 +233,43 @@ export class Interpreter {
     private visitBlockStatement(stmt: BlockStatement, env: Environment) {
         const newEnv = new Environment(env)
         return this.executeBlock(stmt.body, newEnv)
+    }
+
+    private visitStructDeclaration(stmt: StructDeclaration, env: Environment) {
+        // Store struct definition in environment
+        // In full impl we might create a constructor function or just a type definition
+        // For v0.3: Define a constructor function 'Name(fields...)' or expects object literal?
+        // User example: let state = SystemState { ... } using ObjectLiteral syntax but with Type name?
+        // Converting explicit struct instantiation `Struct { key: val }` is not yet in Parser (we have ObjectLiteral).
+        // Let's assume StructDeclaration just defines the type name for now, or a constructor.
+        // Let's define a constructor function that takes a map/object.
+        
+        env.define(stmt.name, {
+            type: 'struct_definition',
+            declaration: stmt
+        })
+    }
+
+    private visitEnumDeclaration(stmt: EnumDeclaration, env: Environment) {
+        // Define Enum name as object containing variants?
+        // Enum Type reference
+        const enumObj: any = { type: 'enum_definition', name: stmt.name }
+        
+        // Define variants as constants on the Enum object? 
+        // Or inject variants into scope if wanted? Usually Enum.Variant.
+        stmt.variants.forEach(v => {
+            enumObj[v] = v // Simple string mapping for v0.3
+        })
+        
+        env.define(stmt.name, enumObj)
+    }
+
+    private visitPolicyDeclaration(stmt: PolicyDeclaration, env: Environment) {
+        // Store policy
+        env.define(stmt.name, {
+            type: 'policy',
+            declaration: stmt
+        })
     }
     
     private visitExpression(stmt: ExpressionStatement, env: Environment) {
@@ -246,6 +366,59 @@ export class Interpreter {
                     closure: env
                 }
             }
+            case 'MemberExpression': {
+                const member = expr as MemberExpression
+                const object = this.evaluateExpression(member.object, env)
+                const property = member.property.name
+                
+                if (object === undefined || object === null) {
+                    throw new Error(`Cannot access property '${property}' of ${object}`)
+                }
+                
+                // Allow accessing properties of JS objects (like our reqObj)
+                if (typeof object === 'object') {
+                    const val = object[property]
+                    // If it's a method on a native object (like array.push), we might want to bind it?
+                    // For simple POJO (reqObj), just return value.
+                    return val
+                }
+                throw new Error(`Cannot access property '${property}' on non-object`)
+            }
+            case 'AssignmentExpression': {
+                const assign = expr as AssignmentExpression
+                const value = this.evaluateExpression(assign.right, env)
+                
+                if (assign.left.type === 'Identifier') {
+                    env.assign((assign.left as Identifier).name, value)
+                    return value
+                } else if (assign.left.type === 'MemberExpression') {
+                    const member = assign.left as MemberExpression
+                    const obj = this.evaluateExpression(member.object, env)
+                    if (typeof obj !== 'object' || obj === null) throw new Error("Assignment to property of non-object")
+                    obj[member.property.name] = value
+                    return value
+                }
+                
+                throw new Error("Invalid assignment target")
+            }
+            case 'MatchExpression': {
+                const matchExpr = expr as MatchExpression
+                const discriminant = this.evaluateExpression(matchExpr.discriminant, env) // Corrected from 'test' to 'discriminant' based on parser definition
+                
+                for (const caseNode of matchExpr.cases) {
+                    if (caseNode.test === null) {
+                        // Default case (_)
+                        return this.evaluateExpression(caseNode.consequent, env)
+                    } else {
+                        const testVal = this.evaluateExpression(caseNode.test, env)
+                        if (testVal === discriminant) {
+                            return this.evaluateExpression(caseNode.consequent, env)
+                        }
+                    }
+                }
+                
+                throw new Error("Match expression failed: no matching case found")
+            }
             default:
                 throw new Error(`Unknown expression type: ${expr.type}`)
         }
@@ -267,14 +440,26 @@ export class Interpreter {
     }
     
     private visitCallExpression(expr: CallExpression, env: Environment): any {
-        const callee = env.get(expr.callee.name)
+        // Evaluate callee expression 
+        // Previously assumed callee was Identifier
         
+        let callee
+        if (expr.callee.type === 'Identifier') {
+             callee = env.get((expr.callee as Identifier).name)
+        } else {
+             callee = this.evaluateExpression(expr.callee, env)
+        }
+        
+        if (callee && callee.type === 'native_function') {
+             return callee.call(expr.arguments.map(arg => this.evaluateExpression(arg, env)), env)
+        }
+
         if (callee && callee.type === 'function') {
             const func = callee.declaration as FunctionDeclaration
             const args = expr.arguments.map(arg => this.evaluateExpression(arg, env))
             
             if (args.length !== func.params.length) {
-                throw new Error(`Function ${func.name} expects ${func.params.length} arguments but got ${args.length}`)
+                throw new Error(`Function ${func.name || 'anonymous'} expects ${func.params.length} arguments but got ${args.length}`)
             }
             
             const scope = new Environment(callee.closure)
@@ -293,7 +478,7 @@ export class Interpreter {
             } 
         }
         
-        throw new Error(`'${expr.callee.name}' is not a function`)
+        throw new Error(`'${expr.callee.type === 'Identifier' ? (expr.callee as Identifier).name : 'Expression'}' is not a function`)
     }
 
     private isTruthy(val: any): boolean {

@@ -39,6 +39,10 @@
         {
           "name": "storage.modifier.uplim",
           "match": "\\b(mut|const|static)\\b"
+        },
+        {
+          "name": "storage.type.function.uplim",
+          "match": "\\b(fn|func|def)\\b"
         }
       ]
     },
