@@ -135,7 +135,15 @@ export type Expression =
   | ArrayLiteral
   | ObjectLiteral
   | FunctionExpression
+  | FunctionExpression
   | AwaitExpression
+  | StructInstantiation
+
+export interface StructInstantiation extends ASTNode {
+    type: 'StructInstantiation'
+    structName: string
+    fields: { name: string, value: Expression }[]
+}
 
 export interface UnaryExpression extends ASTNode {
     type: 'UnaryExpression'
