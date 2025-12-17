@@ -28,17 +28,17 @@ enum Status {
 }
 
 struct Room {
-    name,
-    floor,
-    temperature
+    name: string,
+    floor: int,
+    temperature: int
 }
 
 struct Device {
-    id,
-    type,
-    room,
-    status,
-    usage
+    id: string,
+    type: DeviceType,
+    room: string,
+    status: Status,
+    usage: int
 }
 
 # ------------------------------------------
