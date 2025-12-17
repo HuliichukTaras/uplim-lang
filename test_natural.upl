@@ -1,0 +1,15 @@
+make add(a, b) => a + b
+
+fn main() {
+    let x = 10
+    
+    when x > 5 do
+        say "x is greater than 5"
+        
+    when (x < 20) do {
+        say "x is less than 20"
+    }
+
+    say "Testing make function:"
+    say add(10, 20)
+}

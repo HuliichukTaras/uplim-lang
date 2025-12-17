@@ -1,7 +1,7 @@
 // Engine Module: Static Analysis
 // Performs deep code analysis for quality, safety, and performance
 
-import { UPLimParser, ASTNode } from '../parser';
+import { Parser, ASTNode } from '../parser';
 import { Lexer } from '../lexer';
 
 export type AnalysisIssue = {
@@ -15,10 +15,10 @@ export type AnalysisIssue = {
 };
 
 export class StaticAnalyzer {
-  private parser: UPLimParser;
+  private parser: Parser;
 
   constructor() {
-    this.parser = new UPLimParser();
+    this.parser = new Parser();
   }
 
   analyze(code: string): AnalysisIssue[] {
@@ -27,8 +27,8 @@ export class StaticAnalyzer {
     try {
       const lexer = new Lexer(code);
       lexer.tokenize(); // Tokenize is called inside parser usually, but here we can just pass code to parser
-      // Actually UPLimParser.parse takes source string.
-      // But UPLimParser logic: parse(source) -> new Lexer(source) -> tokenize -> parse.
+      // Actually Parser.parse takes source string.
+      // But Parser logic: parse(source) -> new Lexer(source) -> tokenize -> parse.
       // So we just need parser.parse(code)
       
       const parseResult = this.parser.parse(code, 'analysis.upl');

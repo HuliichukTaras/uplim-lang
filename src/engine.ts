@@ -2,7 +2,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { UPLimParser, Program } from './parser'
+import { Parser, Program } from './parser'
 import { Interpreter } from './interpreter'
 import { Analyzer, Diagnostic, CodeMetrics } from './analysis'
 import { SecurityAnalyzer, SecurityIssue } from './security'
@@ -35,7 +35,7 @@ export interface Summary {
 }
 
 export class UPLimEngine {
-  private parser = new UPLimParser()
+  private parser = new Parser()
   private interpreter = new Interpreter()
   private analyzer = new Analyzer()
   private securityAnalyzer = new SecurityAnalyzer()

@@ -1,0 +1,87 @@
+
+// main.upl - UPLim v0.1 Canonical Example
+
+// Imports
+import math // standard lib (mock)
+import ai.gpt // hypothetical AI module
+
+// Models (AI Native)
+model Architect {
+    provider: "openai"
+    version: "gpt-4o"
+}
+
+// Enums
+enum BuildingStatus {
+    Planned,
+    Building,
+    Completed
+}
+
+// Structs
+struct House {
+    address: String
+    floors: Int
+    status: BuildingStatus
+    energy_score: Float
+}
+
+// Global mutable variable (if needed, usually discouraged but supported)
+var project_count: Int = 0
+
+// Main logic
+pub async fn main() -> Int {
+    say "Starting UPLim Construction Demo..."
+
+    // Variable declaration with type
+    let target_floors: Int = 2
+    
+    // Struct instantiation (simulated via make or literal if supported? 
+    // Spec says 'struct name { field: val }' literal or 'make' helper?
+    // Spec implies struct literal syntax isn't fully defined in 'Literals' section but in 'Data Structures' section it says:
+    // "struct Name { field: Type }" for decl. For value?
+    // Let's assume a helper function or map-like syntax for now until constructor syntax is explicit.
+    // Spec v0.1: "Structs are instantiated with strict field checking." -> Implies literal syntax exists.
+    // Assume: House { address: "...", ... }
+    
+    // Since Parser doesn't strictly parse StructLiteral yet (it parses ObjectLiteral/Block), 
+    // let's use a mocked ObjectLiteral which interpreter treats as struct if we check types.
+    // But currently interpreter doesn't validate struct instances against types.
+    
+    let my_house = make_house("123 Code St", target_floors)
+    
+    if (my_house.floors > 1) {
+        say "That's a tall house!"
+    } else {
+        say "Cozy cabin."
+    }
+    
+    // While loop test
+    var floors_built: Int = 0
+    while (floors_built < target_floors) {
+        floors_built = floors_built + 1
+        say "Built floor " + floors_built
+    }
+
+    // AI Integration
+    say "Consulting Architect..."
+    // let plan = await Architect.prompt("Design a modern facade") // Mock call
+    say "Architect approves."
+    
+    return 0
+}
+
+// Helper function
+fn make_house(addr: String, f: Int) -> House {
+    project_count = project_count + 1
+    
+    // Return struct-like object
+    // In v0.1 this would be a StructLiteral. 
+    // Interpreted as Object for now.
+    return {
+        address: addr,
+        floors: f,
+        status: 0, // Enum value (0 = Planned)
+        energy_score: 95.5
+    }
+}

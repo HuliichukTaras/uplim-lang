@@ -1,5 +1,5 @@
 
-import { defineConfig } from "uplim"
+import { defineConfig } from "./src/config"
 
 export default defineConfig({
   target: "node", // node | edge | wasm

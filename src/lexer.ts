@@ -12,19 +12,21 @@ export enum TokenType {
   WHILE = 'WHILE',
   LOOP = 'LOOP',
   FOR = 'FOR',
+  WHEN = 'WHEN',
+  DO = 'DO',
   IN = 'IN',
   MATCH = 'MATCH',
   RETURN = 'RETURN',
   STRUCT = 'STRUCT',
   ENUM = 'ENUM',
   IMPORT = 'IMPORT',
+  EXPORT = 'EXPORT',
   FROM = 'FROM',
+  AS = 'AS',
   ASYNC = 'ASYNC',
   AWAIT = 'AWAIT',
   SPAWN = 'SPAWN',
   BREAK = 'BREAK',
-  POLICY = 'POLICY',
-  WITH = 'WITH',
   
   // Type Keywords (Basic)
   TYPE_INT = 'TYPE_INT',
@@ -37,10 +39,18 @@ export enum TokenType {
   IDENTIFIER = 'IDENTIFIER',
   NUMBER = 'NUMBER',
   STRING = 'STRING',
+
+  // New Keywords v0.1
+  VAR = 'VAR',
+  PUB = 'PUB',
+  MODEL = 'MODEL',
+  EXTERN = 'EXTERN',
+  TYPE_ANY = 'TYPE_ANY',
   
   // Syntax
   ASSIGN = 'ASSIGN', // =
-  ARROW = 'ARROW',   // =>
+  FAT_ARROW = 'FAT_ARROW',   // =>
+  ARROW = 'ARROW',   // ->
   COLON = 'COLON',   // :
   DOT = 'DOT',       // .
   DOUBLE_COLON = 'DOUBLE_COLON', // ::
@@ -113,38 +123,20 @@ export class Lexer {
         continue
       }
       
-      // Multi-char operators
-      if (char === '=' && this.peek() === '>') {
-        tokens.push(this.createToken(TokenType.ARROW, '=>'))
-        this.advance(2)
-        continue
-      }
-      
-      if (char === ':' && this.peek() === ':') {
-        tokens.push(this.createToken(TokenType.DOUBLE_COLON, '::'))
-        this.advance(2)
-        continue
-      }
-      
-      if (char === '-' && this.peek() === '>') {
-         // Arrow for return type func() -> Type
-         tokens.push(this.createToken(TokenType.ARROW, '->')) // Reuse ARROW or create RARROW? Using ARROW contextually or define new token if needed. 
-         // Let's stick to ARROW for now or just treat -> as a separate token if parser needs distinction.
-         // Actually v0.1 spec says -> OR : is used. Let's strictly separate if needed, but '=>' is body, '->' is return type.
-         // Let's safe-guard and call it ARROW for now, parser can disambiguate or we rename to THIN_ARROW.
-         // For simplicity, let's allow '->' to be a token.
-         tokens.push(this.createToken(TokenType.ARROW, '->')) 
-         this.advance(2)
-         continue
-      }
+
 
       if (char === '/' && this.peek() === '/') {
-        this.skipComment()
+        this.skipLineComment()
+        continue
+      }
+
+      if (char === '/' && this.peek() === '*') {
+        this.skipBlockComment()
         continue
       }
       
       if (char === '#') {
-          this.skipComment() // Support # comments
+          this.skipLineComment() // Support # comments for backward compat
           continue
       }
       
@@ -155,7 +147,7 @@ export class Lexer {
         case ')': tokens.push(this.createToken(TokenType.RPAREN, ')')); break
         case '=': 
           if (this.peek() === '>') {
-             this.advance(); tokens.push(this.createToken(TokenType.ARROW, '=>'))
+             this.advance(); tokens.push(this.createToken(TokenType.FAT_ARROW, '=>'))
           } else {
              tokens.push(this.createToken(TokenType.ASSIGN, '='))
           }
@@ -193,13 +185,20 @@ export class Lexer {
         case ',': tokens.push(this.createToken(TokenType.COMMA, ',')); break
         case ';': tokens.push(this.createToken(TokenType.SEMICOLON, ';')); break
         case '+': tokens.push(this.createToken(TokenType.PLUS, '+')); break
-        case '-': tokens.push(this.createToken(TokenType.MINUS, '-')); break
+        case '-': 
+          if (this.peek() === '>') {
+              this.advance(); 
+              tokens.push(this.createToken(TokenType.ARROW, '->'))
+          } else {
+              tokens.push(this.createToken(TokenType.MINUS, '-')); 
+          }
+          break
         case '*': tokens.push(this.createToken(TokenType.MULTIPLY, '*')); break
         case '/': tokens.push(this.createToken(TokenType.DIVIDE, '/')); break
         case '>': tokens.push(this.createToken(TokenType.GT, '>')); break
         case '<': tokens.push(this.createToken(TokenType.LT, '<')); break
         default:
-          console.warn(`Unexpected character: ${char} at ${this.line}:${this.column}`)
+          // console.warn(`Unexpected character: ${char} at ${this.line}:${this.column}`)
       }
       
       this.advance()
@@ -270,7 +269,6 @@ export class Lexer {
       
       case 'fn': 
       case 'func': // v0.1
-      case 'f':    // v0.1 short
         return TokenType.FUNC
         
       case 'make': return TokenType.MAKE
@@ -284,11 +282,11 @@ export class Lexer {
       case 'while': return TokenType.WHILE
       case 'loop': return TokenType.LOOP
       case 'for': return TokenType.FOR
+      case 'when': return TokenType.WHEN
+      case 'do': return TokenType.DO
       case 'in': return TokenType.IN
       case 'break': return TokenType.BREAK
       case 'by': return TokenType.BY
-      case 'policy': return TokenType.POLICY
-      case 'with': return TokenType.WITH
       
       case 'match':
       case 'm': return TokenType.MATCH
@@ -300,12 +298,21 @@ export class Lexer {
       case 'enum': return TokenType.ENUM
       
       case 'import': return TokenType.IMPORT
+      case 'export': return TokenType.EXPORT
       case 'from': return TokenType.FROM
+      case 'as': return TokenType.AS
       
       case 'async': return TokenType.ASYNC
       case 'await': return TokenType.AWAIT
       case 'spawn': return TokenType.SPAWN
       
+      case 'var': return TokenType.VAR
+      case 'pub': return TokenType.PUB
+      case 'model': return TokenType.MODEL
+      case 'extern': return TokenType.EXTERN
+      
+      case 'Any': return TokenType.TYPE_ANY
+
       // Types
       case 'Int': return TokenType.TYPE_INT
       case 'Float': return TokenType.TYPE_FLOAT
@@ -355,8 +362,19 @@ export class Lexer {
     return { type: TokenType.STRING, value, line: startLine, column: startCol }
   }
 
-  private skipComment() {
+  private skipLineComment() {
     while (this.position < this.source.length && this.current() !== '\n') {
+      this.advance()
+    }
+  }
+
+  private skipBlockComment() {
+    this.advance(2) // Skip /*
+    while (this.position < this.source.length - 1) {
+      if (this.current() === '*' && this.peek() === '/') {
+        this.advance(2)
+        return
+      }
       this.advance()
     }
   }

@@ -12,37 +12,6 @@ export interface Program extends ASTNode {
   body: ASTNode[]
 }
 
-export interface StructDeclaration extends ASTNode {
-  type: 'StructDeclaration'
-  name: string
-  fields: { name: string, typeAnnotation: string }[]
-}
-
-export interface EnumDeclaration extends ASTNode {
-  type: 'EnumDeclaration'
-  name: string
-  variants: string[]
-}
-
-export interface PolicyDeclaration extends ASTNode {
-  type: 'PolicyDeclaration'
-  name: string
-  properties: { key: string, value: Expression }[]
-}
-
-export interface MatchExpression extends ASTNode {
-  type: 'MatchExpression'
-  discriminant: Expression
-  cases: MatchCase[]
-}
-
-export interface MatchCase extends ASTNode {
-  type: 'MatchCase'
-  test: Expression | null // null for default/wildcard
-  consequent: Expression
-}
-
-
 export type Pattern = Identifier | ObjectPattern | ArrayPattern
 
 export interface ObjectPattern extends ASTNode {
@@ -55,11 +24,41 @@ export interface ArrayPattern extends ASTNode {
     elements: string[] // variable names
 }
 
+export interface TypeAnnotation extends ASTNode {
+    type: 'TypeAnnotation'
+    name: string
+    isGeneric?: boolean
+    params?: TypeAnnotation[] // For Result[T, E] or Map[K, V]
+    isArray?: boolean // For T[]
+}
+
 export interface VariableDeclaration extends ASTNode {
   type: 'VariableDeclaration'
+  kind: 'let' | 'var' | 'const'
   pattern: Pattern
+  typeAnnotation?: TypeAnnotation
   value: Expression
 }
+
+export interface StructDeclaration extends ASTNode {
+    type: 'StructDeclaration'
+    name: string
+    fields: { name: string, typeAnnotation: TypeAnnotation }[]
+}
+
+export interface EnumDeclaration extends ASTNode {
+    type: 'EnumDeclaration'
+    name: string
+    members: string[]
+}
+
+export interface ModelDeclaration extends ASTNode {
+    type: 'ModelDeclaration'
+    name: string
+    properties: { key: string, value: Literal }[]
+}
+
+
 
 // ... existing code ...
 
@@ -68,8 +67,11 @@ export interface VariableDeclaration extends ASTNode {
 export interface FunctionDeclaration extends ASTNode {
   type: 'FunctionDeclaration'
   name: string
-  params: string[]
+  params: { name: string, typeAnnotation?: TypeAnnotation }[]
+  returnType?: TypeAnnotation
   body: BlockStatement
+  isPub?: boolean
+  isAsync?: boolean
 }
 
 export interface FunctionExpression extends ASTNode {
@@ -93,12 +95,25 @@ export interface IfStatement extends ASTNode {
     type: 'IfStatement'
     test: Expression
     consequent: BlockStatement
-    alternate?: BlockStatement
+    alternate?: BlockStatement | IfStatement
 }
 
 export interface ReturnStatement extends ASTNode {
   type: 'ReturnStatement'
   argument?: Expression
+}
+
+
+export interface ImportDeclaration extends ASTNode {
+    type: 'ImportDeclaration'
+    source: string
+}
+
+// ExportDeclaration removed for v0.1
+
+export interface AwaitExpression extends ASTNode {
+    type: 'AwaitExpression'
+    argument: Expression
 }
 
 export interface ExpressionStatement extends ASTNode {
@@ -109,20 +124,44 @@ export interface ExpressionStatement extends ASTNode {
 export type Expression = 
   | BinaryExpression 
   | Literal 
-  | Identifier 
+  | Identifier
+  | UnaryExpression
   | CallExpression
   | MemberExpression
   | AssignmentExpression
   | PipelineExpression
   | RangeExpression
   | ListComprehension
-  | RangeExpression
-  | ListComprehension
   | ArrayLiteral
   | ObjectLiteral
   | FunctionExpression
-  | MatchExpression
-  | StructInstantiation
+  | AwaitExpression
+
+export interface UnaryExpression extends ASTNode {
+    type: 'UnaryExpression'
+    operator: string
+    argument: Expression
+}
+
+export interface WhileStatement extends ASTNode {
+    type: 'WhileStatement'
+    test: Expression
+    body: BlockStatement
+}
+
+export type Statement = 
+    | VariableDeclaration
+    | FunctionDeclaration
+    | IfStatement
+    | ReturnStatement
+    | BlockStatement
+    | ExpressionStatement
+    | StructDeclaration
+    | EnumDeclaration
+    | ModelDeclaration
+    | ImportDeclaration
+    | SayStatement
+    | WhileStatement
 
 export interface PipelineExpression extends ASTNode {
   type: 'PipelineExpression'
@@ -175,12 +214,6 @@ export interface MemberExpression extends ASTNode {
   property: Identifier
 }
 
-export interface StructInstantiation extends ASTNode {
-    type: 'StructInstantiation'
-    structName: string
-    properties: { key: string, value: Expression }[]
-}
-
 export interface AssignmentExpression extends ASTNode {
   type: 'AssignmentExpression'
   left: Expression
@@ -210,7 +243,7 @@ export interface ParseError {
   severity: 'error' | 'warning'
 }
 
-export class UPLimParser {
+export class Parser {
 
   private tokens: Token[] = []
   private position: number = 0
@@ -253,17 +286,27 @@ export class UPLimParser {
   private parseStatement(): ASTNode | null {
     const token = this.current()
 
-    if (token.type === TokenType.LET) {
+    if (token.type === TokenType.LET || token.type === TokenType.VAR) {
       return this.parseVariableDeclaration()
     }
-    if (token.type === TokenType.FUNC || token.type === TokenType.MAKE) {
+    if (token.type === TokenType.FUNC || token.type === TokenType.MAKE ||
+        token.type === TokenType.PUB || token.type === TokenType.ASYNC) {
         return this.parseFunctionDeclaration()
     }
+    if (token.type === TokenType.STRUCT) return this.parseStructDeclaration()
+    if (token.type === TokenType.ENUM) return this.parseEnumDeclaration()
+    if (token.type === TokenType.MODEL) return this.parseModelDeclaration()
+    if (token.type === TokenType.IMPORT) return this.parseImportDeclaration()
+    // if (token.type === TokenType.EXPORT) return this.parseExportDeclaration()
+
     if (token.type === TokenType.SAY) {
         return this.parseSayStatement()
     }
-    if (token.type === TokenType.IF) {
+    if (token.type === TokenType.IF || token.type === TokenType.WHEN) {
         return this.parseIfStatement()
+    }
+    if (token.type === TokenType.WHILE) {
+        return this.parseWhileStatement()
     }
     if (token.type === TokenType.LBRACE) {
         return this.parseBlock()
@@ -271,68 +314,217 @@ export class UPLimParser {
     if (token.type === TokenType.RETURN) {
         return this.parseReturnStatement()
     }
-    if (token.type === TokenType.STRUCT) {
-        return this.parseStructDeclaration()
-    }
-    if (token.type === TokenType.ENUM) {
-        return this.parseEnumDeclaration()
-    }
-    if (token.type === TokenType.POLICY) {
-        return this.parsePolicyDeclaration()
-    }
 
+    // Default to Expression Statement
     return this.parseExpressionStatement()
   }
 
   private parseVariableDeclaration(): VariableDeclaration {
-    const startToken = this.consume(TokenType.LET)
+    const startToken = this.current()
+    if (startToken.type === TokenType.LET) this.advance()
+    else if (startToken.type === TokenType.VAR) this.advance()
+    else throw new Error("Expected let or var")
+    
+    // Pattern parsing (simplified) ...
+    // Note: Assuming Identifier pattern for now for strict typing
+    // If strict typing, do we support destructuring with types?
+    // "let {x}: {x:Int} = ..." - complex.
+    // Spec shows: let x: Int = 10
     
     let pattern: Pattern
+    const nameToken = this.consume(TokenType.IDENTIFIER, "Expected variable name")
+    pattern = { type: 'Identifier', name: nameToken.value, location: nameToken }
     
-    if (this.match(TokenType.LBRACE)) {
-        // Object Destructuring { a, b }
-        const properties: { key: string, value: string }[] = []
-        if (this.current().type !== TokenType.RBRACE) {
-            do {
-                const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
-                // For now simple { a, b } support (shorthand)
-                // If we want { a: b }, we need check for COLON
-                let value = key
-                if (this.match(TokenType.COLON)) {
-                    value = this.consume(TokenType.IDENTIFIER, "Expected variable name").value
-                }
-                properties.push({ key, value })
-            } while (this.match(TokenType.COMMA))
-        }
-        this.consume(TokenType.RBRACE, "Expected '}'")
-        pattern = { type: 'ObjectPattern', properties, location: startToken }
-    } else if (this.match(TokenType.LBRACKET)) {
-        // Array Destructuring [ a, b ]
-        const elements: string[] = []
-        if (this.current().type !== TokenType.RBRACKET) {
-            do {
-                elements.push(this.consume(TokenType.IDENTIFIER, "Expected variable name").value)
-            } while (this.match(TokenType.COMMA))
-        }
-        this.consume(TokenType.RBRACKET, "Expected ']'")
-        pattern = { type: 'ArrayPattern', elements, location: startToken }
-    } else {
-        const name = this.consume(TokenType.IDENTIFIER, "Expected variable name").value
-        pattern = { type: 'Identifier', name, location: startToken }
+    // Optional Type Annotation
+    let typeAnnotation: TypeAnnotation | undefined
+    if (this.match(TokenType.COLON)) {
+        typeAnnotation = this.parseTypeAnnotation()
     }
 
     this.consume(TokenType.ASSIGN, "Expected '=' after variable declaration")
     const value = this.parseExpression()
-    // Optional semicolon
-    if (this.current().type === TokenType.SEMICOLON) {
-        this.advance()
-    }
+    
+    if (this.current().type === TokenType.SEMICOLON) this.advance()
+
     return {
       type: 'VariableDeclaration',
+      kind: startToken.type === TokenType.VAR ? 'var' : 'let',
       pattern,
+      typeAnnotation,
       value,
       location: { line: startToken.line, column: startToken.column }
     }
+  }
+
+  private parseTypeAnnotation(): TypeAnnotation {
+      // Simple type: Int
+      // Array: [Int]
+      // Map: Map[String, Any]
+      // Result: Result[T, E]
+      
+      const start = this.current()
+      
+      if (this.match(TokenType.LBRACKET)) {
+          // [Int] syntax from spec -> Array
+          const inner = this.parseTypeAnnotation()
+          this.consume(TokenType.RBRACKET)
+          return {
+              type: 'TypeAnnotation',
+              name: inner.name, // Simplified 'Array<T>' or just mark as array
+              params: [inner],
+              isArray: true,
+              location: start
+          }
+      }
+      
+      // Basic type identifier
+      let name = ''
+      if (
+          this.current().type === TokenType.TYPE_INT ||
+          this.current().type === TokenType.TYPE_FLOAT ||
+          this.current().type === TokenType.TYPE_STRING ||
+          this.current().type === TokenType.TYPE_BOOL ||
+          this.current().type === TokenType.TYPE_VOID ||
+          this.current().type === TokenType.TYPE_ANY
+      ) {
+          name = this.advance().value
+      } else {
+          name = this.consume(TokenType.IDENTIFIER).value
+      }
+      
+      let params: TypeAnnotation[] = []
+      
+      // Check for generics [T, E]
+      // Note: Spec uses Map[String, Any] -> Square Brackets for generics?
+      // Spec: Result[T, E]
+      if (this.match(TokenType.LBRACKET)) {
+          do {
+              params.push(this.parseTypeAnnotation())
+          } while (this.match(TokenType.COMMA))
+          this.consume(TokenType.RBRACKET)
+      }
+      
+      return {
+          type: 'TypeAnnotation',
+          name,
+          params,
+          isArray: false,
+          location: start
+      }
+  }
+
+  private parseStructDeclaration(): StructDeclaration {
+      const start = this.consume(TokenType.STRUCT)
+      const name = this.consume(TokenType.IDENTIFIER).value
+      this.consume(TokenType.LBRACE)
+      
+      const fields: { name: string, typeAnnotation: TypeAnnotation }[] = []
+      
+      while (this.current().type !== TokenType.RBRACE && this.current().type !== TokenType.EOF) {
+          const fieldName = this.consume(TokenType.IDENTIFIER).value
+          this.consume(TokenType.COLON)
+          const typeAnn = this.parseTypeAnnotation()
+          fields.push({ name: fieldName, typeAnnotation: typeAnn })
+          
+          // Optional comma or newline handling implicitly via loop
+          if (this.current().type === TokenType.COMMA) this.advance()
+      }
+      
+      this.consume(TokenType.RBRACE)
+      return { type: 'StructDeclaration', name, fields, location: start }
+  }
+
+  private parseEnumDeclaration(): EnumDeclaration {
+      const start = this.consume(TokenType.ENUM)
+      const name = this.consume(TokenType.IDENTIFIER).value
+      this.consume(TokenType.LBRACE)
+      
+      const members: string[] = []
+      while (this.current().type !== TokenType.RBRACE) {
+          members.push(this.consume(TokenType.IDENTIFIER).value)
+          if (this.current().type === TokenType.COMMA) this.advance()
+      }
+      
+      this.consume(TokenType.RBRACE)
+      return { type: 'EnumDeclaration', name, members, location: start }
+  }
+
+  private parseModelDeclaration(): ModelDeclaration {
+      const start = this.consume(TokenType.MODEL)
+      const name = this.consume(TokenType.IDENTIFIER).value
+      this.consume(TokenType.LBRACE)
+      
+      const properties: { key: string, value: Literal }[] = []
+       while (this.current().type !== TokenType.RBRACE) {
+          const key = this.consume(TokenType.IDENTIFIER).value
+          this.consume(TokenType.COLON)
+          // Expect Literal
+          const valToken = this.current()
+          let val: Literal
+          if (valToken.type === TokenType.STRING) {
+             val = { type: 'Literal', value: valToken.value, raw: valToken.value, location: valToken }
+             this.advance()
+          } else {
+              throw new Error("Expected string literal in model definition")
+          }
+          properties.push({ key, value: val })
+          if (this.current().type === TokenType.COMMA) this.advance()
+      }
+      this.consume(TokenType.RBRACE)
+      return { type: 'ModelDeclaration', name, properties, location: start }
+  }
+
+  private parseImportDeclaration(): ImportDeclaration {
+       const start = this.consume(TokenType.IMPORT)
+       const specifiers: { local: string, imported: string }[] = []
+       let source = ""
+       
+       if (this.match(TokenType.LBRACE)) {
+           do {
+               const imported = this.consume(TokenType.IDENTIFIER, "Expected imported name").value
+               let local = imported
+               if (this.match(TokenType.AS)) {
+                   local = this.consume(TokenType.IDENTIFIER, "Expected local alias").value
+               }
+               specifiers.push({ local, imported })
+           } while (this.match(TokenType.COMMA))
+           this.consume(TokenType.RBRACE, "Expected '}'")
+           
+           this.consume(TokenType.FROM, "Expected 'from'")
+           const srcToken = this.consume(TokenType.STRING, "Expected module path string")
+            source = srcToken.value
+       } else if (this.match(TokenType.MULTIPLY)) {
+            this.consume(TokenType.AS, "Expected 'as' after '*'")
+            const local = this.consume(TokenType.IDENTIFIER, "Expected namespace name").value
+            specifiers.push({ local, imported: "*" })
+            
+            this.consume(TokenType.FROM, "Expected 'from'")
+            const srcToken = this.consume(TokenType.STRING, "Expected module path string")
+            source = srcToken.value
+       } else if (this.current().type === TokenType.IDENTIFIER) {
+            const first = this.consume(TokenType.IDENTIFIER).value
+            
+            if (this.match(TokenType.FROM)) {
+                specifiers.push({ local: first, imported: "default" })
+                const srcToken = this.consume(TokenType.STRING, "Expected module path string")
+                source = srcToken.value
+            } else {
+                source = first
+                while (this.match(TokenType.DOT)) {
+                    source += "." + this.consume(TokenType.IDENTIFIER).value
+                }
+            }
+       } else if (this.current().type === TokenType.STRING) {
+            source = this.consume(TokenType.STRING).value
+       } else {
+            throw new Error("Unexpected import syntax")
+       }
+       
+       return { 
+           type: 'ImportDeclaration', 
+           source, 
+           location: start 
+       }
   }
 
   private parseReturnStatement(): ReturnStatement {
@@ -347,44 +539,70 @@ export class UPLimParser {
       return { type: 'ReturnStatement', argument, location: token }
   }
 
-
+  // ExportDeclaration removed
   
+
+
   private parseFunctionDeclaration(): FunctionDeclaration {
-      const startToken = this.advance() // func or make
+      const startToken = this.current()
+      let isPub = false
+      let isAsync = false
+      
+      if (this.match(TokenType.PUB)) isPub = true
+      if (this.match(TokenType.ASYNC)) isAsync = true
+      
+      if (this.match(TokenType.MAKE)) {
+          // consumed 'make'
+      } else {
+          this.consume(TokenType.FUNC, "Expected 'fn' or 'make'")
+      }
       const name = this.consume(TokenType.IDENTIFIER, "Expected function name").value
       
       this.consume(TokenType.LPAREN, "Expected '(' after function name")
-      const params: string[] = []
+
+      const params: { name: string, typeAnnotation?: TypeAnnotation }[] = []
+      
       if (this.current().type !== TokenType.RPAREN) {
           do {
-              params.push(this.consume(TokenType.IDENTIFIER, "Expected parameter name").value)
+              const paramName = this.consume(TokenType.IDENTIFIER, "Expected parameter name").value
+              let typeAnnotation: TypeAnnotation | undefined
+              if (this.match(TokenType.COLON)) {
+                  typeAnnotation = this.parseTypeAnnotation()
+              }
+              params.push({ name: paramName, typeAnnotation })
           } while (this.match(TokenType.COMMA))
       }
       this.consume(TokenType.RPAREN, "Expected ')' after parameters")
       
-      let body: BlockStatement
+      let returnType: TypeAnnotation | undefined
+      if (this.match(TokenType.ARROW)) { // ->
+          returnType = this.parseTypeAnnotation()
+      }
       
-      if (this.match(TokenType.ARROW)) {
+      let body: BlockStatement
+      if (this.match(TokenType.FAT_ARROW)) {
            const expr = this.parseExpression()
-           // Implicit return block for short syntax
            body = {
                type: 'BlockStatement',
-               location: { line: startToken.line, column: startToken.column },
                body: [{
-                   type: 'ExpressionStatement', // In a real lang this might be explicit return, simplifying for now
-                   expression: expr,
-                   location: expr.location
-               } as ASTNode] 
+                   type: 'ReturnStatement',
+                   argument: expr,
+                   location: expr.location // Simplified location
+               }],
+               location: expr.location
            }
       } else {
-          body = this.parseBlock()
+           body = this.parseBlock()
       }
       
       return {
           type: 'FunctionDeclaration',
           name,
           params,
+          returnType,
           body,
+          isPub,
+          isAsync,
           location: { line: startToken.line, column: startToken.column }
       }
   }
@@ -403,21 +621,54 @@ export class UPLimParser {
   }
 
   private parseIfStatement(): IfStatement {
-      const startToken = this.consume(TokenType.IF)
-      const test = this.parseExpression()
-      const consequent = this.parseBlock()
-      let alternate: BlockStatement | undefined
+      const token = this.current()
+      if (token.type === TokenType.WHEN) {
+          this.consume(TokenType.WHEN)
+      } else {
+          this.consume(TokenType.IF)
+      }
+      const startToken = token
+      
+      let test: Expression
+      if (this.match(TokenType.LPAREN)) {
+           test = this.parseExpression()
+           this.consume(TokenType.RPAREN, "Expected ')' after condition")
+      } else {
+           test = this.parseExpression()
+      }
+      
+      // Optional DO
+      this.match(TokenType.DO)
+      
+      let consequent: BlockStatement
+      if (this.current().type === TokenType.LBRACE) {
+          consequent = this.parseBlock()
+      } else {
+           const stmt = this.parseStatement()
+           if (!stmt) throw new Error("Expected statement")
+           consequent = {
+               type: 'BlockStatement',
+               body: [stmt as Statement],
+               location: stmt.location
+           }
+      }
+      
+      let alternate: BlockStatement | undefined | IfStatement
       
       if (this.match(TokenType.ELSE)) {
-          if (this.current().type === TokenType.IF) {
-              // else if - wrap in block
-              alternate = {
-                  type: 'BlockStatement',
-                  location: this.current(),
-                  body: [this.parseIfStatement()]
-              }
-          } else {
+          if (this.current().type === TokenType.IF || this.current().type === TokenType.WHEN) {
+              // else if / else when
+              alternate = this.parseIfStatement()
+          } else if (this.current().type === TokenType.LBRACE) {
               alternate = this.parseBlock()
+          } else {
+              const stmt = this.parseStatement()
+              if (!stmt) throw new Error("Expected statement after else")
+               alternate = {
+                   type: 'BlockStatement',
+                   body: [stmt as Statement],
+                   location: stmt.location
+               }
           }
       }
       
@@ -425,8 +676,20 @@ export class UPLimParser {
           type: 'IfStatement',
           test,
           consequent,
-          alternate,
+          alternate, // Type mismatch in AST? IfStatement defines alternate?
           location: { line: startToken.line, column: startToken.column }
+      }
+  }
+
+  private parseWhileStatement(): WhileStatement {
+      const startToken = this.consume(TokenType.WHILE)
+      const test = this.parseExpression()
+      const body = this.parseBlock()
+      return {
+          type: 'WhileStatement',
+          test,
+          body,
+          location: startToken
       }
   }
   
@@ -496,7 +759,7 @@ export class UPLimParser {
   }
 
   private parseBinaryExpression(minPrecedence: number): Expression {
-    let left = this.parsePrimary()
+    let left = this.parseUnary()
     
     while (true) {
         const token = this.current()
@@ -548,6 +811,19 @@ export class UPLimParser {
     return left
   }
 
+  private parseUnary(): Expression {
+      if (this.current().type === TokenType.AWAIT) {
+           const token = this.advance()
+           const arg = this.parseUnary()
+           return {
+               type: 'AwaitExpression',
+               argument: arg,
+               location: token
+           } as unknown as Expression
+      }
+      return this.parsePrimary()
+  }
+
   private parsePrimary(): Expression {
     const token = this.current()
     
@@ -565,67 +841,18 @@ export class UPLimParser {
         this.advance()
         let expr: Expression = { type: 'Identifier', name: token.value, location: token }
         
-        // Handle suffixes: Call (foo()) or Member (foo.bar) or Index (foo[1]) or Struct (Foo { ... })
+        // Handle suffixes: Call (foo()) or Member (foo.bar) or Index (foo[1])
         while (true) {
             if (this.match(TokenType.LPAREN)) {
                 expr = this.finishCall(expr)
             } else if (this.match(TokenType.DOT)) {
-                // Allow keywords as property names
-                const propToken = this.current()
-                let propName = ""
-                
-                if (propToken.type === TokenType.IDENTIFIER) {
-                    propName = this.consume(TokenType.IDENTIFIER).value
-                } else if (this.isKeyword(propToken.type)) {
-                     // Allow keywords like 'with', 'type', etc. as properties
-                     propName = propToken.value
-                     this.advance()
-                } else {
-                    throw new Error("Expected property name after '.'")
-                }
-
+                const propName = this.consume(TokenType.IDENTIFIER, "Expected property name after '.'")
                 expr = {
                     type: 'MemberExpression',
                     object: expr,
-                    property: { type: 'Identifier', name: propName, location: propToken },
+                    property: { type: 'Identifier', name: propName.value, location: propName },
                     location: expr.location
                 } as MemberExpression
-            } else if (this.match(TokenType.LBRACE)) {
-                // Struct Instantiation: Name { key: val }
-                // Check if expr is an Identifier
-                if (expr.type !== 'Identifier') {
-                     // Could be block or object literal if we weren't in suffix loop?
-                     // Actually parsePrimary calls parseObjectLiteral for LBRACE at start.
-                     // Here we saw Identifier then LBRACE.
-                     // It is likely Struct instantiation.
-                     const structName = (expr as unknown as Identifier).name
-                     // We already consumed LBRACE in match()
-                     // Parse properties
-                     const properties: { key: string, value: Expression }[] = []
-                     
-                     if (this.current().type !== TokenType.RBRACE) {
-                         do {
-                             const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
-                             this.consume(TokenType.COLON, "Expected ':'")
-                             const value = this.parseExpression()
-                             properties.push({ key, value })
-                         } while (this.match(TokenType.COMMA))
-                     }
-                     
-                     const rbrace = this.consume(TokenType.RBRACE, "Expected '}'")
-                     
-                     expr = {
-                         type: 'StructInstantiation',
-                         structName,
-                         properties,
-                         location: expr.location
-                     } as StructInstantiation
-                     
-                     // Struct literal is a primary expression, typically not followed by . or () immediately (though could be).
-                     // Continue loop to allow Foo{...}.prop
-                } else {
-                     throw new Error("Expected identifier before struct instantiation block")
-                }
             } else {
                 break
             }
@@ -633,8 +860,6 @@ export class UPLimParser {
         
         return expr
     }
-
-
     
     if (token.type === TokenType.LBRACKET) {
         return this.parseArrayOrComprehension()
@@ -656,12 +881,21 @@ export class UPLimParser {
         return expr
     }
 
-    if (token.type === TokenType.FUNC) {
-        return this.parseFunctionExpression()
+    if (token.type === TokenType.IF) {
+        // If Expression
+        const stmt = this.parseIfStatement()
+        // Convert Statement to Expression wrapper
+        return {
+            type: 'IfStatement', // Reusing IfStatement node for expression context
+            test: stmt.test,
+            consequent: stmt.consequent,
+            alternate: stmt.alternate,
+            location: stmt.location
+        } as unknown as Expression 
     }
 
-    if (token.type === TokenType.MATCH) {
-        return this.parseMatchExpression()
+    if (token.type === TokenType.FUNC) {
+        return this.parseFunctionExpression()
     }
     
     throw new Error(`Unexpected token: ${token.type} (${token.value})`)
@@ -748,7 +982,7 @@ export class UPLimParser {
       this.consume(TokenType.RPAREN, "Expected ')'")
       
       let body: BlockStatement
-      if (this.match(TokenType.ARROW)) {
+      if (this.match(TokenType.FAT_ARROW)) {
            const expr = this.parseExpression()
            body = {
                type: 'BlockStatement',
@@ -790,127 +1024,6 @@ export class UPLimParser {
       }
   }
 
-  private parseStructDeclaration(): StructDeclaration {
-      const start = this.consume(TokenType.STRUCT)
-      const name = this.consume(TokenType.IDENTIFIER, "Expected struct name").value
-      this.consume(TokenType.LBRACE, "Expected '{'")
-      
-      const fields: { name: string, typeAnnotation: string }[] = []
-      if (this.current().type !== TokenType.RBRACE) {
-          do {
-              const fieldName = this.consume(TokenType.IDENTIFIER, "Expected field name").value
-              this.consume(TokenType.COLON, "Expected ':'")
-              // Simple type parsing: identifier for now (Int, String, or custom type)
-              // For full type system we need parseType(), but here simple token check
-              let typeName = "Any"
-              if (this.current().type >= TokenType.TYPE_INT && this.current().type <= TokenType.TYPE_VOID) {
-                  typeName = this.current().value
-                  this.advance()
-              } else {
-                  typeName = this.consume(TokenType.IDENTIFIER, "Expected type name").value
-              }
-              fields.push({ name: fieldName, typeAnnotation: typeName })
-          } while (this.match(TokenType.COMMA) || (this.current().type !== TokenType.RBRACE && this.current().type === TokenType.IDENTIFIER)) 
-          // Allow comma or just newline/space separator by checking if next is identifier
-      }
-      this.consume(TokenType.RBRACE, "Expected '}'")
-      
-      return {
-          type: 'StructDeclaration',
-          name,
-          fields,
-          location: start
-      }
-  }
-
-  private parseEnumDeclaration(): EnumDeclaration {
-      const start = this.consume(TokenType.ENUM)
-      const name = this.consume(TokenType.IDENTIFIER, "Expected enum name").value
-      this.consume(TokenType.LBRACE, "Expected '{'")
-      
-      const variants: string[] = []
-      if (this.current().type !== TokenType.RBRACE) {
-          do {
-              variants.push(this.consume(TokenType.IDENTIFIER, "Expected variant name").value)
-          } while (this.match(TokenType.COMMA) || (this.current().type !== TokenType.RBRACE && this.current().type === TokenType.IDENTIFIER))
-      }
-      this.consume(TokenType.RBRACE, "Expected '}'")
-      
-      return {
-          type: 'EnumDeclaration',
-          name,
-          variants,
-          location: start
-      }
-  }
-
-  private parsePolicyDeclaration(): PolicyDeclaration {
-      const start = this.consume(TokenType.POLICY)
-      const name = this.consume(TokenType.IDENTIFIER, "Expected policy name").value
-      this.consume(TokenType.LBRACE, "Expected '{'")
-      
-      const properties: { key: string, value: Expression }[] = []
-      if (this.current().type !== TokenType.RBRACE) {
-          do {
-              const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
-              this.consume(TokenType.COLON, "Expected ':'")
-              const value = this.parseExpression()
-              properties.push({ key, value })
-          } while (this.match(TokenType.COMMA))
-      }
-
-      this.consume(TokenType.RBRACE, "Expected '}'")
-
-      return {
-          type: 'PolicyDeclaration',
-          name,
-          properties,
-          location: start
-      }
-  }
-
-  private parseMatchExpression(): MatchExpression {
-      const start = this.consume(TokenType.MATCH)
-      const discriminant = this.parseExpression()
-      this.consume(TokenType.LBRACE, "Expected '{'")
-      
-      const cases: MatchCase[] = []
-      while (this.current().type !== TokenType.RBRACE && this.current().type !== TokenType.EOF) {
-          let test: Expression | null = null
-          // Check for wildcard '_'
-          if (this.current().type === TokenType.IDENTIFIER && this.current().value === '_') {
-              this.advance()
-              test = null // Default case
-          } else {
-              // Parse expression/literal for case
-              // Note: Case patterns are usually restricted, but for v0.3 we allow expressions
-              test = this.parseExpression()
-          }
-          
-          this.consume(TokenType.ARROW, "Expected '=>'")
-          const consequent = this.parseExpression()
-          
-          cases.push({
-              type: 'MatchCase',
-              test,
-              consequent,
-              location: test ? test.location : consequent.location
-          })
-          
-          // Optional comma
-          this.match(TokenType.COMMA)
-      }
-      
-      this.consume(TokenType.RBRACE, "Expected '}'")
-      
-      return {
-          type: 'MatchExpression',
-          discriminant,
-          cases,
-          location: start
-      }
-  }
-
   private current(): Token {
     return this.tokens[this.position]
   }
@@ -922,6 +1035,8 @@ export class UPLimParser {
     return this.tokens[this.position - 1]
   }
   
+
+
   private consume(type: TokenType, message?: string): Token {
       if (this.current().type === type) {
           this.position++
@@ -953,12 +1068,6 @@ export class UPLimParser {
       }
       this.advance()
     }
-  }
-
-  private isKeyword(type: TokenType): boolean {
-      // Helper to check if token is a keyword that can be a property name
-      return (type >= TokenType.LET && type <= TokenType.TYPE_VOID) // Rough range check or manual list
-             || type === TokenType.WITH || type === TokenType.POLICY || type === TokenType.STRUCT || type === TokenType.ENUM
   }
 }
 

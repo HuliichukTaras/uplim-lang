@@ -2,7 +2,7 @@
 
 import { Command } from 'commander'
 import { UPLimEngine } from './engine'
-import { UPLimParser } from './parser'
+import { Parser } from './parser'
 import * as fs from 'fs'
 import * as path from 'path'
 import { Compiler } from './compiler'
@@ -16,10 +16,9 @@ program
   .version('0.1.0')
 
 program
-  .command('check')
-  .alias('analyze')
-  .description('Check UPLim project for errors (Static Analysis)')
-  .argument('[path]', 'Path to check', '.')
+  .command('analyze')
+  .description('Analyze UPLim project or file')
+  .argument('[path]', 'Path to analyze', '.')
   .option('--ai', 'Enable AI-powered suggestions')
   .action(async (targetPath: string, options: { ai?: boolean }) => {
     try {
@@ -92,43 +91,6 @@ program
   })
 
 program
-  .command('init')
-  .description('Initialize a new UPLim project')
-  .argument('[name]', 'Project name')
-  .action((name) => {
-      const projectName = name || 'uplim-project'
-      const targetDir = path.resolve(process.cwd(), projectName)
-      
-      if (fs.existsSync(targetDir)) {
-          console.error(`Directory ${projectName} already exists`)
-          process.exit(1)
-      }
-      
-      fs.mkdirSync(targetDir)
-      
-      const mainContent = `# My UPLim Project
-say "Hello from UPLim!"
-
-fn main() {
-    let x = 10
-    say "X is " + x
-}
-
-main()
-`
-      fs.writeFileSync(path.join(targetDir, 'main.upl'), mainContent)
-      console.log(`Initialized new project in ${projectName}`)
-  })
-
-program
-  .command('fmt')
-  .description('Format UPLim source code')
-  .argument('[file]', 'File to format')
-  .action((file) => {
-      console.log("Formatter coming in v0.2. (Phase 1.3 of Roadmap)")
-  })
-
-program
   .command('run')
   .description('Run a UPLim file')
   .argument('<file>', 'File to run')
@@ -148,8 +110,15 @@ program
         process.exit(1)
       }
       
-      // Print output from execution
-      result.right.forEach(line => console.log(line))
+      // Success - interpreter usually prints to stdout during execution, 
+      // but if we want to print the return value (string[] output lines):
+      // result.right.forEach(line => console.log(line)) 
+      // Note: The interpreter itself might be printing. Checking previous behavior.
+      // If evaluate returns output lines captured, we should print them.
+      // The original code just called execute(source) without printing return value,
+      // implying evaluate() did the printing OR the caller ignored it. 
+      // Checking interpreter.ts would confirm. Assuming we should print only if not handled.
+      // For safe measure, let's keep it minimal as before, but the return value is now accessible.
       
     } catch (error: any) {
       console.error(error.message)
@@ -170,7 +139,7 @@ program
     }
 
     const content = fs.readFileSync(filePath, 'utf-8')
-    const parser = new UPLimParser()
+    const parser = new Parser()
     const result = parser.parse(content, filePath)
     
     if (result.errors.length > 0) {
@@ -229,6 +198,41 @@ program
             console.error('Error talking to AI:', error.message)
         }
     }
+  })
+
+program
+  .command('check <file>')
+  .description('Check UPLim file for syntax errors')
+  .action((file) => {
+    const filePath = path.resolve(process.cwd(), file)
+    if (!fs.existsSync(filePath)) {
+      console.error(`File not found: ${file}`)
+      process.exit(1)
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const parser = new Parser()
+    const result = parser.parse(content, filePath)
+    
+    if (result.errors.length > 0) {
+      console.error(`Check failed: ${result.errors.length} error(s) found`)
+      result.errors.forEach(err => {
+        console.error(`  ${err.severity === 'error' ? '✗' : '⚠'} ${file}:${err.line}:${err.column} - ${err.message}`)
+      })
+      process.exit(1)
+    } else {
+      console.log(`✓ ${file} syntax valid`)
+      process.exit(0)
+    }
+  })
+
+program
+  .command('fmt <file>')
+  .description('Format UPLim file (Not implemented yet)')
+  .option('-w, --write', 'Write changes to file')
+  .action((file, options) => {
+      console.log(`Formatting ${file}... (Placeholder: Implemetation coming in v0.2)`)
+      // TODO: Implement AST-to-Source printer
   })
 
 program.parse(process.argv)

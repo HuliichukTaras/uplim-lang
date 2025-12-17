@@ -10,7 +10,7 @@
   "description": "UPLim Language Analysis Engine",
   "main": "dist/index.js",
   "bin": {
-    "uplim": "./dist/cli.js"
+    "uplim-engine": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
