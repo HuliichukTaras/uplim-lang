@@ -598,7 +598,7 @@ export class UPLimParser {
                      // Actually parsePrimary calls parseObjectLiteral for LBRACE at start.
                      // Here we saw Identifier then LBRACE.
                      // It is likely Struct instantiation.
-                     const structName = (expr as Identifier).name
+                     const structName = (expr as unknown as Identifier).name
                      // We already consumed LBRACE in match()
                      // Parse properties
                      const properties: { key: string, value: Expression }[] = []
@@ -634,11 +634,7 @@ export class UPLimParser {
         return expr
     }
 
-  private isKeyword(type: TokenType): boolean {
-      // Helper to check if token is a keyword that can be a property name
-      return (type >= TokenType.LET && type <= TokenType.TYPE_VOID) // Rough range check or manual list
-             || type === TokenType.WITH || type === TokenType.POLICY || type === TokenType.STRUCT || type === TokenType.ENUM
-  }
+
     
     if (token.type === TokenType.LBRACKET) {
         return this.parseArrayOrComprehension()
@@ -945,6 +941,12 @@ export class UPLimParser {
       }
       this.advance()
     }
+  }
+
+  private isKeyword(type: TokenType): boolean {
+      // Helper to check if token is a keyword that can be a property name
+      return (type >= TokenType.LET && type <= TokenType.TYPE_VOID) // Rough range check or manual list
+             || type === TokenType.WITH || type === TokenType.POLICY || type === TokenType.STRUCT || type === TokenType.ENUM
   }
 }
 

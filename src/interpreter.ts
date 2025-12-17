@@ -6,7 +6,7 @@ import {
     PipelineExpression, RangeExpression, ListComprehension,
     ArrayLiteral, ObjectLiteral, ObjectPattern, ArrayPattern, ReturnStatement,
     FunctionExpression, MemberExpression, AssignmentExpression,
-    StructDeclaration, EnumDeclaration, PolicyDeclaration, MatchExpression, MatchCase
+    StructDeclaration, EnumDeclaration, PolicyDeclaration, MatchExpression, MatchCase, StructInstantiation
 } from './parser'
 import * as http from 'http'
 
