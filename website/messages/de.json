@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Fantikx erkunden",
+    "becomeCreator": "Creator werden",
+    "contactSupport": "Support kontaktieren",
+    "complaintProcess": "Beschwerdeverfahren",
+    "terms": "AGB",
+    "privacy": "Datenschutz",
+    "copyright": "Urheberrecht",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "login": "Login",
+    "logout": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "dateOfBirth": "Geburtsdatum",
+    "forgotPassword": "Passwort vergessen?",
+    "signInWithGoogle": "MIT GOOGLE ANMELDEN",
+    "connecting": "Verbinden...",
+    "acceptAge": "Ich bestätige, dass ich <strong>18 Jahre oder älter</strong> bin",
+    "acceptTerms": "Ich akzeptiere die <link>Nutzungsbedingungen</link>, <link>Datenschutzrichtlinie</link> und <link>18+ Inhaltsrichtlinie</link>",
+    "loginAgreement": "Mit der Anmeldung stimmen Sie unseren <link>Nutzungsbedingungen</link> und der <link>Datenschutzrichtlinie</link> zu",
+    "mustBe18": "Sie müssen 18 Jahre oder älter sein, um Fantikx zu nutzen",
+    "or": "oder",
+    "passwordValid": "Passwort ist gültig",
+    "passwordsMatch": "Passwörter stimmen überein",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "passwordMinLength": "Mindestens 6 Zeichen",
+    "ageConfirmation": "Ich bestätige, dass ich 18 Jahre oder älter bin und den Nutzungsbedingungen und der Datenschutzrichtlinie zustimme",
+    "loggingIn": "Anmelden...",
+    "creatingAccount": "Konto erstellen...",
+    "invalidCredentials": "Falsche E-Mail oder falsches Passwort. Bitte versuchen Sie es erneut.",
+    "emailNotConfirmed": "Bitte bestätigen Sie Ihre E-Mail vor der Anmeldung.",
+    "sessionError": "Sitzung konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "emailAlreadyRegistered": "Diese E-Mail ist bereits registriert. Versuchen Sie sich anzumelden."
+  },
+  "landing": {
+    "headline": "Plattform für Creator",
+    "headlineHighlight": "ohne Limits",
+    "subheadline": "Dein Content. Deine Regeln.",
+    "tagline": "Keine Sperren. Keine Einschränkungen.",
+    "quote": "\"Echte Verbindungen. Echte Freiheit. Echte Möglichkeiten.\"",
+    "features": {
+      "noLimits": {
+        "title": "Keine Limits",
+        "desc": "Drücke dich frei aus"
+      },
+      "noBans": {
+        "title": "Keine Shadowbans",
+        "desc": "Dein Content immer sichtbar"
+      },
+      "monetization": {
+        "title": "Faire Belohnung",
+        "desc": "Monetarisierung für jeden Creator"
+      },
+      "global": {
+        "title": "Globale Community",
+        "desc": "Verbinde dich ohne Grenzen"
+      },
+      "modern": {
+        "title": "Deine Regeln",
+        "desc": "Du kontrollierst deinen Content"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "Startseite",
+    "explore": "Entdecken",
+    "reels": "Reels",
+    "live": "Live",
+    "messages": "Nachrichten",
+    "notifications": "Benachrichtigungen",
+    "ads": "Werbung",
+    "create": "Erstellen",
+    "dashboard": "Dashboard",
+    "wallet": "Wallet",
+    "profile": "Profil",
+    "more": "Mehr",
+    "transactions": "Transaktionen",
+    "settings": "Einstellungen",
+    "help": "Hilfe",
+    "report": "Problem melden"
+  },
+  "ads": {
+    "title": "Content bewerben",
+    "description": "Erhöhen Sie Ihre Reichweite mit Fantikx Ads",
+    "hero": {
+      "title": "Vergrößern Sie Ihr Publikum",
+      "subtitle": "Erreichen Sie mehr Fans und steigern Sie Ihren Content mit gezielter Werbung"
+    },
+    "features": {
+      "targeting": {
+        "title": "Intelligentes Targeting",
+        "description": "Erreichen Sie die richtige Zielgruppe mit präzisem Targeting"
+      },
+      "growth": {
+        "title": "Schnelles Wachstum",
+        "description": "Mehr Views, Likes und Abonnenten in kürzester Zeit"
+      },
+      "analytics": {
+        "title": "Echtzeit-Analytics",
+        "description": "Verfolgen Sie Ihre Kampagnen-Performance in Echtzeit"
+      }
+    },
+    "comingSoon": {
+      "title": "Demnächst",
+      "description": "Wir arbeiten hart daran, Ihnen leistungsstarke Werbe-Tools zu bieten. Bleiben Sie dran!",
+      "pricing": "Flexible Preise ab $10"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

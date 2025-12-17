@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "探索 Fantikx",
+    "becomeCreator": "成為創作者",
+    "contactSupport": "聯繫支援",
+    "complaintProcess": "投訴流程",
+    "terms": "條款",
+    "privacy": "隱私",
+    "copyright": "版權",
+    "signIn": "登入",
+    "signUp": "註冊",
+    "login": "登入",
+    "logout": "登出",
+    "email": "電子郵件",
+    "password": "密碼",
+    "confirmPassword": "確認密碼",
+    "dateOfBirth": "出生日期",
+    "forgotPassword": "忘記密碼？",
+    "signInWithGoogle": "使用 GOOGLE 登入",
+    "connecting": "連線中...",
+    "acceptAge": "我確認我已<strong>年滿 18 歲</strong>",
+    "acceptTerms": "我接受<link>服務條款</link>、<link>隱私權政策</link>和<link>18+ 內容政策</link>",
+    "loginAgreement": "登入即表示您同意我們的<link>服務條款</link>和<link>隱私權政策</link>",
+    "mustBe18": "您必須年滿 18 歲才能使用 Fantikx",
+    "or": "或",
+    "passwordValid": "密碼有效",
+    "passwordsMatch": "密碼匹配",
+    "passwordMismatch": "密碼不匹配",
+    "passwordMinLength": "最少6個字元",
+    "ageConfirmation": "我確認我已年滿18歲，並同意服務條款和隱私權政策",
+    "loggingIn": "登入中...",
+    "creatingAccount": "創建帳戶中...",
+    "invalidCredentials": "郵箱或密碼錯誤。請重試。",
+    "emailNotConfirmed": "請在登入前驗證您的郵箱。",
+    "sessionError": "無法創建會話。請重試。",
+    "emailAlreadyRegistered": "此郵箱已註冊。請嘗試登入。"
+  },
+  "landing": {
+    "headline": "創作者平台",
+    "headlineHighlight": "無限制",
+    "subheadline": "你的內容。你的規則。",
+    "tagline": "沒有封禁。沒有限制。",
+    "quote": "\"真正的連接。真正的自由。真正的機會。\"",
+    "features": {
+      "noLimits": {
+        "title": "無限制",
+        "desc": "自由表達"
+      },
+      "noBans": {
+        "title": "無影子封禁",
+        "desc": "內容始終可見"
+      },
+      "monetization": {
+        "title": "公平回報",
+        "desc": "每位創作者的變現"
+      },
+      "global": {
+        "title": "全球社區",
+        "desc": "無國界連接"
+      },
+      "modern": {
+        "title": "你的規則",
+        "desc": "掌控你的內容"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "首頁",
+    "explore": "探索",
+    "reels": "短影片",
+    "live": "直播",
+    "messages": "訊息",
+    "notifications": "通知",
+    "ads": "廣告",
+    "create": "創作",
+    "dashboard": "儀表板",
+    "wallet": "錢包",
+    "profile": "個人資料",
+    "more": "更多",
+    "transactions": "交易",
+    "settings": "設定",
+    "help": "幫助",
+    "report": "報告問題"
+  },
+  "ads": {
+    "title": "推廣您的內容",
+    "description": "通過 Fantikx 廣告擴大您的影響力",
+    "hero": {
+      "title": "擴大您的受眾",
+      "subtitle": "通過定向推廣觸達更多粉絲並增強您的內容"
+    },
+    "features": {
+      "targeting": {
+        "title": "智能定向",
+        "description": "通過精準定向觸達正確的受眾"
+      },
+      "growth": {
+        "title": "快速增長",
+        "description": "快速獲得更多觀看、點讚和訂閱"
+      },
+      "analytics": {
+        "title": "即時分析",
+        "description": "即時追蹤您的活動表現"
+      }
+    },
+    "comingSoon": {
+      "title": "即將推出",
+      "description": "我們正在努力為您提供強大的推廣工具。敬請期待！",
+      "pricing": "靈活定價從 $10 起"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

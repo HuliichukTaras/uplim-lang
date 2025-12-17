@@ -1,86 +1,51 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type React from "react"
+import type { Metadata } from "next"
+import { Geist_Mono, Inter, Source_Serif_4 } from "next/font/google"
+
+import { defaultLocale } from "@/i18n/config"
+
+import "./globals.css"
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-inter",
+})
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-geist-mono",
+})
+
+const sourceSerif4 = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-source-serif-4",
+})
 
 export const metadata: Metadata = {
-  title: 'UPLim - The Human Programming Language',
-  description: 'A minimal, cross-platform language with a built-in WASM compiler and AI-driven architecture. Build apps without boilerplate.',
-  keywords: ['uplim', 'minimal language', 'cross-platform language', 'WASM compiler', 'Uplim REPL', 'programming language'],
-  authors: [{ name: 'Taras Huliichuk', url: 'https://github.com/Huliichuk' }],
-  creator: 'Taras Huliichuk',
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://uplim.org',
-    title: 'UPLim - The Human Programming Language',
-    description: 'Simple to read. Safe by default. Fast everywhere. Built for the AI era.',
-    siteName: 'UPLim',
-    images: [{
-      url: '/og-image.png', // Ensure this image exists later or use a placeholder
-      width: 1200,
-      height: 630,
-      alt: 'UPLim Programming Language'
-    }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'UPLim - The Human Programming Language',
-    description: 'Simple to read. Safe by default. Fast everywhere.',
-    images: ['/og-image.png'],
-    creator: '@uplim_lang',
-  },
+  title: "v0 App",
+  description: "Created with v0",
+  generator: "v0.app",
   icons: {
-    icon: '/icon.svg',
-    apple: '/apple-icon.png',
+    icon: "/icon.svg",
   },
-}
-
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'ProgrammingLanguage',
-      name: 'UPLim',
-      description: 'A minimal, cross-platform language with a built-in WASM compiler.',
-      url: 'https://uplim.org',
-      author: {
-        '@type': 'Person',
-        name: 'Taras Huliichuk',
-        url: 'https://github.com/Huliichuk'
-      },
-      creator: {
-        '@type': 'Person',
-        name: 'Taras Huliichuk'
-      },
-      applicationCategory: 'Development Tool',
-      operatingSystem: 'Cross-platform',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD'
-      }
-    },
-    {
-      '@type': 'SoftwareApplication',
-      name: 'UPLim Compiler',
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Cross-platform',
-      url: 'https://uplim.org/compiler'
-    }
-  ]
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en" className="dark">
-      <body>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+    <html lang={defaultLocale}>
+      <body
+        className={`${inter.className} ${geistMono.variable} ${sourceSerif4.variable} antialiased overflow-x-hidden bg-background`}
+      >
         {children}
       </body>
     </html>

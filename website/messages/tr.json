@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Fantikx'i Keşfet",
+    "becomeCreator": "İçerik Üreticisi Ol",
+    "contactSupport": "Destek ile İletişime Geç",
+    "complaintProcess": "Şikayet Süreci",
+    "terms": "Şartlar",
+    "privacy": "Gizlilik",
+    "copyright": "Telif Hakkı",
+    "signIn": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "login": "Giriş",
+    "logout": "Çıkış Yap",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifreyi Onayla",
+    "dateOfBirth": "Doğum Tarihi",
+    "forgotPassword": "Şifreni mi unuttun?",
+    "signInWithGoogle": "GOOGLE İLE GİRİŞ YAP",
+    "connecting": "Bağlanıyor...",
+    "acceptAge": "<strong>18 yaşında veya daha büyük</strong> olduğumu onaylıyorum",
+    "acceptTerms": "<link>Hizmet Şartları</link>, <link>Gizlilik Politikası</link> ve <link>18+ İçerik Politikası</link>'nı kabul ediyorum",
+    "loginAgreement": "Giriş yaparak, <link>Hizmet Şartları</link> ve <link>Gizlilik Politikası</link>'nı kabul etmiş olursunuz",
+    "mustBe18": "Fantikx'i kullanmak için 18 yaşında veya daha büyük olmalısınız",
+    "or": "veya",
+    "passwordValid": "Şifre geçerli",
+    "passwordsMatch": "Şifreler eşleşiyor",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordMinLength": "Minimum 6 karakter",
+    "ageConfirmation": "18 yaşında veya daha büyük olduğumu onaylıyor ve Hizmet Şartları ile Gizlilik Politikası'nı kabul ediyorum",
+    "loggingIn": "Giriş yapılıyor...",
+    "creatingAccount": "Hesap oluşturuluyor...",
+    "invalidCredentials": "E-posta veya şifre yanlış. Lütfen tekrar deneyin.",
+    "emailNotConfirmed": "Giriş yapmadan önce lütfen e-postanızı doğrulayın.",
+    "sessionError": "Oturum oluşturulamadı. Lütfen tekrar deneyin.",
+    "emailAlreadyRegistered": "Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin."
+  },
+  "landing": {
+    "headline": "İçerik üreticisi platformu",
+    "headlineHighlight": "limitsiz",
+    "subheadline": "Senin içeriğin. Senin kuralların.",
+    "tagline": "Yasaklar yok. Kısıtlamalar yok.",
+    "quote": "\"Gerçek bağlantılar. Gerçek özgürlük. Gerçek fırsatlar.\"",
+    "features": {
+      "noLimits": {
+        "title": "Limitsiz",
+        "desc": "Özgürce ifade et"
+      },
+      "noBans": {
+        "title": "Gölge Yasak Yok",
+        "desc": "İçeriğin her zaman görünür"
+      },
+      "monetization": {
+        "title": "Adil Ödül",
+        "desc": "Her içerik üreticisi için para kazanma"
+      },
+      "global": {
+        "title": "Küresel Topluluk",
+        "desc": "Sınır olmadan bağlan"
+      },
+      "modern": {
+        "title": "Senin Kuralların",
+        "desc": "İçeriğini sen kontrol et"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "Ana Sayfa",
+    "explore": "Keşfet",
+    "reels": "Reels",
+    "live": "Canlı",
+    "messages": "Mesajlar",
+    "notifications": "Bildirimler",
+    "ads": "Reklamlar",
+    "create": "Oluştur",
+    "dashboard": "Panel",
+    "wallet": "Cüzdan",
+    "profile": "Profil",
+    "more": "Daha Fazla",
+    "transactions": "İşlemler",
+    "settings": "Ayarlar",
+    "help": "Yardım",
+    "report": "Sorun bildir"
+  },
+  "ads": {
+    "title": "İçeriğinizi Tanıtın",
+    "description": "Fantikx Reklamları ile erişiminizi artırın",
+    "hero": {
+      "title": "Kitlenizi Büyütün",
+      "subtitle": "Hedefli tanıtımla daha fazla hayrana ulaşın ve içeriğinizi güçlendirin"
+    },
+    "features": {
+      "targeting": {
+        "title": "Akıllı Hedefleme",
+        "description": "Hassas hedefleme ile doğru kitleye ulaşın"
+      },
+      "growth": {
+        "title": "Hızlı Büyüme",
+        "description": "Hızlıca daha fazla görüntüleme, beğeni ve abone edinin"
+      },
+      "analytics": {
+        "title": "Gerçek Zamanlı Analitik",
+        "description": "Kampanya performansınızı gerçek zamanlı takip edin"
+      }
+    },
+    "comingSoon": {
+      "title": "Yakında",
+      "description": "Size güçlü tanıtım araçları getirmek için çalışıyoruz. Takipte kalın!",
+      "pricing": "$10'dan başlayan esnek fiyatlandırma"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}
