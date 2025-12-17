@@ -122,6 +122,7 @@ export type Expression =
   | ObjectLiteral
   | FunctionExpression
   | MatchExpression
+  | StructInstantiation
 
 export interface PipelineExpression extends ASTNode {
   type: 'PipelineExpression'
@@ -172,6 +173,12 @@ export interface MemberExpression extends ASTNode {
   type: 'MemberExpression'
   object: Expression
   property: Identifier
+}
+
+export interface StructInstantiation extends ASTNode {
+    type: 'StructInstantiation'
+    structName: string
+    properties: { key: string, value: Expression }[]
 }
 
 export interface AssignmentExpression extends ASTNode {
@@ -558,18 +565,67 @@ export class UPLimParser {
         this.advance()
         let expr: Expression = { type: 'Identifier', name: token.value, location: token }
         
-        // Handle suffixes: Call (foo()) or Member (foo.bar) or Index (foo[1])
+        // Handle suffixes: Call (foo()) or Member (foo.bar) or Index (foo[1]) or Struct (Foo { ... })
         while (true) {
             if (this.match(TokenType.LPAREN)) {
                 expr = this.finishCall(expr)
             } else if (this.match(TokenType.DOT)) {
-                const propName = this.consume(TokenType.IDENTIFIER, "Expected property name after '.'")
+                // Allow keywords as property names
+                const propToken = this.current()
+                let propName = ""
+                
+                if (propToken.type === TokenType.IDENTIFIER) {
+                    propName = this.consume(TokenType.IDENTIFIER).value
+                } else if (this.isKeyword(propToken.type)) {
+                     // Allow keywords like 'with', 'type', etc. as properties
+                     propName = propToken.value
+                     this.advance()
+                } else {
+                    throw new Error("Expected property name after '.'")
+                }
+
                 expr = {
                     type: 'MemberExpression',
                     object: expr,
-                    property: { type: 'Identifier', name: propName.value, location: propName },
+                    property: { type: 'Identifier', name: propName, location: propToken },
                     location: expr.location
                 } as MemberExpression
+            } else if (this.match(TokenType.LBRACE)) {
+                // Struct Instantiation: Name { key: val }
+                // Check if expr is an Identifier
+                if (expr.type !== 'Identifier') {
+                     // Could be block or object literal if we weren't in suffix loop?
+                     // Actually parsePrimary calls parseObjectLiteral for LBRACE at start.
+                     // Here we saw Identifier then LBRACE.
+                     // It is likely Struct instantiation.
+                     const structName = (expr as Identifier).name
+                     // We already consumed LBRACE in match()
+                     // Parse properties
+                     const properties: { key: string, value: Expression }[] = []
+                     
+                     if (this.current().type !== TokenType.RBRACE) {
+                         do {
+                             const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
+                             this.consume(TokenType.COLON, "Expected ':'")
+                             const value = this.parseExpression()
+                             properties.push({ key, value })
+                         } while (this.match(TokenType.COMMA))
+                     }
+                     
+                     const rbrace = this.consume(TokenType.RBRACE, "Expected '}'")
+                     
+                     expr = {
+                         type: 'StructInstantiation',
+                         structName,
+                         properties,
+                         location: expr.location
+                     } as StructInstantiation
+                     
+                     // Struct literal is a primary expression, typically not followed by . or () immediately (though could be).
+                     // Continue loop to allow Foo{...}.prop
+                } else {
+                     throw new Error("Expected identifier before struct instantiation block")
+                }
             } else {
                 break
             }
@@ -577,6 +633,12 @@ export class UPLimParser {
         
         return expr
     }
+
+  private isKeyword(type: TokenType): boolean {
+      // Helper to check if token is a keyword that can be a property name
+      return (type >= TokenType.LET && type <= TokenType.TYPE_VOID) // Rough range check or manual list
+             || type === TokenType.WITH || type === TokenType.POLICY || type === TokenType.STRUCT || type === TokenType.ENUM
+  }
     
     if (token.type === TokenType.LBRACKET) {
         return this.parseArrayOrComprehension()

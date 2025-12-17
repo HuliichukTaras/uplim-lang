@@ -272,6 +272,9 @@ export class Interpreter {
         })
     }
     
+    // Add visitStructInstantiation logic in expression evaluation
+
+    
     private visitExpression(stmt: ExpressionStatement, env: Environment) {
         return this.evaluateExpression(stmt.expression, env)
     }
@@ -417,7 +420,16 @@ export class Interpreter {
                     }
                 }
                 
+                
                 throw new Error("Match expression failed: no matching case found")
+            }
+            case 'StructInstantiation': {
+                const structExpr = expr as StructInstantiation
+                const result: any = { type: 'struct_instance', struct: structExpr.structName }
+                for (const prop of structExpr.properties) {
+                    result[prop.key] = this.evaluateExpression(prop.value, env)
+                }
+                return result
             }
             default:
                 throw new Error(`Unknown expression type: ${expr.type}`)
@@ -444,6 +456,52 @@ export class Interpreter {
         // Previously assumed callee was Identifier
         
         let callee
+        // SPECIAL HANDLING for .with(...) pattern on Structs
+        if (expr.callee.type === 'MemberExpression') {
+             const mem = expr.callee as MemberExpression
+             if (mem.property.name === 'with') { // 'with' is now allowed as property name
+                  // This is a copy-and-update operation
+                  const objectToCopy = this.evaluateExpression(mem.object, env)
+                  if (typeof objectToCopy !== 'object' || objectToCopy === null) {
+                      throw new Error("Cannot call .with() on non-object")
+                  }
+                  
+                  // Arguments should be assignments? 
+                  // User syntax: d.with(active = on)
+                  // The parser treats these as arguments to the call.
+                  // 'active = on' is AssignmentExpression.
+                  // evaluateExpression(AssignmentExpression) returns the value AND updates environment?
+                  // Wait, AssignmentExpression updates the LEFT side. 
+                  // If left is Identifier, it updates variable in scope.
+                  // But here we want to update the property of the NEW object.
+                  
+                  // WE MUST NOT evaluate arguments as standard assignments in current scope!
+                  // We need special handling for arguments of .with()
+                  
+                  // Shallow copy
+                  const newObj = { ...objectToCopy }
+                  
+                  for (const arg of expr.arguments) {
+                      if (arg.type === 'AssignmentExpression') {
+                          const assign = arg as AssignmentExpression
+                          // We only support Identifier on left for this syntax: field = value
+                          if (assign.left.type === 'Identifier') {
+                               const fieldName = (assign.left as Identifier).name
+                               const val = this.evaluateExpression(assign.right, env) // Value is evaluated in current scope
+                               newObj[fieldName] = val
+                          } else {
+                               throw new Error(".with() only supports simple field assignment (field = value)")
+                          }
+                      } else {
+                          // Could be ObjectLiteral? e.g. .with({ active: true }) ?
+                          // User used .with(active = on). Let's stick to supporting AssignmentExpression.
+                          throw new Error(".with() arguments must be assignments (field = value)")
+                      }
+                  }
+                  return newObj
+             }
+        }
+
         if (expr.callee.type === 'Identifier') {
              callee = env.get((expr.callee as Identifier).name)
         } else {
