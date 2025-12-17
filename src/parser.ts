@@ -27,7 +27,7 @@ export interface EnumDeclaration extends ASTNode {
 export interface PolicyDeclaration extends ASTNode {
   type: 'PolicyDeclaration'
   name: string
-  body: BlockStatement
+  properties: { key: string, value: Expression }[]
 }
 
 export interface MatchExpression extends ASTNode {
@@ -847,12 +847,24 @@ export class UPLimParser {
   private parsePolicyDeclaration(): PolicyDeclaration {
       const start = this.consume(TokenType.POLICY)
       const name = this.consume(TokenType.IDENTIFIER, "Expected policy name").value
-      // Policy body is a block for now
-      const body = this.parseBlock()
+      this.consume(TokenType.LBRACE, "Expected '{'")
+      
+      const properties: { key: string, value: Expression }[] = []
+      if (this.current().type !== TokenType.RBRACE) {
+          do {
+              const key = this.consume(TokenType.IDENTIFIER, "Expected property name").value
+              this.consume(TokenType.COLON, "Expected ':'")
+              const value = this.parseExpression()
+              properties.push({ key, value })
+          } while (this.match(TokenType.COMMA))
+      }
+
+      this.consume(TokenType.RBRACE, "Expected '}'")
+
       return {
           type: 'PolicyDeclaration',
           name,
-          body,
+          properties,
           location: start
       }
   }
