@@ -1,11 +1,12 @@
 {
-  "name": "uplim-engine",
+  "name": "uplim-monorepo",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
     "website",
     "uplim-lsp",
-    "vscode-extension"
+    "vscode-extension",
+    "engine"
   ],
   "description": "UPLim Language Analysis Engine",
   "main": "dist/index.js",

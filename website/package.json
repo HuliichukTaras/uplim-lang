@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "uplim-website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "uplim-engine": "workspace:*",
     "@emotion/is-prop-valid": "latest",
     "@flaticon/flaticon-uicons": "^3.3.1",
     "@hookform/resolvers": "^3.10.0",

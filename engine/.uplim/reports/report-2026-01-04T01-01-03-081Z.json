@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-01-04T01:01:03.080Z",
+  "projectPath": "/Users/tarashuliichuk/Desktop/My projects/UPLim/uplim-lang/engine/test.upl",
+  "files": [
+    {
+      "path": "/Users/tarashuliichuk/Desktop/My projects/UPLim/uplim-lang/engine/test.upl",
+      "diagnostics": [
+        {
+          "type": "error",
+          "message": "Expect expression.",
+          "line": 7,
+          "column": 1,
+          "rule": "syntax",
+          "file": "/Users/tarashuliichuk/Desktop/My projects/UPLim/uplim-lang/engine/test.upl"
+        }
+      ],
+      "security": [],
+      "metrics": {
+        "totalLines": 9,
+        "codeLines": 6,
+        "commentLines": 0,
+        "functions": 1,
+        "types": 0,
+        "complexity": 2
+      }
+    }
+  ],
+  "summary": {
+    "totalFiles": 1,
+    "totalDiagnostics": 1,
+    "errorCount": 1,
+    "warningCount": 0,
+    "securityScore": 100,
+    "averageComplexity": 2
+  }
+}

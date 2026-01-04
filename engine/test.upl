@@ -1,0 +1,8 @@
+make add(a, b) => a + b
+
+let result = add(10, 20)
+
+when result > 30 do
+    say "Greater than 30"
+else
+    say "Less or equal"
