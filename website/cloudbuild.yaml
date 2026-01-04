@@ -1,0 +1,23 @@
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/fantikx-web", "."]
+
+  # Push the image to Container Registry/Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/fantikx-web"]
+
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "fantikx-web"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/fantikx-web"
+      - "--region"
+      - "us-central1"
+      - "--allow-unauthenticated"
+images:
+  - "gcr.io/$PROJECT_ID/fantikx-web"

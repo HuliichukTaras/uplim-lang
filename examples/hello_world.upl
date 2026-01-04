@@ -1,0 +1,18 @@
+
+let message = "Hello UPLim";
+say message;
+
+fn add(a, b) {
+  make res(x, y) => x + y
+  res(a, b) // Implicit return is not fully implemented but this tests parsing
+}
+
+let sum = add(10, 20);
+// say sum; // Implicit return unimplemented in interpreter, so this would be null/undefined
+say sum;
+
+if 10 > 5 {
+    say "Math works"
+} else {
+    say "Math is broken"
+}

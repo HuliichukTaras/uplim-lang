@@ -79,14 +79,14 @@ The UPLim Engine is a self-improving system that analyzes, tests, and evolves th
 
 ### Engine Config
 
-```typescript
+\`\`\`typescript
 {
   enableAI: boolean,
   aiProvider: "openai",
   aiApiKey: string | null,
   performanceProfilePath: string
 }
-```
+\`\`\`
 
 ### VS Code Settings
 

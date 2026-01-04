@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/recheck-moderation?all=true&fix=true&limit=100",
+      "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/cron/send-emails",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 10 * * 0"
+    },
+    {
+      "path": "/api/cron/process-digests",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/winback",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}

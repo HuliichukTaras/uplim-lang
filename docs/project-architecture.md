@@ -4,7 +4,7 @@ UPLim має власну стандартизовану архітектуру 
 
 ## Структура Проєкту
 
-```
+\`\`\`
 uplim-project/
 ├── app/                  # Головний entry-point
 │   ├── routes/           # Файли-маршрути CLI/REPL/HTTP
@@ -42,7 +42,7 @@ uplim-project/
 │
 ├── uplim.config          # Конфігурація
 └── README.md
-```
+\`\`\`
 
 ## Принципи Архітектури
 
@@ -73,7 +73,7 @@ JSON-файли локалізації для багатомовності
 
 ## Файл uplim.config
 
-```json
+\`\`\`json
 {
   "name": "my-uplim-app",
   "version": "0.1.0",
@@ -88,17 +88,17 @@ JSON-файли локалізації для багатомовності
     "compiler": false
   }
 }
-```
+\`\`\`
 
 ## Створення Нового Проєкту
 
-```bash
+\`\`\`bash
 # CLI команда
 uplim new my-app
 
 # З опціями
 uplim new my-app --target web --i18n --testing
-```
+\`\`\`
 
 ## Стандарти
 
@@ -112,8 +112,8 @@ uplim new my-app --target web --i18n --testing
 
 ## Валідація Структури
 
-```bash
+\`\`\`bash
 uplim validate
-```
+\`\`\`
 
 Перевіряє наявність обов'язкових файлів та правильність структури.

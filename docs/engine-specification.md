@@ -203,14 +203,14 @@ Main API for Engine integration.
 
 ### Configuration
 
-```typescript
+\`\`\`typescript
 interface OpenAIConfig {
   apiKey: string
   baseUrl: string
   model: 'gpt-4o' | 'gpt-4o-mini' | string
   maxTokens: number
 }
-```
+\`\`\`
 
 ### System Prompt
 
@@ -218,7 +218,7 @@ interface OpenAIConfig {
 
 ### Request Format
 
-```json
+\`\`\`json
 {
   "kind": "language-evolution",
   "payload": {
@@ -230,7 +230,7 @@ interface OpenAIConfig {
     ]
   }
 }
-```
+\`\`\`
 
 ### Response Parsing
 
@@ -249,7 +249,7 @@ interface OpenAIConfig {
 
 ## Usage Example
 
-```typescript
+\`\`\`typescript
 import { initEngine, analyzeProject } from './engine/interface/engine_main'
 
 const config = {
@@ -267,7 +267,7 @@ console.log('Diagnostics:', report.analysis.diagnostics)
 console.log('Security:', report.security.issues)
 console.log('Performance:', report.performance.suggestions)
 console.log('Evolution:', report.evolution.merged)
-```
+\`\`\`
 
 ## Future Enhancements
 

@@ -73,23 +73,23 @@ Public API for compiler and external tools.
 
 ### CLI Integration
 
-```bash
+\`\`\`bash
 uplim engine start              # Start autonomous engine
 uplim engine analyze file.upl   # Analyze code
 uplim engine benchmark file.upl # Performance test
 uplim engine security file.upl  # Security scan
 uplim engine status             # Engine health
-```
+\`\`\`
 
 ### API Integration
 
-```typescript
+\`\`\`typescript
 import { engineAPI } from '@/engine/interface/engine-api';
 
 const analysis = await engineAPI.analyzeCode(code);
 const benchmark = await engineAPI.benchmarkCode(code);
 const security = engineAPI.scanSecurity(code);
-```
+\`\`\`
 
 ### LSP Integration
 

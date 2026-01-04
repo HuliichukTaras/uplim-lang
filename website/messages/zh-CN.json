@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "探索 Fantikx",
+    "becomeCreator": "成为创作者",
+    "contactSupport": "联系支持",
+    "complaintProcess": "投诉流程",
+    "terms": "条款",
+    "privacy": "隐私",
+    "copyright": "版权",
+    "signIn": "登录",
+    "signUp": "注册",
+    "login": "登录",
+    "logout": "登出",
+    "email": "电子邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "dateOfBirth": "出生日期",
+    "forgotPassword": "忘记密码？",
+    "signInWithGoogle": "使用 GOOGLE 登录",
+    "connecting": "连接中...",
+    "acceptAge": "我确认我已<strong>年满 18 岁</strong>",
+    "acceptTerms": "我接受<link>服务条款</link>、<link>隐私政策</link>和<link>18+ 内容政策</link>",
+    "loginAgreement": "登录即表示您同意我们的<link>服务条款</link>和<link>隐私政策</link>",
+    "mustBe18": "您必须年满 18 岁才能使用 Fantikx",
+    "or": "或",
+    "passwordValid": "密码有效",
+    "passwordsMatch": "密码匹配",
+    "passwordMismatch": "密码不匹配",
+    "passwordMinLength": "最少6个字符",
+    "ageConfirmation": "我确认我已年满18岁，并同意服务条款和隐私政策",
+    "loggingIn": "登录中...",
+    "creatingAccount": "创建账户中...",
+    "invalidCredentials": "邮箱或密码错误。请重试。",
+    "emailNotConfirmed": "请在登录前验证您的邮箱。",
+    "sessionError": "无法创建会话。请重试。",
+    "emailAlreadyRegistered": "此邮箱已注册。请尝试登录。"
+  },
+  "landing": {
+    "headline": "创作者平台",
+    "headlineHighlight": "无限制",
+    "subheadline": "你的内容。你的规则。",
+    "tagline": "没有封禁。没有限制。",
+    "quote": "\"真正的连接。真正的自由。真正的机会。\"",
+    "features": {
+      "noLimits": {
+        "title": "无限制",
+        "desc": "自由表达"
+      },
+      "noBans": {
+        "title": "无影子封禁",
+        "desc": "内容始终可见"
+      },
+      "monetization": {
+        "title": "公平回报",
+        "desc": "每位创作者的变现"
+      },
+      "global": {
+        "title": "全球社区",
+        "desc": "无国界连接"
+      },
+      "modern": {
+        "title": "你的规则",
+        "desc": "掌控你的内容"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "首页",
+    "explore": "探索",
+    "reels": "短视频",
+    "live": "直播",
+    "messages": "消息",
+    "notifications": "通知",
+    "ads": "广告",
+    "create": "创作",
+    "dashboard": "仪表板",
+    "wallet": "钱包",
+    "profile": "个人资料",
+    "more": "更多",
+    "transactions": "交易",
+    "settings": "设置",
+    "help": "帮助",
+    "report": "报告问题"
+  },
+  "ads": {
+    "title": "推广您的内容",
+    "description": "通过 Fantikx 广告扩大您的影响力",
+    "hero": {
+      "title": "扩大您的受众",
+      "subtitle": "通过定向推广触达更多粉丝并增强您的内容"
+    },
+    "features": {
+      "targeting": {
+        "title": "智能定向",
+        "description": "通过精准定向触达正确的受众"
+      },
+      "growth": {
+        "title": "快速增长",
+        "description": "快速获得更多观看、点赞和订阅"
+      },
+      "analytics": {
+        "title": "实时分析",
+        "description": "实时跟踪您的活动表现"
+      }
+    },
+    "comingSoon": {
+      "title": "即将推出",
+      "description": "我们正在努力为您提供强大的推广工具。敬请期待！",
+      "pricing": "灵活定价从 $10 起"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

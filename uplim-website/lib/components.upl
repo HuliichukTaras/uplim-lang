@@ -1,0 +1,118 @@
+
+// Components.upl - UI Building Blocks
+
+export fn Navbar() {
+    ret "
+    <nav class='fixed top-0 w-full z-50 glass border-b border-white/10'>
+        <div class='max-w-7xl mx-auto px-6 h-20 flex items-center justify-between'>
+            <div class='flex items-center gap-2'>
+                <div class='w-8 h-8 rounded-lg bg-gradient-to-br from-uplim-500 to-indigo-500 flex items-center justify-center font-bold'>U</div>
+                <span class='text-xl font-bold tracking-tight'>UPLim</span>
+            </div>
+            <div class='hidden md:flex items-center gap-8 text-sm font-medium text-slate-300'>
+                <a href='#features' class='hover:text-white transition-colors'>Features</a>
+                <a href='#philosophy' class='hover:text-white transition-colors'>Philosophy</a>
+                <a href='#docs' class='hover:text-white transition-colors'>Docs</a>
+            </div>
+            <a href='https://github.com/HuliichukTaras/uplim-lang' class='px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all text-sm font-medium border border-white/10'>
+                GitHub
+            </a>
+        </div>
+    </nav>
+    "
+}
+
+export fn Hero() {
+    ret "
+    <section class='pt-32 pb-20 px-6 relative overflow-hidden'>
+        <div class='max-w-7xl mx-auto text-center'>
+            <div class='inline-block mb-6 px-4 py-1.5 rounded-full glass text-uplim-100 text-xs font-medium tracking-wide uppercase'>
+                v0.3.0 Now Available
+            </div>
+            <h1 class='text-5xl md:text-7xl font-bold mb-8 leading-tight tracking-tight'>
+                The <span class='text-transparent bg-clip-text bg-gradient-to-r from-uplim-500 to-indigo-500'>AI-First</span><br>
+                Programming Language
+            </h1>
+            <p class='text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed'>
+                Deterministic, composable, and designed for agents. UPLim bridges the gap between human intent and machine execution with a syntax built for both.
+            </p>
+            <div class='flex flex-col sm:flex-row items-center justify-center gap-4'>
+                <a href='#get-started' class='px-8 py-4 rounded-full bg-uplim-600 hover:bg-uplim-500 text-white font-semibold transition-all shadow-lg shadow-uplim-500/25'>
+                    Get Started ->
+                </a>
+                <a href='#demo' class='px-8 py-4 rounded-full glass hover:bg-white/5 transition-all font-semibold'>
+                    View Syntax
+                </a>
+            </div>
+        </div>
+    </section>
+    "
+}
+
+export fn FeatureCard(title, desc, icon) {
+    ret "
+    <div class='glass p-8 rounded-2xl hover:bg-white/5 transition-all group'>
+        <div class='w-12 h-12 rounded-xl bg-uplim-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform'>
+            <span class='text-2xl'>" + icon + "</span>
+        </div>
+        <h3 class='text-xl font-bold mb-3'>" + title + "</h3>
+        <p class='text-slate-400 leading-relaxed'>" + desc + "</p>
+    </div>
+    "
+}
+
+export fn Features() {
+    ret "
+    <section id='features' class='py-24 px-6 relative'>
+        <div class='max-w-7xl mx-auto'>
+            <div class='grid md:grid-cols-3 gap-6'>
+                " + FeatureCard("AI-Native", "First-class constructs for agent definition, context management, and LLM integration.", "🤖") + "
+                " + FeatureCard("Deterministic", "Predictable execution model designed for secure and reliable agentic workflows.", "🔒") + "
+                " + FeatureCard("Composable", "Modular architecture with strict rules preventing circular dependencies and side effects.", "🧩") + "
+            </div>
+        </div>
+    </section>
+    "
+}
+
+export fn CodePreview() {
+    let code = "
+fn main() {
+    let data = [1, 2, 3, 4, 5]
+    
+    // Declarative Pipelines
+    let processed = data
+        |> map((x) => x * 2)
+        |> filter((x) => x > 5)
+        
+    // AI-First Structs
+    struct Agent {
+        name: String
+        role: String
+    }
+}
+    "
+    ret "
+    <section class='py-20 px-6 bg-black/20'>
+        <div class='max-w-5xl mx-auto glass rounded-2xl overflow-hidden border border-white/10 shadow-2xl'>
+            <div class='flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/5'>
+                <div class='w-3 h-3 rounded-full bg-red-500'></div>
+                <div class='w-3 h-3 rounded-full bg-yellow-500'></div>
+                <div class='w-3 h-3 rounded-full bg-green-500'></div>
+                <span class='ml-4 text-xs text-slate-500 font-mono'>agent.upl</span>
+            </div>
+            <pre class='p-6 overflow-x-auto text-sm md:text-base font-mono leading-relaxed text-slate-300'>
+" + code + "
+            </pre>
+        </div>
+    </section>
+    "
+}
+
+export fn Footer() {
+    ret "
+    <footer class='py-12 border-t border-white/10 text-center text-slate-500 text-sm'>
+        <p>&copy; 2025 UPLim Language. Designed for the Autonomous Era.</p>
+    </footer>
+    "
+}

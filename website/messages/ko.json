@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Fantikx 탐색",
+    "becomeCreator": "크리에이터 되기",
+    "contactSupport": "지원팀 문의",
+    "complaintProcess": "신고 절차",
+    "terms": "이용��관",
+    "privacy": "개인정보처리방침",
+    "copyright": "저작권",
+    "signIn": "로그인",
+    "signUp": "가입하기",
+    "login": "로그인",
+    "logout": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "dateOfBirth": "생년월일",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "signInWithGoogle": "GOOGLE로 로그인",
+    "connecting": "연결 중...",
+    "acceptAge": "본인은 <strong>만 18세 이상</strong>임을 확인합니다",
+    "acceptTerms": "<link>이용약관</link>, <link>개인정보처리방침</link> 및 <link>18세 이상 콘텐츠 정책</link>에 동의합니다",
+    "loginAgreement": "로그인하면 <link>이용약관</link> 및 <link>개인정보처리방침</link>에 동의하는 것으로 간주됩니다",
+    "mustBe18": "Fantikx를 이용하려면 만 18세 이상이어야 합니다",
+    "or": "또는",
+    "passwordValid": "비밀번호가 유효합니다",
+    "passwordsMatch": "비밀번호가 일치합니다",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다",
+    "passwordMinLength": "최소 6자",
+    "ageConfirmation": "만 18세 이상임을 확인하고 이용약관 및 개인정보처리방침에 동의합니다",
+    "loggingIn": "로그인 중...",
+    "creatingAccount": "계정 생성 중...",
+    "invalidCredentials": "이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해 주세요.",
+    "emailNotConfirmed": "로그인 전에 이메일을 확인해 주세요.",
+    "sessionError": "세션을 생성할 수 없습니다. 다시 시도해 주세요.",
+    "emailAlreadyRegistered": "이 이메일은 이미 등록되어 있습니다. 로그인해 보세요."
+  },
+  "landing": {
+    "headline": "크리에이터 플랫폼",
+    "headlineHighlight": "제한 없음",
+    "subheadline": "당신의 콘텐츠. 당신의 규칙.",
+    "tagline": "밴 없음. 제한 없음.",
+    "quote": "\"진정한 연결. 진정한 자유. 진정한 기회.\"",
+    "features": {
+      "noLimits": {
+        "title": "제한 없음",
+        "desc": "자유롭게 표현하세요"
+      },
+      "noBans": {
+        "title": "섀도우밴 없음",
+        "desc": "콘텐츠가 항상 표시됨"
+      },
+      "monetization": {
+        "title": "공정한 보상",
+        "desc": "모든 크리에이터를 위한 수익화"
+      },
+      "global": {
+        "title": "글로벌 커뮤니티",
+        "desc": "국경 없이 연결"
+      },
+      "modern": {
+        "title": "당신의 규칙",
+        "desc": "콘텐츠를 제어하세요"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "홈",
+    "explore": "탐색",
+    "reels": "릴스",
+    "live": "라이브",
+    "messages": "메시지",
+    "notifications": "알림",
+    "ads": "광고",
+    "create": "만들기",
+    "dashboard": "대시보드",
+    "wallet": "지갑",
+    "profile": "프로필",
+    "more": "더보기",
+    "transactions": "거래 내역",
+    "settings": "설정",
+    "help": "도움말",
+    "report": "문제 신고"
+  },
+  "ads": {
+    "title": "콘텐츠 홍보",
+    "description": "Fantikx 광고로 도달 범위 확대",
+    "hero": {
+      "title": "오디언스 확장",
+      "subtitle": "타겟 광고로 더 많은 팬에게 도달하고 콘텐츠를 강화하세요"
+    },
+    "features": {
+      "targeting": {
+        "title": "스마트 타겟팅",
+        "description": "정밀한 타겟팅으로 올바른 오디언스에게 도달"
+      },
+      "growth": {
+        "title": "빠른 성장",
+        "description": "조회수, 좋아요, 구독자를 빠르게 늘리세요"
+      },
+      "analytics": {
+        "title": "실시간 분석",
+        "description": "캠페인 성과를 실시간으로 추적"
+      }
+    },
+    "comingSoon": {
+      "title": "곧 출시",
+      "description": "강력한 홍보 도구를 제공하기 위해 열심히 작업 중입니다. 기대해 주세요!",
+      "pricing": "$10부터 시작하는 유연한 가격"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

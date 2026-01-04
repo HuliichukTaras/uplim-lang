@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Explorar Fantikx",
+    "becomeCreator": "Tornar-se Criador",
+    "contactSupport": "Contatar Suporte",
+    "complaintProcess": "Processo de Reclamação",
+    "terms": "Termos",
+    "privacy": "Privacidade",
+    "copyright": "Direitos Autorais",
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "login": "Login",
+    "logout": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "dateOfBirth": "Data de Nascimento",
+    "forgotPassword": "Esqueceu a senha?",
+    "signInWithGoogle": "ENTRAR COM GOOGLE",
+    "connecting": "Conectando...",
+    "acceptAge": "Confirmo que tenho <strong>18 anos ou mais</strong>",
+    "acceptTerms": "Aceito os <link>Termos de Serviço</link>, a <link>Política de Privacidade</link> e a <link>Política de Conteúdo +18</link>",
+    "loginAgreement": "Ao entrar, você concorda com nossos <link>Termos de Serviço</link> e <link>Política de Privacidade</link>",
+    "mustBe18": "Você deve ter 18 anos ou mais para usar o Fantikx",
+    "or": "ou",
+    "passwordValid": "Senha válida",
+    "passwordsMatch": "As senhas coincidem",
+    "passwordMismatch": "As senhas não coincidem",
+    "passwordMinLength": "Mínimo 6 caracteres",
+    "ageConfirmation": "Confirmo que tenho 18 anos ou mais e aceito os Termos de Serviço e a Política de Privacidade",
+    "loggingIn": "Entrando...",
+    "creatingAccount": "Criando conta...",
+    "invalidCredentials": "E-mail ou senha incorretos. Por favor, tente novamente.",
+    "emailNotConfirmed": "Por favor, verifique seu e-mail antes de entrar.",
+    "sessionError": "Não foi possível criar a sessão. Por favor, tente novamente.",
+    "emailAlreadyRegistered": "Este e-mail já está cadastrado. Tente fazer login."
+  },
+  "landing": {
+    "headline": "Plataforma para criadores",
+    "headlineHighlight": "sem limites",
+    "subheadline": "Seu conteúdo. Suas regras.",
+    "tagline": "Sem bans. Sem restrições.",
+    "quote": "\"Conexões reais. Liberdade real. Oportunidades reais.\"",
+    "features": {
+      "noLimits": {
+        "title": "Sem Limites",
+        "desc": "Expresse-se livremente"
+      },
+      "noBans": {
+        "title": "Sem Shadowbans",
+        "desc": "Seu conteúdo sempre visível"
+      },
+      "monetization": {
+        "title": "Recompensa Justa",
+        "desc": "Monetização para cada criador"
+      },
+      "global": {
+        "title": "Comunidade Global",
+        "desc": "Conecte-se sem fronteiras"
+      },
+      "modern": {
+        "title": "Suas Regras",
+        "desc": "Você controla seu conteúdo"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "Início",
+    "explore": "Explorar",
+    "reels": "Reels",
+    "live": "Ao Vivo",
+    "messages": "Mensagens",
+    "notifications": "Notificações",
+    "ads": "Anúncios",
+    "create": "Criar",
+    "dashboard": "Painel",
+    "wallet": "Carteira",
+    "profile": "Perfil",
+    "more": "Mais",
+    "transactions": "Transações",
+    "settings": "Configurações",
+    "help": "Ajuda",
+    "report": "Relatar um problema"
+  },
+  "ads": {
+    "title": "Promova Seu Conteúdo",
+    "description": "Aumente seu alcance com Fantikx Ads",
+    "hero": {
+      "title": "Aumente Sua Audiência",
+      "subtitle": "Alcance mais fãs e impulsione seu conteúdo com promoção direcionada"
+    },
+    "features": {
+      "targeting": {
+        "title": "Segmentação Inteligente",
+        "description": "Alcance o público certo com segmentação precisa"
+      },
+      "growth": {
+        "title": "Crescimento Rápido",
+        "description": "Obtenha mais visualizações, curtidas e assinantes rapidamente"
+      },
+      "analytics": {
+        "title": "Análises em Tempo Real",
+        "description": "Acompanhe o desempenho da sua campanha em tempo real"
+      }
+    },
+    "comingSoon": {
+      "title": "Em Breve",
+      "description": "Estamos trabalhando para trazer ferramentas de promoção poderosas. Fique atento!",
+      "pricing": "Preços flexíveis a partir de $10"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

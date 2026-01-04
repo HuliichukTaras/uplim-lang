@@ -1,0 +1,153 @@
+// Grammar Evolution Module
+// Generates and applies language improvements
+
+import { validateAgainstIdeology } from "./ideology_guard.upl"
+
+make generateProposals(config) do
+  say "[GrammarEvolver] Generating evolution proposals..."
+  
+  let proposals be []
+  
+  // Proposal 1: Enhanced error handling in match
+  proposals.push({
+    id: "prop_001",
+    title: "Add default case validation in match expressions",
+    type: "feature",
+    description: "Require explicit default case or exhaustive matching",
+    syntaxBefore: "match x do\n  case 1: ...\nend",
+    syntaxAfter: "match x do\n  case 1: ...\n  default: ...\nend",
+    breaksCompatibility: false,
+    versionBump: "minor",
+    testCases: [
+      { input: "match 5 do case 1: 'a' case 2: 'b' default: 'c' end", expected: "'c'" }
+    ],
+    ideologyAlignment: {
+      readability: 9,
+      safety: 10,
+      portability: 10,
+      performance: 9,
+      ergonomics: 8
+    }
+  })
+  
+  // Proposal 2: Async/await sugar
+  proposals.push({
+    id: "prop_002",
+    title: "Simplified async function syntax",
+    type: "feature",
+    description: "Add 'async' keyword for cleaner asynchronous code",
+    syntaxBefore: "make fetchData() do\n  return Promise.resolve(data)\nend",
+    syntaxAfter: "make async fetchData() do\n  return data\nend",
+    breaksCompatibility: false,
+    versionBump: "minor",
+    testCases: [
+      { input: "async fetchData()", expected: "Promise" }
+    ],
+    ideologyAlignment: {
+      readability: 10,
+      safety: 9,
+      portability: 10,
+      performance: 9,
+      ergonomics: 10
+    }
+  })
+  
+  // Proposal 3: Type inference for arrays
+  proposals.push({
+    id: "prop_003",
+    title: "Automatic type inference for array literals",
+    type: "enhancement",
+    description: "Compiler infers array element type from literals",
+    syntaxBefore: "let numbers: Array<Int> be [1, 2, 3]",
+    syntaxAfter: "let numbers be [1, 2, 3]  // Type: Array<Int>",
+    breaksCompatibility: false,
+    versionBump: "patch",
+    testCases: [
+      { input: "let x = [1,2,3]", expected: "Array<Int>" }
+    ],
+    ideologyAlignment: {
+      readability: 10,
+      safety: 9,
+      portability: 10,
+      performance: 10,
+      ergonomics: 10
+    }
+  })
+  
+  // Filter proposals through ideology guard
+  let validProposals be []
+  for each proposal in proposals do
+    let validation be validateAgainstIdeology(proposal)
+    
+    when validation.approved equals true do
+      validProposals.push(proposal)
+    else
+      say "[GrammarEvolver] Rejected proposal:" proposal.title
+      say "[GrammarEvolver] Reason:" validation.reason
+    end
+  end
+  
+  say "[GrammarEvolver] Generated" validProposals.length "valid proposals"
+  return validProposals
+end
+
+make applyChanges(proposal) do
+  say "[GrammarEvolver] Applying changes for:" proposal.title
+  
+  match proposal.type do
+    case "feature":
+      addFeature(proposal)
+    case "enhancement":
+      enhanceExisting(proposal)
+    case "optimization":
+      optimizeCode(proposal)
+    default:
+      say "[GrammarEvolver] Unknown proposal type"
+  end
+end
+
+make addFeature(proposal) do
+  // Add new feature to compiler/parser
+  say "[GrammarEvolver] Adding feature:" proposal.title
+  
+  // Update grammar rules
+  updateGrammarRules(proposal)
+  
+  // Update parser
+  updateParser(proposal)
+  
+  // Update code generator
+  updateCodegen(proposal)
+end
+
+make enhanceExisting(proposal) do
+  say "[GrammarEvolver] Enhancing existing feature:" proposal.title
+  // Implementation here
+end
+
+make optimizeCode(proposal) do
+  say "[GrammarEvolver] Optimizing:" proposal.title
+  // Implementation here
+end
+
+make rollback(proposal) do
+  say "[GrammarEvolver] Rolling back:" proposal.title
+  // Restore previous state from backup
+end
+
+make updateGrammarRules(proposal) do
+  // Mock implementation
+  say "[GrammarEvolver] Updated grammar rules for" proposal.title
+end
+
+make updateParser(proposal) do
+  // Mock implementation
+  say "[GrammarEvolver] Updated parser for" proposal.title
+end
+
+make updateCodegen(proposal) do
+  // Mock implementation
+  say "[GrammarEvolver] Updated code generator for" proposal.title
+end
+
+export { generateProposals, applyChanges, rollback }

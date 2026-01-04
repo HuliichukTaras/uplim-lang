@@ -55,15 +55,6 @@ Protects core principles:
 - Detects violations
 - Rejects non-compliant changes
 
-### 8. LSP Integration (`engine/lsp.upl`)
-Language Server Protocol enables IDE support with:
-- **Standard Methods**: initialize, textDocument/didOpen, textDocument/didChange, textDocument/didSave, textDocument/didClose
-- **Code Intelligence**: completion, hover, definition, references, rename, formatting
-- **Custom Methods**: 
-  - `uplim/engineReport` - Comprehensive engine analysis
-  - `uplim/projectHealth` - Project status overview
-  - `uplim/quickFixes` - Immediate code improvements
-
 ## Core Ideology
 
 The engine enforces these principles (scored 1-10):
@@ -96,7 +87,7 @@ The engine enforces these principles (scored 1-10):
 
 ## Workflow
 
-```
+\`\`\`
 1. Analyze → Detect issues in current syntax
 2. Queue → Add tasks to priority queue
 3. Propose → Generate improvement proposals
@@ -106,11 +97,11 @@ The engine enforces these principles (scored 1-10):
 7. Document → Update docs automatically
 8. Log → Record in changelog
 9. Repeat → Continue evolution cycle
-```
+\`\`\`
 
 ## Proposal Format
 
-```typescript
+\`\`\`typescript
 {
   id: "prop_001",
   title: "Feature name",
@@ -129,7 +120,7 @@ The engine enforces these principles (scored 1-10):
     ergonomics: 8
   }
 }
-```
+\`\`\`
 
 ## Running the Engine
 
@@ -147,27 +138,3 @@ resume()
 
 // Stop engine
 stop()
-
-```
-
-## Integration with Context7 Documentation
-
-The UPLim Autonomous Engine follows the official specification from the GitHub repository, integrated via Context7:
-
-### Iteration Cycle (Context7 Spec)
-
-The engine operates on a precise 10-second iteration cycle:
-
-- **Every 1st iteration**: Process task queue
-- **Every 3rd iteration**: Syntax analysis and validation
-- **Every 5th iteration**: Grammar evolution and proposal generation
-- **Every 7th iteration**: Project structure verification
-- **Every 10th iteration**: Documentation synchronization (DocSync)
-
-### Documentation Sync (DocSync)
-
-Automatic documentation generation ensures:
-- Code examples are validated
-- API docs stay synchronized
-- Changelog is auto-generated
-- All documentation reflects current language state

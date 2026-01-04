@@ -1,0 +1,73 @@
+{
+  "common": {
+    "explore": "探索 Telloos",
+    "becomeCreator": "成为创作者",
+    "contactSupport": "联系支持",
+    "complaintProcess": "投诉流程",
+    "terms": "条款",
+    "privacy": "隐私",
+    "copyright": "版权",
+    "signIn": "登录",
+    "signUp": "注册",
+    "login": "登录",
+    "logout": "登出",
+    "email": "电子邮件",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "dateOfBirth": "出生日期",
+    "forgotPassword": "忘记密码？",
+    "signInWithGoogle": "使用 GOOGLE 登录",
+    "connecting": "连接中...",
+    "acceptAge": "我确认我已<strong>年满 18 岁</strong>",
+    "acceptTerms": "我接受<link>服务条款</link>、<link>隐私政策</link>和<link>18+ 内容政策</link>",
+    "loginAgreement": "登录即表示您同意我们的<link>服务条款</link>和<link>隐私政策</link>",
+    "mustBe18": "您必须年满 18 岁才能使用 Telloos"
+  },
+  "landing": {
+    "headline": "创作者平台",
+    "subheadline": "智能模糊分享内容。观众解锁、订阅、支持。安全赚钱。",
+    "quote": "\"真实内容。真实创作者。真实收入。\"",
+    "features": {
+      "safeBlur": {
+        "title": "内容保护",
+        "desc": "自动模糊保护"
+      },
+      "monetization": {
+        "title": "变现",
+        "desc": "订阅、解锁、打赏"
+      },
+      "appStore": {
+        "title": "合规",
+        "desc": "完全符合规定"
+      },
+      "global": {
+        "title": "全球",
+        "desc": "全球连接"
+      },
+      "modern": {
+        "title": "现代",
+        "desc": "社交动态 + 优质内容"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "首页",
+    "explore": "探索",
+    "reels": "短视频",
+    "live": "直播",
+    "messages": "消息",
+    "notifications": "通知",
+    "create": "创作",
+    "dashboard": "仪表板",
+    "wallet": "钱包",
+    "profile": "个人资料",
+    "more": "更多",
+    "transactions": "交易",
+    "settings": "设置",
+    "help": "帮助",
+    "report": "报告问题"
+  },
+  "footer": {
+    "copyright": "© 2025 Telloos"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Fantikxを探索",
+    "becomeCreator": "クリエイターになる",
+    "contactSupport": "サポートに連絡",
+    "complaintProcess": "苦情処理プロセス",
+    "terms": "利用規約",
+    "privacy": "プライバシー",
+    "copyright": "著作権",
+    "signIn": "サインイン",
+    "signUp": "サインアップ",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード（確認）",
+    "dateOfBirth": "生年月日",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "signInWithGoogle": "GOOGLEでサインイン",
+    "connecting": "接続中...",
+    "acceptAge": "私は<strong>18歳以上</strong>であることを確認します",
+    "acceptTerms": "<link>利用規約</link>、<link>プライバシーポリシー</link>、および<link>18歳以上向けコンテンツポリシー</link>に同意します",
+    "loginAgreement": "ログインすることで、<link>利用規約</link>および<link>プライバシーポリシー</link>に同意したことになります",
+    "mustBe18": "Fantikxを利用するには18歳以上である必要があります",
+    "or": "または",
+    "passwordValid": "パスワードは有効です",
+    "passwordsMatch": "パスワードが一致しました",
+    "passwordMismatch": "パスワードが一致しません",
+    "passwordMinLength": "最低6文字",
+    "ageConfirmation": "18歳以上であることを確認し、利用規約とプライバシーポリシーに同意します",
+    "loggingIn": "ログイン中...",
+    "creatingAccount": "アカウント作成中...",
+    "invalidCredentials": "メールアドレスまたはパスワードが間違っています。再試行してください。",
+    "emailNotConfirmed": "ログイン前にメールを確認してください。",
+    "sessionError": "セッションを作成できませんでした。再試行してください。",
+    "emailAlreadyRegistered": "このメールは既に登録されています。ログインしてみてください。"
+  },
+  "landing": {
+    "headline": "クリエイター向けプラットフォーム",
+    "headlineHighlight": "制限なし",
+    "subheadline": "あなたのコンテンツ。あなたのルール。",
+    "tagline": "BANなし。制限なし。",
+    "quote": "「本当のつながり。本当の自由。本当の機会。」",
+    "features": {
+      "noLimits": {
+        "title": "制限なし",
+        "desc": "自由に表現しよう"
+      },
+      "noBans": {
+        "title": "シャドウバンなし",
+        "desc": "コンテンツは常に表示"
+      },
+      "monetization": {
+        "title": "公正な報酬",
+        "desc": "すべてのクリエイターに収益化"
+      },
+      "global": {
+        "title": "グローバルコミュニティ",
+        "desc": "国境なくつながる"
+      },
+      "modern": {
+        "title": "あなたのルール",
+        "desc": "コンテンツをコントロール"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "ホーム",
+    "explore": "探索",
+    "reels": "リール",
+    "live": "ライブ",
+    "messages": "メッセージ",
+    "notifications": "通知",
+    "ads": "広告",
+    "create": "作成",
+    "dashboard": "ダッシュボード",
+    "wallet": "ウォレット",
+    "profile": "プロフィール",
+    "more": "その他",
+    "transactions": "取引",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "report": "問題を報告"
+  },
+  "ads": {
+    "title": "コンテンツをプロモート",
+    "description": "Fantikx広告でリーチを拡大",
+    "hero": {
+      "title": "オーディエンスを拡大",
+      "subtitle": "ターゲット広告でより多くのファンにリーチし、コンテンツを強化"
+    },
+    "features": {
+      "targeting": {
+        "title": "スマートターゲティング",
+        "description": "精密なターゲティングで適切なオーディエンスにリーチ"
+      },
+      "growth": {
+        "title": "急速な成長",
+        "description": "ビュー、いいね、購読者を迅速に増やす"
+      },
+      "analytics": {
+        "title": "リアルタイム分析",
+        "description": "キャンペーンのパフォーマンスをリアルタイムで追跡"
+      }
+    },
+    "comingSoon": {
+      "title": "近日公開",
+      "description": "強力なプロモーションツールをお届けするために作業中です。お楽しみに！",
+      "pricing": "$10からの柔軟な価格設定"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

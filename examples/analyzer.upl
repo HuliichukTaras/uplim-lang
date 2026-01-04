@@ -1,0 +1,148 @@
+// Syntax Analyzer Module
+// Scans current UPLim syntax for inconsistencies
+
+let syntaxRules be [
+  { name: "variable_declaration", pattern: /let\s+\w+\s+(be|=)/ },
+  { name: "function_definition", pattern: /make\s+\w+$$[^)]*$$\s+do/ },
+  { name: "conditional", pattern: /when\s+.+\s+do/ },
+  { name: "loop", pattern: /for\s+each\s+\w+\s+in/ },
+  { name: "output", pattern: /say\s+/ },
+  { name: "return", pattern: /return\s+/ }
+]
+
+make scanSyntax() do
+  say "[Analyzer] Scanning syntax tree..."
+  let issues be []
+  
+  // Load all .upl files
+  let files be loadAllUplFiles()
+  
+  for each file in files do
+    let content be readFile(file.path)
+    let fileIssues be analyzeFile(content, file.path)
+    issues = issues.concat(fileIssues)
+  end
+  
+  say "[Analyzer] Scan complete. Found" issues.length "issues."
+  return issues
+end
+
+make analyzeFile(content, filepath) do
+  let issues be []
+  let lines be content.split("\n")
+  
+  for each line, index in lines do
+    // Check for inconsistent indentation
+    when hasInconsistentIndent(line) equals true do
+      issues.push({
+        type: "style",
+        severity: "low",
+        line: index + 1,
+        file: filepath,
+        description: "Inconsistent indentation",
+        suggestedFix: "Use 2 spaces for indentation"
+      })
+    end
+    
+    // Check for missing 'end' keywords
+    when lineStartsBlock(line) equals true do
+      when blockNotClosed(lines, index) equals true do
+        issues.push({
+          type: "syntax",
+          severity: "high",
+          line: index + 1,
+          file: filepath,
+          description: "Block not closed with 'end' keyword",
+          suggestedFix: "Add 'end' at the end of the block"
+        })
+      end
+    end
+    
+    // Check for unsafe patterns
+    when containsUnsafePattern(line) equals true do
+      issues.push({
+        type: "safety",
+        severity: "critical",
+        line: index + 1,
+        file: filepath,
+        description: "Unsafe pattern detected",
+        suggestedFix: "Use Option or Result type instead"
+      })
+    end
+  end
+  
+  return issues
+end
+
+make getCurrentSyntax() do
+  return {
+    keywords: ["let", "make", "when", "do", "end", "for", "each", "in", "say", "return", "import", "export"],
+    operators: ["be", "=", "plus", "+", "minus", "-", "times", "*", "divided by", "/", "equals", "==", "not equals", "!="],
+    types: ["Int", "String", "Bool", "Float", "Array", "Option", "Result"],
+    structures: ["function", "conditional", "loop", "match"]
+  }
+end
+
+make hasInconsistentIndent(line) do
+  let leadingSpaces be line.search(/\S/)
+  when leadingSpaces modulo 2 not equals 0 do
+    return true
+  end
+  return false
+end
+
+make lineStartsBlock(line) do
+  let blockStarters be ["make", "when", "for", "match"]
+  for each starter in blockStarters do
+    when line.includes(starter) and line.includes("do") do
+      return true
+    end
+  end
+  return false
+end
+
+make blockNotClosed(lines, startIndex) do
+  let depth be 1
+  for let i be startIndex + 1; i less than lines.length; i = i + 1 do
+    let line be lines[i].trim()
+    
+    when lineStartsBlock(line) equals true do
+      depth = depth + 1
+    end
+    
+    when line equals "end" do
+      depth = depth - 1
+      when depth equals 0 do
+        return false
+      end
+    end
+  end
+  return true
+end
+
+make containsUnsafePattern(line) do
+  let unsafePatterns be [
+    /null/,
+    /undefined/,
+    /throw\s+/,
+    /delete\s+/
+  ]
+  
+  for each pattern in unsafePatterns do
+    when pattern.test(line) equals true do
+      return true
+    end
+  end
+  return false
+end
+
+make loadAllUplFiles() do
+  // Mock implementation - should scan filesystem
+  return [
+    { path: "examples/hello_world.upl" },
+    { path: "examples/advanced.upl" },
+    { path: "engine/self_engine.upl" }
+  ]
+end
+
+export { scanSyntax, getCurrentSyntax, analyzeFile }

@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Explorer Fantikx",
+    "becomeCreator": "Devenir Créateur",
+    "contactSupport": "Contacter le Support",
+    "complaintProcess": "Processus de Plainte",
+    "terms": "Conditions",
+    "privacy": "Confidentialité",
+    "copyright": "Droits d'auteur",
+    "signIn": "Se Connecter",
+    "signUp": "S'inscrire",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "dateOfBirth": "Date de naissance",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signInWithGoogle": "SE CONNECTER AVEC GOOGLE",
+    "connecting": "Connexion...",
+    "acceptAge": "Je confirme que j'ai <strong>18 ans ou plus</strong>",
+    "acceptTerms": "J'accepte les <link>Conditions d'Utilisation</link>, la <link>Politique de Confidentialité</link> et la <link>Politique de Contenu 18+</link>",
+    "loginAgreement": "En vous connectant, vous acceptez nos <link>Conditions d'Utilisation</link> et notre <link>Politique de Confidentialité</link>",
+    "mustBe18": "Vous devez avoir 18 ans ou plus pour utiliser Fantikx",
+    "or": "ou",
+    "passwordValid": "Mot de passe valide",
+    "passwordsMatch": "Les mots de passe correspondent",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordMinLength": "Minimum 6 caractères",
+    "ageConfirmation": "Je confirme que j'ai 18 ans ou plus et j'accepte les Conditions d'Utilisation et la Politique de Confidentialité",
+    "loggingIn": "Connexion...",
+    "creatingAccount": "Création du compte...",
+    "invalidCredentials": "Email ou mot de passe incorrect. Veuillez réessayer.",
+    "emailNotConfirmed": "Veuillez vérifier votre email avant de vous connecter.",
+    "sessionError": "Impossible de créer la session. Veuillez réessayer.",
+    "emailAlreadyRegistered": "Cet email est déjà enregistré. Essayez de vous connecter."
+  },
+  "landing": {
+    "headline": "Plateforme pour créateurs",
+    "headlineHighlight": "sans limites",
+    "subheadline": "Ton contenu. Tes règles.",
+    "tagline": "Pas de bans. Pas de restrictions.",
+    "quote": "\"Vraies connexions. Vraie liberté. Vraies opportunités.\"",
+    "features": {
+      "noLimits": {
+        "title": "Sans Limites",
+        "desc": "Exprime-toi librement"
+      },
+      "noBans": {
+        "title": "Pas de Shadowbans",
+        "desc": "Ton contenu toujours visible"
+      },
+      "monetization": {
+        "title": "Récompense Équitable",
+        "desc": "Monétisation pour chaque créateur"
+      },
+      "global": {
+        "title": "Communauté Mondiale",
+        "desc": "Connecte-toi sans frontières"
+      },
+      "modern": {
+        "title": "Tes Règles",
+        "desc": "Tu contrôles ton contenu"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "reels": "Reels",
+    "live": "Live",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "ads": "Publicités",
+    "create": "Créer",
+    "dashboard": "Tableau de bord",
+    "wallet": "Portefeuille",
+    "profile": "Profil",
+    "more": "Plus",
+    "transactions": "Transactions",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "report": "Signaler un problème"
+  },
+  "ads": {
+    "title": "Promouvoir Votre Contenu",
+    "description": "Augmentez votre portée avec Fantikx Ads",
+    "hero": {
+      "title": "Agrandissez Votre Audience",
+      "subtitle": "Atteignez plus de fans et boostez votre contenu avec une promotion ciblée"
+    },
+    "features": {
+      "targeting": {
+        "title": "Ciblage Intelligent",
+        "description": "Atteignez la bonne audience avec un ciblage précis"
+      },
+      "growth": {
+        "title": "Croissance Rapide",
+        "description": "Obtenez plus de vues, likes et abonnés rapidement"
+      },
+      "analytics": {
+        "title": "Analytiques en Temps Réel",
+        "description": "Suivez les performances de votre campagne en temps réel"
+      }
+    },
+    "comingSoon": {
+      "title": "Bientôt Disponible",
+      "description": "Nous travaillons pour vous offrir des outils de promotion puissants. Restez à l'écoute !",
+      "pricing": "Prix flexibles à partir de $10"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

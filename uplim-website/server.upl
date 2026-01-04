@@ -1,0 +1,15 @@
+
+// server.upl - Main Entry Point
+
+import { Layout } from "@/uplim-website/lib/layout"
+import { Navbar, Hero, CodePreview, Features, Footer } from "@/uplim-website/lib/components"
+
+// MAIN HANDLER
+fn handler(req) {
+    let body = Navbar() + Hero() + CodePreview() + Features() + Footer()
+    ret Layout("UPLim - The AI-First Language", body)
+}
+
+// START SERVER
+print("Starting modern UPLim landing site (Modular architecture) on port 3000...")
+serve(3000, handler)

@@ -1,0 +1,115 @@
+{
+  "common": {
+    "explore": "Explore Fantikx",
+    "becomeCreator": "Become A Creator",
+    "contactSupport": "Contact Support",
+    "complaintProcess": "Complaint Process",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "copyright": "Copyright",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "dateOfBirth": "Date of Birth",
+    "forgotPassword": "Forgot password?",
+    "signInWithGoogle": "SIGN IN WITH GOOGLE",
+    "connecting": "Connecting...",
+    "acceptAge": "I confirm that I am <strong>18 years of age or older</strong>",
+    "acceptTerms": "I accept the <link>Terms of Service</link>, <link>Privacy Policy</link>, and <link>18+ Content Policy</link>",
+    "loginAgreement": "By logging in, you agree to our <link>Terms of Service</link> and <link>Privacy Policy</link>",
+    "mustBe18": "You must be 18 or older to use Fantikx",
+    "or": "or",
+    "passwordValid": "Password is valid",
+    "passwordsMatch": "Passwords match",
+    "passwordMismatch": "Passwords do not match",
+    "passwordMinLength": "Minimum 6 characters",
+    "ageConfirmation": "I confirm that I am 18 years or older and agree to the Terms of Service and Privacy Policy",
+    "loggingIn": "Logging in...",
+    "creatingAccount": "Creating account...",
+    "invalidCredentials": "Incorrect email or password. Please try again.",
+    "emailNotConfirmed": "Please verify your email before logging in. Check your inbox for the verification link.",
+    "sessionError": "Unable to create session. Please try again.",
+    "emailAlreadyRegistered": "This email is already registered. Try logging in instead."
+  },
+  "landing": {
+    "headline": "Platform for Creators",
+    "headlineHighlight": "with No Limits",
+    "subheadline": "Your content. Your rules.",
+    "tagline": "No bans. No restrictions.",
+    "quote": "\"Real connections. Real freedom. Real opportunities.\"",
+    "features": {
+      "noLimits": {
+        "title": "No Limits",
+        "desc": "Express yourself freely"
+      },
+      "noBans": {
+        "title": "No Shadow Bans",
+        "desc": "Your content always visible"
+      },
+      "monetization": {
+        "title": "Fair Rewards",
+        "desc": "Monetization for every creator"
+      },
+      "global": {
+        "title": "Global Community",
+        "desc": "Connect without borders"
+      },
+      "modern": {
+        "title": "Your Rules",
+        "desc": "You control your content"
+      }
+    }
+  },
+  "sidebar": {
+    "home": "Home",
+    "explore": "Explore",
+    "reels": "Reels",
+    "live": "Live",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "ads": "Ads",
+    "create": "Create",
+    "dashboard": "Dashboard",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "more": "More",
+    "transactions": "Transactions",
+    "settings": "Settings",
+    "help": "Help",
+    "report": "Report a problem"
+  },
+  "ads": {
+    "title": "Promote Your Content",
+    "description": "Boost your reach with Fantikx Ads",
+    "hero": {
+      "title": "Grow Your Audience",
+      "subtitle": "Reach more fans and boost your content with targeted promotion"
+    },
+    "features": {
+      "targeting": {
+        "title": "Smart Targeting",
+        "description": "Reach the right audience with precision targeting"
+      },
+      "growth": {
+        "title": "Fast Growth",
+        "description": "Get more views, likes, and subscribers quickly"
+      },
+      "analytics": {
+        "title": "Real-Time Analytics",
+        "description": "Track your campaign performance in real-time"
+      }
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "description": "We're working hard to bring you powerful promotion tools. Stay tuned!",
+      "pricing": "Flexible pricing starting from $10"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Fantikx"
+  }
+}

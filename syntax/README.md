@@ -21,25 +21,25 @@ To install:
 
 Import and register the language:
 
-```typescript
+\`\`\`typescript
 import { registerUPLimLanguage } from '@/lib/monaco-uplim';
 
 // After Monaco loads
 registerUPLimLanguage();
-```
+\`\`\`
 
 ### Highlight.js
 
-```javascript
+\`\`\`javascript
 import uplim from '@/syntax/highlightjs/uplim';
 hljs.registerLanguage('upl', uplim);
-```
+\`\`\`
 
 ### Prism.js
 
-```html
+\`\`\`html
 <script src="/syntax/prism/prism-uplim.js"></script>
-```
+\`\`\`
 
 ## Syntax Elements
 
