@@ -8,7 +8,7 @@ import {
     AwaitExpression, SayStatement, ExpressionStatement,
     PipelineExpression, RangeExpression, ListComprehension,
     ArrayLiteral, ObjectLiteral, ObjectPattern, ArrayPattern,
-    FunctionExpression, MemberExpression
+    FunctionExpression, MemberExpression, MatchExpression, StructInstantiation, WithExpression
 } from 'uplim-frontend'
 import * as http from 'http'
 import * as fs from 'fs'
@@ -450,6 +450,23 @@ export class Interpreter {
                 }
                 return result
             }
+            case 'StructInstantiation': {
+                const inst = expr as StructInstantiation
+                const result: any = { __upl_struct: inst.structName }
+                for (const field of inst.fields) {
+                    result[field.name] = this.evaluateExpression(field.value, env)
+                }
+                return result
+            }
+            case 'WithExpression': {
+                const withExpr = expr as WithExpression
+                const base = this.evaluateExpression(withExpr.base, env)
+                if (base === null || typeof base !== 'object' || Array.isArray(base)) {
+                    throw new Error("with requires an object-like base value")
+                }
+                const updates = this.evaluateExpression(withExpr.updates, env)
+                return { ...base, ...updates }
+            }
             case 'ListComprehension': {
                 const comp = expr as ListComprehension
                 const source = this.evaluateExpression(comp.source, env)
@@ -522,8 +539,71 @@ export class Interpreter {
                  // Mock async: just evaluate argument
                  return this.evaluateExpression(awaitExpr.argument, env)
             }
+            case 'MatchExpression': {
+                 const matchExpr = expr as MatchExpression
+                 const subject = this.evaluateExpression(matchExpr.value, env)
+                 for (const arm of matchExpr.arms) {
+                     const matchEnv = new Environment(env)
+                     const matched = this.matchPattern(arm.pattern, subject, matchEnv)
+
+                     if (!matched) {
+                         continue
+                     }
+
+                     if (arm.guard && !this.isTruthy(this.evaluateExpression(arm.guard, matchEnv))) {
+                         continue
+                     }
+
+                     return this.evaluateExpression(arm.value, matchEnv)
+                 }
+                 throw new Error("Match expression did not find a matching arm")
+            }
             default:
                 throw new Error(`Unknown expression type: ${(expr as any).type}`)
+        }
+    }
+
+    private matchPattern(pattern: ASTNode, subject: any, env: Environment): boolean {
+        switch (pattern.type) {
+            case 'Identifier': {
+                const identifier = pattern as Identifier
+                if (identifier.name === '_') {
+                    return true
+                }
+                env.define(identifier.name, subject)
+                return true
+            }
+            case 'Literal':
+                return subject === (pattern as Literal).value
+            case 'ArrayLiteral': {
+                const arrayPattern = pattern as ArrayLiteral
+                if (!Array.isArray(subject) || subject.length !== arrayPattern.elements.length) {
+                    return false
+                }
+                for (let i = 0; i < arrayPattern.elements.length; i++) {
+                    if (!this.matchPattern(arrayPattern.elements[i], subject[i], env)) {
+                        return false
+                    }
+                }
+                return true
+            }
+            case 'ObjectLiteral': {
+                const objectPattern = pattern as ObjectLiteral
+                if (subject === null || typeof subject !== 'object' || Array.isArray(subject)) {
+                    return false
+                }
+                for (const property of objectPattern.properties) {
+                    if (!(property.key in subject)) {
+                        return false
+                    }
+                    if (!this.matchPattern(property.value, subject[property.key], env)) {
+                        return false
+                    }
+                }
+                return true
+            }
+            default:
+                throw new Error(`Unsupported match pattern type: ${pattern.type}`)
         }
     }
     
@@ -536,6 +616,7 @@ export class Interpreter {
             case '-': return left - right
             case '*': return left * right
             case '/': return left / right
+            case '==': return left === right
             case '>': return left > right
             case '<': return left < right
             default: throw new Error(`Unknown operator: ${expr.operator}`)

@@ -2,6 +2,7 @@ import unittest
 import subprocess
 import os
 import sys
+import tempfile
 
 # Path to the UPLim CLI
 CLI_PATH = os.path.join(os.getcwd(), 'packages', 'cli', 'src', 'cli.ts')
@@ -16,6 +17,28 @@ class TestUPLim(unittest.TestCase):
             capture_output=True,
             text=True,
             cwd=os.getcwd() # Run from root
+        )
+        return result
+
+    def run_check(self, file_path):
+        """Runs semantic checking for a UPLim file using the CLI."""
+        result = subprocess.run(
+            NPX_CMD + ['check', file_path],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        return result
+
+    def run_fmt(self, file_path, write=False):
+        args = ['fmt', file_path]
+        if write:
+            args.append('-w')
+        result = subprocess.run(
+            NPX_CMD + args,
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
         )
         return result
 
@@ -148,6 +171,38 @@ let res_err = 10 |> x  # Error: x is not a function
         self.assertNotEqual(result.returncode, 0, "Should have failed with non-zero exit code")
         self.assertIn("'x' is not a function", result.stderr)
 
+    def test_semantic_check_type_errors(self):
+        """Check command should report semantic type errors, not only parse errors."""
+        file_path = os.path.abspath('examples/test_type_errors.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+fn add_one(x: Int) -> Int {
+  return x + 1
+}
+
+let value: Int = "hello"
+let answer = add_one("nope")
+            """)
+
+        result = self.run_check(file_path)
+        self.assertNotEqual(result.returncode, 0, "Semantic check should fail")
+        self.assertIn("TYPE_MISMATCH", result.stderr)
+        self.assertIn("CALL_ARG_TYPE_MISMATCH", result.stderr)
+
+    def test_semantic_check_return_mismatch(self):
+        """Check command should detect invalid return type."""
+        file_path = os.path.abspath('examples/test_return_type_error.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+fn wrong() -> Int {
+  return "bad"
+}
+            """)
+
+        result = self.run_check(file_path)
+        self.assertNotEqual(result.returncode, 0, "Semantic check should fail on return mismatch")
+        self.assertIn("RETURN_TYPE_MISMATCH", result.stderr)
+
     def test_const_and_range_step(self):
         """Test const bindings and range expressions with explicit step."""
         file_path = os.path.abspath('examples/test_const_range.upl')
@@ -223,6 +278,227 @@ for item in items {
         self.assertIn("1", node_result.stdout)
         self.assertIn("2", node_result.stdout)
         self.assertIn("3", node_result.stdout)
+
+    def test_match_expression(self):
+        """Test match expressions in runtime and JS transpilation."""
+        file_path = os.path.abspath('examples/test_match.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+let value = 12
+let result = match value {
+  n if n > 10 => "large",
+  n if n > 0 => "positive",
+  _ => "other"
+}
+say result
+
+let point = [3, 4]
+let total = match point {
+  [x, y] => x + y,
+  _ => 0
+}
+say total
+
+let person = { name: "Alice", age: 30 }
+let label = match person {
+  { name: name, age: age } => name,
+  _ => "unknown"
+}
+say label
+            """)
+
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        self.assertIn("large", result.stdout)
+        self.assertIn("7", result.stdout)
+        self.assertIn("Alice", result.stdout)
+
+        output_file = 'test_match_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("large", node_result.stdout)
+        self.assertIn("7", node_result.stdout)
+        self.assertIn("Alice", node_result.stdout)
+
+    def test_short_syntax_function_alias(self):
+        """Test UPLim-native short syntax aliases for function, let, and print."""
+        file_path = os.path.abspath('examples/test_short_syntax.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+f add(a, b) => a + b
+l result = add(2, 3)
+p result
+            """)
+
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        self.assertIn("5", result.stdout)
+
+        output_file = 'test_short_syntax_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("5", node_result.stdout)
+
+    def test_readable_natural_style(self):
+        """Test the original readable UPLim style with be, plus, equals, and when/do."""
+        file_path = os.path.abspath('examples/test_readable_style.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+let name be "UPLim"
+say "Hello" plus name
+when name equals "UPLim" do
+say "Welcome to the future!"
+            """)
+
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        self.assertIn("HelloUPLim", result.stdout)
+        self.assertIn("Welcome to the future!", result.stdout)
+
+        output_file = 'test_readable_style_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("HelloUPLim", node_result.stdout)
+        self.assertIn("Welcome to the future!", node_result.stdout)
+
+    def test_state_and_with_expression(self):
+        """State declarations and with-updates should run, check, and compile consistently."""
+        file_path = os.path.abspath('examples/test_state_with.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+state AppState {
+  message: String
+  visits: Int
+}
+
+fn reducer(current: AppState) -> AppState {
+  return current with { visits: current.visits + 1 }
+}
+
+let app = AppState { message: "Hello", visits: 0 }
+let next = reducer(app)
+say next.visits
+say app.visits
+            """)
+
+        check_result = self.run_check(file_path)
+        self.assertEqual(check_result.returncode, 0, f"Check failed: {check_result.stderr}")
+
+        run_result = self.run_uplim(file_path)
+        self.assertEqual(run_result.returncode, 0, f"Execution failed: {run_result.stderr}")
+        self.assertIn("1", run_result.stdout)
+        self.assertIn("0", run_result.stdout)
+
+        output_file = 'test_state_with_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("1", node_result.stdout)
+        self.assertIn("0", node_result.stdout)
+
+    def test_semantic_check_rejects_any_downcast(self):
+        """Assigning Any into a concrete type should fail without an explicit conversion."""
+        file_path = os.path.abspath('examples/test_any_downcast_error.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+let payload: Any = "hello"
+let title: String = payload
+            """)
+
+        result = self.run_check(file_path)
+        self.assertNotEqual(result.returncode, 0, "Semantic check should fail on Any downcast")
+        self.assertIn("TYPE_MISMATCH", result.stderr)
+
+    def test_formatter_normalizes_readable_syntax(self):
+        """Formatter should canonicalize readable forms into one frozen style."""
+        file_path = os.path.abspath('examples/test_format_input.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+let name be "UPLim"
+when name equals "UPLim" do
+say "Hello" plus name
+            """)
+
+        format_result = self.run_fmt(file_path)
+        self.assertEqual(format_result.returncode, 0, f"Format failed: {format_result.stderr}")
+        self.assertIn('let name = "UPLim"', format_result.stdout)
+        self.assertIn('if name == "UPLim" {', format_result.stdout)
+        self.assertIn('say "Hello" + name', format_result.stdout)
+
+    def test_init_creates_deterministic_project_layout(self):
+        """Init should create the canonical starter layout and a valid starter file."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_dir = os.path.join(temp_dir, 'demo-app')
+            init_result = subprocess.run(
+                NPX_CMD + ['init', project_dir],
+                capture_output=True,
+                text=True,
+                cwd=os.getcwd()
+            )
+            self.assertEqual(init_result.returncode, 0, f"Init failed: {init_result.stderr}")
+            self.assertTrue(os.path.exists(os.path.join(project_dir, 'uplim.toml')))
+            self.assertTrue(os.path.exists(os.path.join(project_dir, 'src', 'main.upl')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'modules')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'schemas')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'services')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'ai')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'wasm')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, 'tests')))
+            self.assertTrue(os.path.isdir(os.path.join(project_dir, '.uplim')))
+
+            check_result = self.run_check(os.path.join(project_dir, 'src', 'main.upl'))
+            self.assertEqual(check_result.returncode, 0, f"Starter project should check cleanly: {check_result.stderr}")
 
 if __name__ == '__main__':
     unittest.main()

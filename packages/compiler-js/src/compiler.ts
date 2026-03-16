@@ -21,7 +21,13 @@ import {
     ObjectLiteral,
     FunctionExpression,
     ReturnStatement,
-    ForInStatement
+    ForInStatement,
+    MatchExpression,
+    StructInstantiation,
+    WithExpression,
+    StructDeclaration,
+    MemberExpression,
+    AssignmentExpression
 } from 'uplim-frontend'
 
 export class Compiler {
@@ -37,6 +43,11 @@ export class Compiler {
         switch (node.type) {
             case 'VariableDeclaration': return this.compileVariableDeclaration(node as VariableDeclaration)
             case 'FunctionDeclaration': return this.compileFunctionDeclaration(node as FunctionDeclaration)
+            case 'StructDeclaration': return this.compileStructDeclaration(node as StructDeclaration)
+            case 'EnumDeclaration':
+            case 'ImportDeclaration':
+            case 'ModelDeclaration':
+                return ''
             case 'SayStatement': return this.compileSayStatement(node as SayStatement)
             case 'IfStatement': return this.compileIfStatement(node as IfStatement)
             case 'BlockStatement': return this.compileBlockStatement(node as BlockStatement)
@@ -46,14 +57,19 @@ export class Compiler {
             case 'CallExpression': return this.compileCallExpression(node as CallExpression)
             case 'Literal': return this.compileLiteral(node as Literal)
             case 'Identifier': return this.compileIdentifier(node as Identifier)
+            case 'MemberExpression': return this.compileMemberExpression(node as MemberExpression)
+            case 'AssignmentExpression': return this.compileAssignmentExpression(node as AssignmentExpression)
             case 'UnaryExpression': return this.compileUnaryExpression(node as UnaryExpression)
             case 'PipelineExpression': return this.compilePipelineExpression(node as PipelineExpression)
             case 'RangeExpression': return this.compileRangeExpression(node as RangeExpression)
             case 'ListComprehension': return this.compileListComprehension(node as ListComprehension)
             case 'ArrayLiteral': return this.compileArrayLiteral(node as ArrayLiteral)
             case 'ObjectLiteral': return this.compileObjectLiteral(node as ObjectLiteral)
+            case 'StructInstantiation': return this.compileStructInstantiation(node as StructInstantiation)
+            case 'WithExpression': return this.compileWithExpression(node as WithExpression)
             case 'FunctionExpression': return this.compileFunctionExpression(node as FunctionExpression)
             case 'ReturnStatement': return this.compileReturnStatement(node as ReturnStatement)
+            case 'MatchExpression': return this.compileMatchExpression(node as MatchExpression)
             default: throw new Error(`Unknown node type: ${node.type}`)
         }
     }
@@ -79,6 +95,10 @@ export class Compiler {
         const params = node.params.map(param => param.name).join(', ')
         const body = this.compileNode(node.body)
         return `function ${node.name}(${params}) ${body}`
+    }
+
+    private compileStructDeclaration(_node: StructDeclaration): string {
+        return ''
     }
 
     private compileSayStatement(node: SayStatement): string {
@@ -127,6 +147,14 @@ export class Compiler {
         return `${callee}(${args})`
     }
 
+    private compileMemberExpression(node: MemberExpression): string {
+        return `${this.compileNode(node.object)}.${node.property.name}`
+    }
+
+    private compileAssignmentExpression(node: AssignmentExpression): string {
+        return `${this.compileNode(node.left)} = ${this.compileNode(node.right)}`
+    }
+
     private compileLiteral(node: Literal): string {
         if (typeof node.value === 'string') {
             return `"${node.value}"`
@@ -148,6 +176,70 @@ export class Compiler {
             return `return ${this.compileNode(node.argument)};`
         }
         return 'return;'
+    }
+
+    private compileMatchExpression(node: MatchExpression): string {
+        const subject = this.compileNode(node.value)
+        const branches = node.arms.map((arm, index) => {
+            const compiledValue = this.compileNode(arm.value)
+            const compiledGuard = arm.guard ? this.compileNode(arm.guard) : null
+            const scopeName = `__scope${index}`
+            const matcher = this.compilePatternMatcher(arm.pattern, '__match', scopeName)
+            const bindings = Array.from(new Set(this.collectPatternBindings(arm.pattern)))
+            const bindingPreamble = bindings.length > 0 ? `const { ${bindings.join(', ')} } = ${scopeName}; ` : ''
+
+            if (compiledGuard) {
+                return `{ const ${scopeName} = {}; if (${matcher}) { ${bindingPreamble}if (${compiledGuard}) return ${compiledValue}; } }`
+            }
+            return `{ const ${scopeName} = {}; if (${matcher}) { ${bindingPreamble}return ${compiledValue}; } }`
+        }).join(' ')
+
+        return `(() => { const __match = ${subject}; ${branches} throw new Error("Match expression did not find a matching arm"); })()`
+    }
+
+    private collectPatternBindings(pattern: ASTNode): string[] {
+        switch (pattern.type) {
+            case 'Identifier': {
+                const name = (pattern as Identifier).name
+                return name === '_' ? [] : [name]
+            }
+            case 'ArrayLiteral':
+                return (pattern as ArrayLiteral).elements.flatMap(element => this.collectPatternBindings(element))
+            case 'ObjectLiteral':
+                return (pattern as ObjectLiteral).properties.flatMap(property => this.collectPatternBindings(property.value))
+            default:
+                return []
+        }
+    }
+
+    private compilePatternMatcher(pattern: ASTNode, subject: string, scopeName: string): string {
+        switch (pattern.type) {
+            case 'Identifier': {
+                const identifier = pattern as Identifier
+                if (identifier.name === '_') {
+                    return 'true'
+                }
+                return `(${scopeName}.${identifier.name} = ${subject}, true)`
+            }
+            case 'Literal':
+                return `${subject} === ${this.compileNode(pattern)}`
+            case 'ArrayLiteral': {
+                const arrayPattern = pattern as ArrayLiteral
+                const conditions = arrayPattern.elements.map((element, index) =>
+                    this.compilePatternMatcher(element, `${subject}[${index}]`, scopeName)
+                )
+                return `Array.isArray(${subject}) && ${subject}.length === ${arrayPattern.elements.length}${conditions.length > 0 ? ` && ${conditions.join(' && ')}` : ''}`
+            }
+            case 'ObjectLiteral': {
+                const objectPattern = pattern as ObjectLiteral
+                const conditions = objectPattern.properties.map(property =>
+                    `${JSON.stringify(property.key)} in ${subject} && ${this.compilePatternMatcher(property.value, `${subject}[${JSON.stringify(property.key)}]`, scopeName)}`
+                )
+                return `${subject} !== null && typeof ${subject} === "object" && !Array.isArray(${subject})${conditions.length > 0 ? ` && ${conditions.join(' && ')}` : ''}`
+            }
+            default:
+                throw new Error(`Unsupported match pattern type: ${pattern.type}`)
+        }
     }
 
     private compileFunctionExpression(node: FunctionExpression): string {
@@ -205,5 +297,14 @@ export class Compiler {
              return `${p.key}: ${this.compileNode(p.value)}`
         }).join(', ')
         return `{ ${props} }`
+    }
+
+    private compileStructInstantiation(node: StructInstantiation): string {
+        const props = node.fields.map(field => `${field.name}: ${this.compileNode(field.value)}`).join(', ')
+        return `{ __upl_struct: ${JSON.stringify(node.structName)}${props.length > 0 ? `, ${props}` : ''} }`
+    }
+
+    private compileWithExpression(node: WithExpression): string {
+        return `({ ...${this.compileNode(node.base)}, ...${this.compileNode(node.updates)} })`
     }
 }

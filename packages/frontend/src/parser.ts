@@ -42,6 +42,7 @@ export interface VariableDeclaration extends ASTNode {
 
 export interface StructDeclaration extends ASTNode {
     type: 'StructDeclaration'
+    kind?: 'struct' | 'state'
     name: string
     fields: { name: string, typeAnnotation: TypeAnnotation }[]
 }
@@ -121,6 +122,12 @@ export interface ExpressionStatement extends ASTNode {
   expression: Expression
 }
 
+export interface MatchArm {
+  pattern: Expression
+  guard?: Expression
+  value: Expression
+}
+
 export type Expression = 
   | BinaryExpression 
   | Literal 
@@ -137,12 +144,27 @@ export type Expression =
   | FunctionExpression
   | FunctionExpression
   | AwaitExpression
+  | MatchExpression
   | StructInstantiation
+  | IfStatement
+  | WithExpression
+
+export interface MatchExpression extends ASTNode {
+    type: 'MatchExpression'
+    value: Expression
+    arms: MatchArm[]
+}
 
 export interface StructInstantiation extends ASTNode {
     type: 'StructInstantiation'
     structName: string
     fields: { name: string, value: Expression }[]
+}
+
+export interface WithExpression extends ASTNode {
+    type: 'WithExpression'
+    base: Expression
+    updates: ObjectLiteral
 }
 
 export interface UnaryExpression extends ASTNode {
@@ -309,7 +331,7 @@ export class Parser {
         token.type === TokenType.PUB || token.type === TokenType.ASYNC) {
         return this.parseFunctionDeclaration()
     }
-    if (token.type === TokenType.STRUCT) return this.parseStructDeclaration()
+    if (token.type === TokenType.STRUCT || token.type === TokenType.STATE) return this.parseStructDeclaration()
     if (token.type === TokenType.ENUM) return this.parseEnumDeclaration()
     if (token.type === TokenType.MODEL) return this.parseModelDeclaration()
     if (token.type === TokenType.IMPORT) return this.parseImportDeclaration()
@@ -467,7 +489,10 @@ export class Parser {
   }
 
   private parseStructDeclaration(): StructDeclaration {
-      const start = this.consume(TokenType.STRUCT)
+      const kind = this.current().type === TokenType.STATE ? 'state' : 'struct'
+      const start = kind === 'state'
+        ? this.consume(TokenType.STATE)
+        : this.consume(TokenType.STRUCT)
       const name = this.consume(TokenType.IDENTIFIER).value
       this.consume(TokenType.LBRACE)
       
@@ -484,7 +509,7 @@ export class Parser {
       }
       
       this.consume(TokenType.RBRACE)
-      return { type: 'StructDeclaration', name, fields, location: start }
+      return { type: 'StructDeclaration', kind, name, fields, location: start }
   }
 
   private parseEnumDeclaration(): EnumDeclaration {
@@ -791,7 +816,17 @@ export class Parser {
   }
 
   private parseExpression(): Expression {
-    const left = this.parseBinaryExpression(0)
+    let left = this.parseBinaryExpression(0)
+
+    while (this.match(TokenType.WITH)) {
+        const updates = this.parseObjectLiteral()
+        left = {
+            type: 'WithExpression',
+            base: left,
+            updates,
+            location: left.location
+        } as WithExpression
+    }
     
     if (this.match(TokenType.ASSIGN)) {
         const right = this.parseExpression()
@@ -808,21 +843,60 @@ export class Parser {
 
   private getPrecedence(type: TokenType): number {
     switch (type) {
-        case TokenType.PIPE_OP:
+        case TokenType.OR:
           return 1
+        case TokenType.AND:
+          return 2
+        case TokenType.PIPE_OP:
+          return 3
         case TokenType.LT:
         case TokenType.GT:
-          return 2
+        case TokenType.LTE:
+        case TokenType.GTE:
+        case TokenType.EQ:
+        case TokenType.NEQ:
+          return 4
         case TokenType.PLUS:
         case TokenType.MINUS:
-          return 3
+          return 5
         case TokenType.MULTIPLY:
         case TokenType.DIVIDE:
-          return 4
+          return 6
         case TokenType.DOT_DOT:
-          return 5
+          return 7
         default:
           return -1
+    }
+  }
+
+  private normalizeBinaryOperator(token: Token): string {
+    switch (token.type) {
+      case TokenType.PLUS:
+        return '+'
+      case TokenType.MINUS:
+        return '-'
+      case TokenType.MULTIPLY:
+        return '*'
+      case TokenType.DIVIDE:
+        return '/'
+      case TokenType.EQ:
+        return '=='
+      case TokenType.NEQ:
+        return '!='
+      case TokenType.GT:
+        return '>'
+      case TokenType.GTE:
+        return '>='
+      case TokenType.LT:
+        return '<'
+      case TokenType.LTE:
+        return '<='
+      case TokenType.AND:
+        return '&&'
+      case TokenType.OR:
+        return '||'
+      default:
+        return token.value
     }
   }
 
@@ -869,7 +943,7 @@ export class Parser {
         const right = this.parseBinaryExpression(precedence + 1)
         left = {
             type: 'BinaryExpression',
-            operator: token.value,
+            operator: this.normalizeBinaryOperator(token),
             left,
             right,
             location: left.location
@@ -880,6 +954,16 @@ export class Parser {
   }
 
   private parseUnary(): Expression {
+      if (this.current().type === TokenType.NOT) {
+           const token = this.advance()
+           const arg = this.parseUnary()
+           return {
+               type: 'UnaryExpression',
+               operator: '!',
+               argument: arg,
+               location: token
+           } as UnaryExpression
+      }
       if (this.current().type === TokenType.MINUS) {
            const token = this.advance()
            const arg = this.parseUnary()
@@ -916,8 +1000,22 @@ export class Parser {
     }
     
     if (token.type === TokenType.IDENTIFIER) {
+        if (token.value === 'true' || token.value === 'false') {
+            this.advance()
+            return { type: 'Literal', value: token.value === 'true', raw: token.value, location: token }
+        }
         this.advance()
         let expr: Expression = { type: 'Identifier', name: token.value, location: token }
+
+        if (this.looksLikeStructInstantiation()) {
+            const fields = this.parseStructFields()
+            expr = {
+                type: 'StructInstantiation',
+                structName: token.value,
+                fields,
+                location: token
+            } as StructInstantiation
+        }
         
         // Handle suffixes: Call (foo()) or Member (foo.bar) or Index (foo[1])
         while (true) {
@@ -970,6 +1068,10 @@ export class Parser {
             alternate: stmt.alternate,
             location: stmt.location
         } as unknown as Expression 
+    }
+
+    if (token.type === TokenType.MATCH) {
+        return this.parseMatchExpression()
     }
 
     if (token.type === TokenType.FUNC) {
@@ -1025,6 +1127,39 @@ export class Parser {
       return { type: 'ArrayLiteral', elements, location: start }
   }
 
+  private parseMatchExpression(): MatchExpression {
+      const startToken = this.consume(TokenType.MATCH)
+      const value = this.parseExpression()
+      this.consume(TokenType.LBRACE, "Expected '{' after match expression")
+
+      const arms: MatchArm[] = []
+      while (this.current().type !== TokenType.RBRACE && this.current().type !== TokenType.EOF) {
+          const pattern = this.parseExpression()
+
+          let guard: Expression | undefined
+          if (this.current().type === TokenType.IF) {
+              this.advance()
+              guard = this.parseExpression()
+          }
+
+          this.consume(TokenType.FAT_ARROW, "Expected '=>' after match pattern")
+          const armValue = this.parseExpression()
+          arms.push({ pattern, guard, value: armValue })
+
+          if (this.current().type === TokenType.COMMA) {
+              this.advance()
+          }
+      }
+
+      this.consume(TokenType.RBRACE, "Expected '}' after match arms")
+      return {
+          type: 'MatchExpression',
+          value,
+          arms,
+          location: startToken
+      }
+  }
+
   private parseObjectLiteral(): ObjectLiteral {
        const start = this.consume(TokenType.LBRACE)
        const properties: { key: string, value: Expression }[] = []
@@ -1040,6 +1175,37 @@ export class Parser {
        
        this.consume(TokenType.RBRACE, "Expected '}'")
        return { type: 'ObjectLiteral', properties, location: start }
+  }
+
+  private parseStructFields(): { name: string, value: Expression }[] {
+      this.consume(TokenType.LBRACE, "Expected '{'")
+      const fields: { name: string, value: Expression }[] = []
+
+      if (this.current().type !== TokenType.RBRACE) {
+          do {
+              const name = this.consume(TokenType.IDENTIFIER, "Expected field name").value
+              this.consume(TokenType.COLON, "Expected ':' after field name")
+              const value = this.parseExpression()
+              fields.push({ name, value })
+          } while (this.match(TokenType.COMMA))
+      }
+
+      this.consume(TokenType.RBRACE, "Expected '}'")
+      return fields
+  }
+
+  private looksLikeStructInstantiation(): boolean {
+      if (this.current().type !== TokenType.LBRACE) {
+          return false
+      }
+
+      const next = this.tokens[this.position + 1]
+      if (!next || next.type === TokenType.RBRACE) {
+          return true
+      }
+
+      const afterNext = this.tokens[this.position + 2]
+      return next.type === TokenType.IDENTIFIER && !!afterNext && afterNext.type === TokenType.COLON
   }
 
   private parseFunctionExpression(): FunctionExpression {

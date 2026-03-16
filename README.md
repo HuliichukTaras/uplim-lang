@@ -103,6 +103,29 @@ Run the current test suite:
 npx pnpm test
 ```
 
+## Canonical Syntax
+
+UPLim has one canonical syntax. It should stay readable, easy to write, and expressive enough for real work without splitting the language into separate beginner and expert variants.
+
+The language also allows a small set of short aliases where they improve flow without hurting readability.
+
+Stable aliases today:
+
+- `l` for `let`
+- `f` for `fn` and `func`
+- `p` for `say` and `print`
+- `m` for `match`
+
+Example:
+
+```upl
+f add(a, b) => a + b
+l result = add(2, 3)
+p result
+```
+
+Single-letter aliases are intentionally limited to avoid breaking natural variable names such as `r`, `x`, or `i`.
+
 ## What Exists Today
 
 - Recursive descent parser and AST in `packages/frontend`

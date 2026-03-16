@@ -13,7 +13,11 @@ This directory defines the current source of truth for the UPLim project.
 - [Gap Analysis](gap-analysis.md): delta between the current TypeScript prototype and the production language target.
 - [Execution Roadmap](execution-roadmap.md): phased delivery plan from repo normalization to Wasm and native backends.
 - [Core Specification](uplim-core-specification.md): product and language-level direction for UPLim v1.
+- [Style Guide](style-guide.md): canonical production coding style for state, reducers, services, and structured logging.
+- [UI Component Mini Spec](ui-component-mini-spec.md): planned `v0.1.1` UI layer for `component`, `view`, and `Html`.
+- [Syntax Guide](language/syntax.md): one canonical readable syntax, with limited aliases instead of multiple language modes.
 - [Licensing](license.md): canonical licensing policy for the language, compiler, runtime, docs, and examples.
+- [Frozen EBNF](../spec/v0.1.ebnf): synchronized grammar artifact for frozen `v0.1`.
 - The active prototype now includes a manifest-backed `build`, `render`, and `serve` pipeline for `.upl` projects via `packages/tooling` and `packages/cli`.
 
 ## Active Code
@@ -55,6 +59,7 @@ The following paths are reference material and should not be treated as canonica
 - Cranelift is the first production backend.
 - LLVM remains a deferred native optimization backend.
 - Tree-sitter is for editor tooling, not the canonical compiler parser.
+- `state`, `with`, reducers, and comprehensions are part of the frozen `v0.1` core.
 - AI is a first-class runtime capability, but not part of parser, type-checker, borrow-checker, or codegen nondeterminism.
 
 ## Supporting Documents

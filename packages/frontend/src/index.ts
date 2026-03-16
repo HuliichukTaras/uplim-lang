@@ -2,6 +2,8 @@ export { Lexer, TokenType } from './lexer'
 export type { Token } from './lexer'
 
 export { Parser, Parser as UPLimParser } from './parser'
+export { formatProgram, formatSource } from './formatter'
+export { typeCheckProgram } from './typechecker'
 export type {
   ASTNode,
   Program,
@@ -22,8 +24,11 @@ export type {
   ImportDeclaration,
   AwaitExpression,
   ExpressionStatement,
+  MatchArm,
+  MatchExpression,
   Expression,
   StructInstantiation,
+  WithExpression,
   UnaryExpression,
   WhileStatement,
   ForInStatement,
@@ -42,3 +47,5 @@ export type {
   ParseResult,
   ParseError
 } from './parser'
+export type { FormatSourceResult } from './formatter'
+export type { TypeDiagnostic } from './typechecker'

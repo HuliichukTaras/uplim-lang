@@ -1,0 +1,5 @@
+
+let name be "UPLim"
+when name equals "UPLim" do
+say "Hello" plus name
+            

@@ -1,0 +1,6 @@
+
+let name be "UPLim"
+say "Hello" plus name
+when name equals "UPLim" do
+say "Welcome to the future!"
+            

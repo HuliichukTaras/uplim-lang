@@ -1,179 +1,170 @@
-# UPLim v0.1 Language Specification
+# UPLim Syntax Guide
 
-This document defines the official syntax for UPLim v0.1.
-The language is designed to be expressive, simple, safe, and strongly typed. It supports two modes: **Full Syntax** (beginner-friendly) and **Short Syntax** (expert-friendly).
+This document defines the readable, canonical syntax direction for UPLim.
 
-## 1. Syntax Basics
+UPLim should have one normal, consistent syntax for everyone.
+It may include a few short aliases, but it should not split into separate "simple" and "progressive" language variants.
 
-### Variables and Constants
+## 1. Design Goals
+
+UPLim syntax should be:
+
+- readable on first pass
+- easy to write without visual noise
+- expressive enough for application code
+- structurally clear for tooling, formatting, and diagnostics
+- familiar in some places, but not a copy of an existing language
+
+The earliest UPLim direction also emphasized readable keyword-style code such as `be`, `plus`, `equals`, and `when ... do`.
+That style remains valid where it improves clarity and should be treated as part of the main language, not as a legacy side mode.
+
+## 2. Declarations
+
+### Variables and constants
 
 ```upl
-let name = "Uplim"       // Variable (type inferred)
-let age: Int = 25        // Variable with explicit type
-const PI: Float = 3.1415 // Constant
+let name = "UPLim"
+let age: Int = 25
+const pi: Float = 3.1415
 ```
 
-## 2. Control Flow
-
-### If / Else
+Readable form:
 
 ```upl
-if age > 18 {
-    print("Adult")
-} else {
-    print("Minor")
+let name be "UPLim"
+```
+
+Short alias:
+
+```upl
+l count = 3
+```
+
+### Functions
+
+Canonical forms:
+
+```upl
+fn greet(name: String) -> String {
+  return "Hello, \(name)"
+}
+
+func sum(a: Int, b: Int): Int {
+  return a + b
 }
 ```
 
-### Match (Switch)
+Short alias:
 
-Values can be matched against patterns.
+```upl
+f add(a, b) => a + b
+```
+
+## 3. Control Flow
+
+### If and else
+
+```upl
+if age > 18 {
+  print("Adult")
+} else {
+  print("Minor")
+}
+```
+
+Readable conditional form:
+
+```upl
+when age equals 18 do
+  say "Adult"
+```
+
+### Match
 
 ```upl
 match value {
-    1 => print("One"),
-    2 => print("Two"),
-    _ => print("Other")
+  1 => "one",
+  2 => "two",
+  _ => "other"
+}
+```
+
+Short alias:
+
+```upl
+let status = m code {
+  200 => "ok",
+  _ => "error"
 }
 ```
 
 ### Loops
 
 ```upl
-// While Loop
 while count < 10 {
-    count += 1
+  count += 1
 }
 
-// Infinite Loop
 loop {
-    break
+  break
 }
 
-// For Loop (Iterator)
-for item in array {
-    print(item)
-}
-```
-
-## 3. Functions
-
-### Declaration
-
-Functions are declared with `func`. Return types are specified with `->` or `:`.
-
-```upl
-func greet(name: String) -> String {
-    return "Hello, \(name)" // String interpolation
-}
-
-func sum(a: Int, b: Int): Int {
-    a + b // Implicit return
+for item in items {
+  print(item)
 }
 ```
 
-## 4. Structures and Types
+## 4. Data Shapes
 
 ### Structs
 
 ```upl
 struct User {
-    name: String
-    age: Int
+  name: String
+  age: Int
 }
 
 let user = User(name: "Ivan", age: 30)
 print(user.name)
 ```
 
+### State and immutable update
+
+```upl
+state AppState {
+  message: String
+  visits: Int
+}
+
+let app = AppState { message: "Hello", visits: 0 }
+let next = app with { visits: app.visits + 1 }
+```
+
 ### Enums
 
 ```upl
 enum Role {
-    Admin,
-    User,
-    Guest
+  Admin,
+  User,
+  Guest
 }
 
 let role = Role::User
 ```
 
-## 5. Async / Await
-
-Native support for asynchronous programming.
+## 5. Async and Concurrency
 
 ```upl
 async func fetchData(): Result<Data, Error> {
-    let data = await http.get("https://api")
-    return Ok(data)
+  let data = await http.get("https://api")
+  return Ok(data)
 }
+
+spawn worker()
+await worker
 ```
 
-## 6. Type System
-
-UPLim is null-safe.
-
-- **Primitives**: `Int`, `Float`, `Bool`, `String`, `Char`
-- **Generics**: `List<T>`, `Map<K, V>`
-- **Safety**: `Option<T>`, `Result<T, E>`
-
-## 7. Modules and Packages
-
-### Imports
-
-```upl
-import math
-import net::http
-from crypto import hash
-```
-
-### Formatting
-
-```bash
-uplim install http
-uplim publish
-```
-
-## 8. Advanced Features
-
-### Concurrency
-
-```upl
-spawn worker()   // Creates a coroutine
-await worker     // Waits for result
-```
-
-### Macros (Planned)
-
-```upl
-macro debug(expr) {
-    print("Debug:", expr)
-}
-```
-
-## 9. Short Syntax (Power User Mode)
-
-Designed for speed and conciseness.
-
-- `f` = `func`
-- `l` = `let`
-- `m` = `match`
-- `=>` = Single expression body
-
-```upl
-// Function
-f add(a: Int, b: Int): Int => a + b
-
-// Variable
-l nums = [1, 2, 3]
-
-// Match
-m r = match x { 1 => "one", _ => "?" }
-```
-
-## 10. Example Program
-
-## 11. Advanced Features (v0.2)
+## 6. Collections and Expressions
 
 ### Destructuring
 
@@ -187,33 +178,82 @@ let [x, y] = [10, 20]
 
 ```upl
 let squares = [x * x | x in numbers, x % 2 == 0]
-let userMap = { user.id: user.name | user in users }
+let user_map = { user.id: user.name | user in users }
 ```
 
-### Pipelines (`|>`)
-
-Pass result of one function to the next.
+### Pipelines
 
 ```upl
-let result = 5 |> double |> addOne
+let result = 5 |> double |> add_one
 ```
 
-### Range & Step
+### Ranges
 
 ```upl
 let evens = 0..10 by 2
 ```
 
-### Enhanced Enum & Match
-
-Enums can hold data. Match supports guards and destructuring.
+## 7. Imports
 
 ```upl
-enum Shape { Circle(radius: Float), Rect(w: Float, h: Float) }
-
-match shape {
-    Shape::Circle(r) if r > 10 => "Big Circle",
-    Shape::Rect(w, h) => "Rectangle",
-    _ => "Other"
-}
+import math
+import net.http
+from crypto import hash
 ```
+
+## 8. Output
+
+Canonical forms:
+
+```upl
+say result
+print(result)
+```
+
+Short alias:
+
+```upl
+p result
+```
+
+Readable expression form:
+
+```upl
+say "Hello" plus name
+```
+
+## 9. Alias Policy
+
+Short aliases are part of the same language, not a separate mode.
+
+Current stable aliases:
+
+- `l` for `let`
+- `f` for `fn` and `func`
+- `p` for `say` and `print`
+- `m` for `match`
+
+Aliases should remain limited.
+UPLim should not reserve common one-letter names such as `r`, `x`, or `i` unless the value is clearly worth the compatibility cost.
+
+Readable word operators are also part of the main syntax where supported:
+
+- `be` for assignment in declarations
+- `plus` for addition and string concatenation
+- `equals` for equality checks
+
+## 10. Direction
+
+UPLim syntax should continue moving toward:
+
+- fewer noisy keywords
+- clearer blocks and expressions
+- stronger pattern matching
+- readable type annotations
+- one consistent style across backend, frontend, AI, and tooling code
+
+It should not move toward:
+
+- two parallel dialects
+- symbolic density that hurts readability
+- syntax designed around copying another language

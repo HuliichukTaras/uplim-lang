@@ -24,6 +24,9 @@ A UPLim module is backed by a `.upl` file.
 The language should support deterministic file-based module resolution.
 Special filenames are allowed, but they must still resolve to ordinary modules with explicit meaning.
 
+UPLim should also treat each file as one semantic unit wherever possible.
+The language must push users toward modular structure instead of rewarding giant mixed-purpose files.
+
 ## Canonical Project Layout
 
 ```text
@@ -46,6 +49,11 @@ my-app/
 │   └── ai/
 │       ├── mod.upl
 │       └── tools.upl
+├── ui/
+│   ├── layout.upl
+│   ├── navbar.upl
+│   ├── hero.upl
+│   └── footer.upl
 ├── components/
 │   └── button.upl
 ├── types/
@@ -111,6 +119,24 @@ Examples:
 - explicit server bootstrap or host integration entry
 - useful when the project needs a separate service-oriented startup path
 
+## File Roles
+
+UPLim should support file-level role annotations for stronger architectural signals.
+
+Initial role direction:
+
+- `@ui`
+- `@entry`
+- `@service`
+
+Rules:
+
+- one role per file
+- `@entry` files should compose imports, not define components inline
+- `@ui` files should export components or UI helpers
+- `@service` files should isolate external effects and adapters
+- a file may not mix `@entry` and `component`
+
 ## Module Resolution
 
 ### File modules
@@ -162,6 +188,24 @@ import dashboard.widgets.summary_card
 
 The compiler maps module paths to `.upl` files according to the module roots.
 
+For UI-oriented projects, import structure should reinforce composition:
+
+```upl
+import ui.navbar
+import ui.hero
+import ui.footer
+```
+
+or, where the syntax evolves toward explicit named imports:
+
+```upl
+import Navbar from "@/ui/navbar"
+import Hero from "@/ui/hero"
+```
+
+The exact import surface may evolve, but the architectural rule should not:
+entry files compose exported units from dedicated modules.
+
 ## Manifest Integration
 
 `uplim.toml` should define:
@@ -189,6 +233,7 @@ test_roots = ["tests"]
 - `app/layout.upl`
 - nested `page.upl` and `layout.upl`
 - reusable UI in `components/`
+- page composition from `ui/` or other dedicated UI modules
 
 ### Backend service
 
@@ -214,3 +259,5 @@ test_roots = ["tests"]
 - Reserve `page.upl`, `layout.upl`, `route.upl`, `main.upl`, `server.upl`, and `mod.upl` as semantic filenames.
 - Prefer file-based determinism over magic discovery.
 - Keep module resolution explicit in `uplim.toml`.
+- Prefer one semantic unit per file.
+- Do not let entry files become mixed layout, component, and runtime blobs.

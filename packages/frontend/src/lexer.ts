@@ -14,10 +14,12 @@ export enum TokenType {
   FOR = 'FOR',
   WHEN = 'WHEN',
   DO = 'DO',
+  EACH = 'EACH',
   IN = 'IN',
   MATCH = 'MATCH',
   RETURN = 'RETURN',
   STRUCT = 'STRUCT',
+  STATE = 'STATE',
   ENUM = 'ENUM',
   IMPORT = 'IMPORT',
   EXPORT = 'EXPORT',
@@ -72,10 +74,18 @@ export enum TokenType {
   MINUS = 'MINUS',
   MULTIPLY = 'MULTIPLY',
   DIVIDE = 'DIVIDE',
+  EQ = 'EQ',
+  NOT = 'NOT',
+  THAN = 'THAN',
   GT = 'GT', // >
   LT = 'LT', // <
-  
+  NEQ = 'NEQ',
+  GTE = 'GTE',
+  LTE = 'LTE',
+  AND = 'AND',
+  OR = 'OR',
   BY = 'BY', // by
+  WITH = 'WITH',
 
   EOF = 'EOF'
 }
@@ -148,12 +158,16 @@ export class Lexer {
         case '=': 
           if (this.peek() === '>') {
              this.advance(); tokens.push(this.createToken(TokenType.FAT_ARROW, '=>'))
+          } else if (this.peek() === '=') {
+             this.advance(); tokens.push(this.createToken(TokenType.EQ, '=='))
           } else {
              tokens.push(this.createToken(TokenType.ASSIGN, '='))
           }
           break
         case '|': 
-          if (this.peek() === '>') {
+          if (this.peek() === '|') {
+             this.advance(); tokens.push(this.createToken(TokenType.OR, '||'))
+          } else if (this.peek() === '>') {
              this.advance(); tokens.push(this.createToken(TokenType.PIPE_OP, '|>')) 
           } else {
              tokens.push(this.createToken(TokenType.PIPE, '|'))
@@ -195,8 +209,32 @@ export class Lexer {
           break
         case '*': tokens.push(this.createToken(TokenType.MULTIPLY, '*')); break
         case '/': tokens.push(this.createToken(TokenType.DIVIDE, '/')); break
-        case '>': tokens.push(this.createToken(TokenType.GT, '>')); break
-        case '<': tokens.push(this.createToken(TokenType.LT, '<')); break
+        case '>':
+          if (this.peek() === '=') {
+             this.advance(); tokens.push(this.createToken(TokenType.GTE, '>='))
+          } else {
+             tokens.push(this.createToken(TokenType.GT, '>'))
+          }
+          break
+        case '<':
+          if (this.peek() === '=') {
+             this.advance(); tokens.push(this.createToken(TokenType.LTE, '<='))
+          } else {
+             tokens.push(this.createToken(TokenType.LT, '<'))
+          }
+          break
+        case '!':
+          if (this.peek() === '=') {
+             this.advance(); tokens.push(this.createToken(TokenType.NEQ, '!='))
+          } else {
+             tokens.push(this.createToken(TokenType.NOT, '!'))
+          }
+          break
+        case '&':
+          if (this.peek() === '&') {
+             this.advance(); tokens.push(this.createToken(TokenType.AND, '&&'))
+          }
+          break
         default:
           // console.warn(`Unexpected character: ${char} at ${this.line}:${this.column}`)
       }
@@ -266,8 +304,10 @@ export class Lexer {
       case 'l': return TokenType.LET
       
       case 'const': return TokenType.CONST
+      case 'be': return TokenType.ASSIGN
       
       case 'fn': 
+      case 'f':
       case 'func': // v0.1
         return TokenType.FUNC
         
@@ -275,6 +315,7 @@ export class Lexer {
       case 'say': return TokenType.SAY
       case 'p': return TokenType.SAY // short for print/say
       case 'print': return TokenType.SAY // alias
+      case 'plus': return TokenType.PLUS
       
       case 'if': return TokenType.IF
       case 'else':
@@ -282,6 +323,7 @@ export class Lexer {
       case 'while': return TokenType.WHILE
       case 'loop': return TokenType.LOOP
       case 'for': return TokenType.FOR
+      case 'each': return TokenType.EACH
       case 'when': return TokenType.WHEN
       case 'do': return TokenType.DO
       case 'in': return TokenType.IN
@@ -290,11 +332,18 @@ export class Lexer {
       
       case 'match':
       case 'm': return TokenType.MATCH
+      case 'equals': return TokenType.EQ
+      case 'not': return TokenType.NOT
+      case 'than': return TokenType.THAN
+      case 'greater': return TokenType.GT
+      case 'less': return TokenType.LT
+      case 'with': return TokenType.WITH
       
       case 'return':
       case 'ret': return TokenType.RETURN
       
       case 'struct': return TokenType.STRUCT
+      case 'state': return TokenType.STATE
       case 'enum': return TokenType.ENUM
       
       case 'import': return TokenType.IMPORT
@@ -379,4 +428,3 @@ export class Lexer {
     }
   }
 }
-

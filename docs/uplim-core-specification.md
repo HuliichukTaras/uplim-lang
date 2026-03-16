@@ -1,5 +1,5 @@
-# UPLim Core Specification
-Version: 2.0-draft
+# UPLim Language Spec
+Version: 0.1-frozen
 
 ## 1. Purpose
 
@@ -16,7 +16,31 @@ UPLim is AI-native, but not AI-dependent for compilation.
 AI is a built-in runtime capability of the language and standard library.
 Compilation, typing, and safety remain deterministic without model participation.
 
-## 2. Product Direction
+## 2. Frozen Core
+
+UPLim v0.1 freezes one core language with one AST and one formatter shape.
+
+Frozen constructs:
+
+- `fn`, `let`, `var`, `const`
+- `struct`, `state`, `enum`
+- `if` plus readable `when ... do`
+- `match`
+- arrays, objects, comprehensions, ranges, pipelines
+- `with` immutable update
+- explicit typed state containers and reducer-style functions
+- readable word-forms such as `be`, `plus`, and `equals`, lowering to the same semantics as symbolic forms
+
+Explicit non-goals for v0.1:
+
+- borrow checking
+- generics
+- policy DSL
+- full agent DSL
+- UI `component/view/Html`
+- LLVM backend
+
+## 3. Product Direction
 
 ### v1 scope
 
@@ -43,7 +67,7 @@ Deferred beyond v1:
 - Deferred native backend: LLVM
 - Built-in AI surface: `std/ai`, structured outputs, tool calling, and MCP integration
 
-## 3. Core Principles
+## 4. Core Principles
 
 1. **Safety first**
    - strong static typing
@@ -63,16 +87,18 @@ Deferred beyond v1:
    - built-in AI runtime access through capability-gated providers
 
 4. **Human-readable syntax**
-   - inspired by Rust and TypeScript
+   - one canonical syntax for all users
+   - inspired by Rust and TypeScript, but not a copy of either
    - formal grammar and clear errors
    - minimal ambiguity
+   - limited aliases may exist, but only where they do not meaningfully damage identifier freedom
 
 5. **Tooling-friendly design**
    - strong LSP support
    - formatter, diagnostics, benchmarks, security analysis
    - Tree-sitter support for editors
 
-## 4. Compilation Pipeline
+## 5. Compilation Pipeline
 
 The canonical pipeline is:
 
@@ -96,7 +122,7 @@ source
 
 - LLVM native binary
 
-## 5. Runtime Model
+## 6. Runtime Model
 
 UPLim v1 uses a small host ABI rather than a large framework runtime.
 
@@ -120,7 +146,7 @@ Runtime surface excludes from v1:
 - .NET bridge
 - implicit ambient authority
 
-## 6. Safety Model
+## 7. Safety Model
 
 UPLim adopts ownership and borrows as the long-term memory model.
 
@@ -132,7 +158,7 @@ Compiler responsibilities:
 - make resource cleanup explicit
 - keep concurrency explicit and verifiable
 
-## 7. Interoperability
+## 8. Interoperability
 
 ### v1
 
@@ -149,14 +175,15 @@ Compiler responsibilities:
 - richer native FFI
 - LLVM-native interop surfaces
 
-## 8. Editor and Tooling Model
+## 9. Editor and Tooling Model
 
 - canonical compiler parser lives in Rust
-- Tree-sitter is editor-only
+- Tree-sitter grammar is the canonical editor grammar
+- EBNF is the synchronized human-readable grammar artifact
 - LSP diagnostics come from the compiler and semantic pipeline
 - formatter and quick-fix systems must rely on compiler-owned syntax and spans
 
-## 9. File And Module Model
+## 10. File And Module Model
 
 UPLim source files use the `.upl` extension.
 
@@ -177,7 +204,7 @@ Module resolution rules:
 - app segments may use `page.upl` and `layout.upl` for route-facing structure
 - the compiler should avoid ambiguous or multi-path lookup heuristics
 
-## 10. AI-Native Boundary
+## 11. AI-Native Boundary
 
 AI is a built-in runtime subsystem of UPLim.
 
@@ -206,13 +233,65 @@ AI behavior must remain:
 - typed at the boundary
 - replaceable across providers
 
-## 11. Compatibility Rules
+## 12. Syntax Policy
+
+UPLim should not split into separate language variants such as a "simple" mode and a "progressive" mode.
+
+There is one canonical syntax.
+That syntax may include a limited set of aliases for common declarations and output where they improve flow without creating a second dialect.
+
+Current stable aliases:
+
+- `l` for `let`
+- `f` for `fn` and `func`
+- `p` for `say` and `print`
+- `m` for `match`
+
+Aliases must follow these rules:
+
+- they must stay readable in mixed codebases
+- they must not reserve common single-letter variable names without strong justification
+- they must not create a separate language mode or dialect
+- they must lower to the same AST and semantics as the canonical forms
+
+Readable word-forms are part of the same language, not a second mode:
+
+- `be` lowers to declaration assignment
+- `plus` lowers to `+`
+- `equals` lowers to `==`
+- `when ... do` lowers to `if`
+
+The canonical formatter may normalize these forms into one stable printed style.
+
+## 13. State And Reducer Model
+
+UPLim v0.1 treats explicit state containers as core language style.
+
+- `state` is a first-class declaration form for named typed state containers
+- reducers are ordinary typed functions, not a separate runtime primitive
+- `with` performs immutable structural update for object-like and named state values
+- comprehensions remain ordinary expressions and may derive next-state values
+
+Canonical example:
+
+```upl
+state AppState {
+  message: String
+  visits: Int
+}
+
+fn reducer(current: AppState) -> AppState {
+  return current with { visits: current.visits + 1 }
+}
+```
+
+## 14. Compatibility Rules
 
 - existing TypeScript prototype packages remain useful for experimentation and migration
 - new language semantics must be defined against the Rust core
 - any compatibility layer must not block the production compiler roadmap
 
-## 12. Canonical Supporting Docs
+## 15. Canonical Supporting Docs
 
 - `docs/production-architecture.md`
 - `docs/toolchain-contracts.md`
@@ -220,7 +299,5 @@ AI behavior must remain:
 - `docs/file-and-module-conventions.md`
 - `docs/gap-analysis.md`
 - `docs/execution-roadmap.md`
-
-These documents should be treated as the current architecture baseline for implementation.
 
 These documents should be treated as the current architecture baseline for implementation.

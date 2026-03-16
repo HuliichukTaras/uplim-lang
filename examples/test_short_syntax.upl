@@ -1,0 +1,5 @@
+
+f add(a, b) => a + b
+l result = add(2, 3)
+p result
+            

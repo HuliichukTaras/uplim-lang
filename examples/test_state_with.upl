@@ -1,0 +1,15 @@
+
+state AppState {
+  message: String
+  visits: Int
+}
+
+fn reducer(current: AppState) -> AppState {
+  return current with { visits: current.visits + 1 }
+}
+
+let app = AppState { message: "Hello", visits: 0 }
+let next = reducer(app)
+say next.visits
+say app.visits
+            

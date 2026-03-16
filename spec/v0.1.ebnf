@@ -1,0 +1,85 @@
+program      = { item | statement } ;
+
+item         = import_decl | struct_decl | state_decl | enum_decl | func_decl ;
+statement    = let_stmt | var_stmt | const_stmt | return_stmt | while_stmt | for_stmt | say_stmt | expr_stmt ;
+
+import_decl  = "import" , module_path ;
+module_path  = ident , { "." , ident } ;
+
+struct_decl  = "struct" , ident , "{" , { field_decl } , "}" ;
+state_decl   = "state" , ident , "{" , { field_decl } , "}" ;
+field_decl   = ident , ":" , type_ref ;
+
+enum_decl    = "enum" , ident , "{" , ident , { "," , ident } , "}" ;
+
+func_decl    = visibility? , async_kw? , ( "fn" | "func" | "f" ) , ident ,
+               "(" , param_list? , ")" , ( "->" , type_ref )? , ( block | "=>" , expr ) ;
+visibility   = "pub" ;
+async_kw     = "async" ;
+param_list   = param , { "," , param } ;
+param        = ident , ( ":" , type_ref )? ;
+
+type_ref     = basic_type | named_type | array_type | generic_type ;
+basic_type   = "Int" | "Float" | "Bool" | "String" | "Void" | "Any" ;
+named_type   = ident ;
+array_type   = "[" , type_ref , "]" ;
+generic_type = ident , "[" , type_ref , { "," , type_ref } , "]" ;
+
+let_stmt     = ( "let" | "l" ) , pattern , type_ann? , ( "=" | "be" ) , expr ;
+var_stmt     = "var" , pattern , type_ann? , "=" , expr ;
+const_stmt   = "const" , pattern , type_ann? , "=" , expr ;
+type_ann     = ":" , type_ref ;
+
+pattern      = ident | object_pattern | array_pattern ;
+object_pattern = "{" , ident , { "," , ident } , "}" ;
+array_pattern  = "[" , ident , { "," , ident } , "]" ;
+
+return_stmt  = ( "return" | "ret" ) , expr? ;
+while_stmt   = "while" , expr , block ;
+for_stmt     = "for" , ident , "in" , expr , block ;
+say_stmt     = ( "say" | "print" | "p" ) , expr ;
+expr_stmt    = expr ;
+
+block        = "{" , { statement } , "}" ;
+
+expr         = with_expr | if_expr | match_expr | assignment ;
+with_expr    = assignment , "with" , object_lit ;
+if_expr      = ( "if" | "when" ) , expr , "do"? , ( block | statement ) , [ "else" , ( block | if_expr | statement ) ] ;
+match_expr   = ( "match" | "m" ) , expr , "{" , match_arm , { "," , match_arm } , "}" ;
+match_arm    = expr , [ "if" , expr ] , "=>" , expr ;
+assignment   = logic_or , [ "=" , expr ] ;
+
+logic_or     = logic_and , { "||" , logic_and } ;
+logic_and    = equality , { "&&" , equality } ;
+equality     = compare , { ( "==" | "!=" | "equals" ) , compare } ;
+compare      = term , { ( "<" | ">" | "<=" | ">=" ) , term } ;
+term         = factor , { ( "+" | "-" | "plus" ) , factor } ;
+factor       = unary , { ( "*" | "/" | "%" ) , unary } ;
+unary        = ( "!" | "-" | "await" ) , unary | postfix ;
+
+postfix      = primary , { call_suffix | member_suffix } ;
+call_suffix  = "(" , arg_list? , ")" ;
+member_suffix = "." , ident ;
+arg_list     = expr , { "," , expr } ;
+
+primary      = literal
+             | ident
+             | struct_init
+             | array_lit
+             | object_lit
+             | comprehension
+             | range_expr
+             | "(" , expr , ")" ;
+
+struct_init  = ident , "{" , init_field , { "," , init_field } , "}" ;
+init_field   = ident , ":" , expr ;
+array_lit    = "[" , [ expr , { "," , expr } ] , "]" ;
+object_lit   = "{" , [ object_field , { "," , object_field } ] , "}" ;
+object_field = ident , ":" , expr ;
+comprehension = "[" , expr , "|" , ident , "in" , expr , [ "," , expr ] , "]" ;
+range_expr   = term , ".." , term , [ "by" , expr ] ;
+
+literal      = number | string | "true" | "false" ;
+ident        = ? identifier ? ;
+number       = ? numeric literal ? ;
+string       = ? string literal ? ;

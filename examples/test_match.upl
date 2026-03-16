@@ -1,0 +1,23 @@
+
+let value = 12
+let result = match value {
+  n if n > 10 => "large",
+  n if n > 0 => "positive",
+  _ => "other"
+}
+say result
+
+let point = [3, 4]
+let total = match point {
+  [x, y] => x + y,
+  _ => 0
+}
+say total
+
+let person = { name: "Alice", age: 30 }
+let label = match person {
+  { name: name, age: age } => name,
+  _ => "unknown"
+}
+say label
+            
