@@ -1,5 +1,7 @@
 # UPLim Roadmap
 
+> Historical roadmap. The current canonical delivery plan lives in `docs/execution-roadmap.md`.
+
 ## Phase 1: Foundation (Current)
 
 - [x] **Interpreter**: Basic TypeScript-based interpreter.

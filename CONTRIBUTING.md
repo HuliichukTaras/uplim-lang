@@ -9,19 +9,24 @@ UPLim represents "Ultra Programming Language for Intelligent Machines".
 2.  **Create a branch** for your feature or fix.
 3.  **Run Tests**:
     ```bash
-    cd engine
-    npm install
-    npx tsx src/cli.ts run ../test_hello.upl
+    npx pnpm install
+    npx tsx packages/cli/src/cli.ts run examples/hello_world.upl
+    python3 test_uplim.py
     ```
 4.  **Submit a Pull Request** with a description of your changes.
 
 ## Development
 
-- **Compiler Core**: Located in `engine/src`.
-  - `lexer.ts`: Tokenizer
-  - `parser.ts`: AST Generator
-  - `interpreter.ts`: Executor
+- **Frontend**: `packages/frontend/src` contains the lexer, parser, and AST types.
+- **Runtime**: `packages/runtime/src` contains the interpreter and execution environment.
+- **Compiler JS**: `packages/compiler-js/src` contains the JavaScript emitter backend.
+- **Tooling**: `packages/tooling/src` contains analysis, engine orchestration, and compiler API services.
+- **Facade**: `packages/core/src` re-exports the public `uplim-engine` API.
+- **CLI**: Located in `packages/cli/src`.
+- **LSP**: Located in `packages/lsp/src`.
+- **VS Code Extension**: Located in `apps/vscode-extension`.
 - **Syntax Highlighting**: located in `syntax/vscode`.
+- **Historical Prototypes**: located in `legacy/` and excluded from the active build graph.
 
 ## Community
 

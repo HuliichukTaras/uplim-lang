@@ -2,15 +2,29 @@
 
 UPLim має власну стандартизовану архітектуру проєктів, що забезпечує чистоту коду, зручність підтримки та масштабованість.
 
+> Це специфікація структури окремого UPLim-застосунку, а не layout цього monorepo. Активна структура репозиторію описана в `README.md` та `docs/index.md`.
+> Canonical file naming and module mapping are defined in `docs/file-and-module-conventions.md`.
+
 ## Структура Проєкту
 
 \`\`\`
 uplim-project/
-├── app/                  # Головний entry-point
-│   ├── routes/           # Файли-маршрути CLI/REPL/HTTP
-│   ├── pages/            # Логіка сторінок або команд
+├── uplim.toml            # Канонічний manifest
+├── app/
+│   ├── main.upl          # Головний entry-point
+│   ├── page.upl          # Root page entry
 │   ├── layout.upl        # Глобальний layout
-│   └── main.upl          # Entry-point
+│   ├── routes/           # Файли-маршрути CLI/REPL/HTTP
+│   │   └── health/
+│   │       └── route.upl
+│   └── dashboard/
+│       ├── page.upl
+│       └── layout.upl
+│
+├── modules/              # Domain modules
+│   └── auth/
+│       ├── mod.upl
+│       └── session.upl
 │
 ├── components/           # Повторно використовувані компоненти
 │   └── button.upl
@@ -40,7 +54,6 @@ uplim-project/
 ├── public/               # Веб-асети
 │   └── logo.svg
 │
-├── uplim.config          # Конфігурація
 └── README.md
 \`\`\`
 
@@ -71,23 +84,23 @@ JSON-файли локалізації для багатомовності
 ### 8. compiler/
 Якщо проєкт — мова програмування, є компілятор
 
-## Файл uplim.config
+## Файл uplim.toml
 
-\`\`\`json
-{
-  "name": "my-uplim-app",
-  "version": "0.1.0",
-  "description": "A new UPLim project",
-  "targets": ["cli", "web", "wasm"],
-  "mode": "simple",
-  "entry": "app/main.upl",
-  "output": "dist",
-  "features": {
-    "i18n": true,
-    "testing": true,
-    "compiler": false
-  }
-}
+\`\`\`toml
+[package]
+name = "my-uplim-app"
+version = "0.1.0"
+edition = "v1"
+
+[build]
+entry = "app/main.upl"
+profile = "wasm-component"
+output = "dist/"
+app_root = "app"
+module_roots = ["modules", "components", "types"]
+
+[features]
+default = ["http"]
 \`\`\`
 
 ## Створення Нового Проєкту
@@ -102,9 +115,9 @@ uplim new my-app --target web --i18n --testing
 
 ## Стандарти
 
-1. Кожен проєкт має `uplim.config`
+1. Кожен проєкт має `uplim.toml`
 2. `app/main.upl` — завжди вхідна точка
-3. Компоненти в `components/` — чисті, без стану
+3. `page.upl`, `layout.upl`, `route.upl` — зарезервовані semantic filenames
 4. Кожен файл — одна функціональність
 5. Тести автоматично розпізнаються в `tests/`
 6. Мови — через `lang/` JSON

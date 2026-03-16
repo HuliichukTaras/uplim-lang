@@ -4,7 +4,7 @@ This directory contains the configuration to deploy the UPLim Engine as a **Pyth
 
 ## Structure
 
-- `app.py`: Flask server with `POST /run` endpoint. It calls `src/cli.ts` via subprocess.
+- `app.py`: Flask server with `POST /run` endpoint. It calls `packages/cli/src/cli.ts` via subprocess.
 - `Dockerfile.render`: A custom hybrid image installing both **Python 3.11** and **Node.js 20**.
 - `render.yaml`: Infrastructure-as-code configuration for Render.
 

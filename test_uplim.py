@@ -4,7 +4,7 @@ import os
 import sys
 
 # Path to the UPLim CLI
-CLI_PATH = os.path.join(os.getcwd(), 'src', 'cli.ts')
+CLI_PATH = os.path.join(os.getcwd(), 'packages', 'cli', 'src', 'cli.ts')
 NPX_CMD = ['npx', 'tsx', CLI_PATH]
 
 class TestUPLim(unittest.TestCase):

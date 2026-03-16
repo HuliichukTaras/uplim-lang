@@ -1,5 +1,3 @@
 packages:
-  - "website"
-  - "uplim-lsp"
-  - "vscode-extension"
-  - "engine"
+  - "apps/*"
+  - "packages/*"

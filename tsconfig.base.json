@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "uplim-frontend": ["packages/frontend/src/index.ts"],
+      "uplim-runtime": ["packages/runtime/src/index.ts"],
+      "uplim-compiler-js": ["packages/compiler-js/src/index.ts"],
+      "uplim-tooling": ["packages/tooling/src/index.ts"],
+      "uplim-engine": ["packages/core/src/index.ts"]
+    }
+  }
+}

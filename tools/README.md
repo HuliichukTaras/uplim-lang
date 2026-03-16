@@ -8,12 +8,12 @@ This directory contains auxiliary scripts and tools for the Uplim language devel
 
 ## CLI
 
-The primary Uplim CLI is located in `src/cli.ts` (compiled to `dist/cli.js`).
-It is exposed via the bin key in `package.json` as `uplim-engine`.
+The primary Uplim CLI is located in `packages/cli/src/cli.ts` (compiled to `packages/cli/dist/cli.js`).
+It is exposed via the bin key in `packages/cli/package.json` as `uplim`.
 
 Usage:
 
 ```bash
 npm run analyze <path>
-npm run run <file.upl>
+npx tsx packages/cli/src/cli.ts run <file.upl>
 ```

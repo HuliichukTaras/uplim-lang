@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "references": [
+    { "path": "../frontend" },
+    { "path": "../compiler-js" },
+    { "path": "../tooling" }
+  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist"]
+}

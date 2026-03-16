@@ -1,0 +1,30 @@
+{
+  "name": "uplim-lang",
+  "version": "0.1.0",
+  "description": "UPLim command line interface",
+  "license": "MIT",
+  "main": "dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "uplim": "./dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "uplim-frontend": "workspace:*",
+    "uplim-compiler-js": "workspace:*",
+    "uplim-tooling": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

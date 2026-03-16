@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "references": [
+    { "path": "../frontend" },
+    { "path": "../runtime" },
+    { "path": "../compiler-js" },
+    { "path": "../tooling" }
+  ],
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["dist", "src/**/*.py", "src/**/__pycache__/**"]
+}

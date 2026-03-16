@@ -2,32 +2,41 @@
 
 Fully functional analysis engine for the UPLim programming language.
 
+The active implementation now lives in `packages/core`, `packages/cli`, and `packages/lsp`.
+
 ## Installation
 
 \`\`\`bash
-cd engine
-npm install
-npm run build
+npx pnpm install
+npx pnpm run build:core
+npx pnpm run build:cli
 \`\`\`
+
+## Active Packages
+
+- `packages/core` - canonical language implementation
+- `packages/cli` - command-line interface
+- `packages/lsp` - language server
+- `legacy/tooling` - archived prototypes
 
 ## Usage
 
 ### Analyze a project
 
 \`\`\`bash
-npx tsx src/cli.ts analyze .
+npx tsx packages/cli/src/cli.ts analyze .
 \`\`\`
 
 ### Analyze a specific file
 
 \`\`\`bash
-npx tsx src/cli.ts analyze ../examples/hello.upl
+npx tsx packages/cli/src/cli.ts analyze ../examples/hello.upl
 \`\`\`
 
 ### With AI analysis
 
 \`\`\`bash
-npx tsx src/cli.ts analyze . --ai
+npx tsx packages/cli/src/cli.ts analyze . --ai
 \`\`\`
 
 ## What it does

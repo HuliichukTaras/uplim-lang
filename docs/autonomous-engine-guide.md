@@ -1,5 +1,7 @@
 # UPLim Autonomous Engine - Complete Guide
 
+This guide documents the historical autonomous-engine web prototype preserved in `legacy/web-prototype`. It is not part of the active monorepo build graph.
+
 ## Overview
 
 The UPLim Autonomous Engine is a revolutionary self-improving system that automatically evolves the UPLim programming language while maintaining strict adherence to its core ideology.
@@ -8,17 +10,17 @@ The UPLim Autonomous Engine is a revolutionary self-improving system that automa
 
 ### Core Components
 
-1. **Autonomous Engine** (`lib/autonomous-engine.ts`)
+1. **Autonomous Engine** (`legacy/web-prototype/lib/autonomous-engine.ts`)
    - Main orchestrator of all evolution operations
    - Manages iteration loops and task processing
    - Coordinates between all subsystems
 
-2. **API Routes** (`app/api/engine/route.ts`)
+2. **API Routes** (`legacy/web-prototype/app/api/engine/route.ts`)
    - RESTful API for engine control
    - Real-time status monitoring
    - Action execution endpoints
 
-3. **Web Dashboard** (`app/engine/page.tsx`)
+3. **Web Dashboard** (`legacy/web-prototype/app/engine/page.tsx`)
    - Visual interface for monitoring
    - Real-time stats and metrics
    - Control panel for manual operations
@@ -95,6 +97,8 @@ Access at `/engine`
 
 \`\`\`typescript
 import { autonomousEngine } from '@/lib/autonomous-engine';
+
+// This alias is resolved inside the historical web prototype.
 
 // Start autonomous evolution
 await autonomousEngine.start();

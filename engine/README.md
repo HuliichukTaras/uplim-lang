@@ -1,13 +1,19 @@
 # UPLim Engine
 
-Fully functional analysis engine for the UPLim programming language.
+Historical engine workspace and `.upl` evolution artifacts.
+
+The active TypeScript implementation now lives in:
+
+- `packages/core`
+- `packages/cli`
+- `packages/lsp`
 
 ## Installation
 
 ```bash
-cd engine
 npm install
-npm run build
+npm run build:core
+npm run build:cli
 ```
 
 ## Usage
@@ -15,19 +21,19 @@ npm run build
 ### Analyze a project
 
 ```bash
-npx tsx src/cli.ts analyze .
+npx tsx packages/cli/src/cli.ts analyze .
 ```
 
 ### Analyze a specific file
 
 ```bash
-npx tsx src/cli.ts analyze ../examples/hello.upl
+npx tsx packages/cli/src/cli.ts analyze ../examples/hello.upl
 ```
 
 ### With AI analysis
 
 ```bash
-npx tsx src/cli.ts analyze . --ai
+npx tsx packages/cli/src/cli.ts analyze . --ai
 ```
 
 ## What it does

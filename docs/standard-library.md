@@ -1,5 +1,7 @@
 # UPLim Standard Library Specification
 
+> Early draft. Treat this as exploratory until it is reconciled with `docs/production-architecture.md` and `docs/toolchain-contracts.md`.
+
 ## Core Principles
 
 - Zero-cost abstractions

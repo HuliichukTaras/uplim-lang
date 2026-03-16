@@ -1,1 +1,9 @@
 node_modules
+.next
+dist
+out
+coverage
+*.tsbuildinfo
+__pycache__
+*.pyc
+.DS_Store

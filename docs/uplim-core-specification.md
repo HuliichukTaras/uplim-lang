@@ -1,268 +1,226 @@
-# UPLim Language – Universal Compatibility Core Specification
-Version: 1.1
+# UPLim Core Specification
+Version: 2.0-draft
 
 ## 1. Purpose
 
-UPLim is a next-generation, general-purpose, compiled programming language designed to be:
+UPLim is a general-purpose compiled language project targeting:
 
-- universal
-- safe
-- simple to use
-- extremely fast
-- modern and AI-aware
-- suitable for everything: games, mobile apps, web apps, servers, desktop, automation, embedded
+- readable source code
+- strong safety guarantees
+- high performance
+- web and backend portability first
+- a future path to broader native deployment
 
-UPLim is not a framework or a wrapper. It is a full programming language with its own compiler, engine and ecosystem.
+UPLim is AI-native, but not AI-dependent for compilation.
 
-The main design goal:
-> Write UPLim once, run it everywhere, without forcing the developer to switch languages or stacks.
+AI is a built-in runtime capability of the language and standard library.
+Compilation, typing, and safety remain deterministic without model participation.
 
----
+## 2. Product Direction
 
-## 2. Core Principles
+### v1 scope
 
-1. **Full standalone language**  
-   UPLim is comparable to C++, Rust, Go and TypeScript in scope, but designed to be:
-   - simpler
-   - safer
-   - more uniform
-   - more cross-platform
+UPLim v1 targets:
 
-2. **Universal compilation targets**  
-   UPLim code is always compiled, never interpreted at runtime by default.  
-   UPLim has a multi-stage compilation pipeline:
+- CLI applications
+- backend services
+- web deployment through WebAssembly
 
-   - Frontend:
-     - UPLim source → AST → High-Level IR (HLIR)
-   - Middle:
-     - HLIR → UPLim Universal IR (UIR)
-   - Backends:
-     - UIR → WebAssembly (WASM)
-     - UIR → LLVM IR → native binaries (Linux, macOS, Windows, mobile, embedded)
-     - UIR → JavaScript / TypeScript (fallback, scripting and rapid integration)
-   
-   This design makes UPLim effectively "understandable" by:
-   - all modern browsers (through WebAssembly or JS)
-   - any platform supported by LLVM
-   - any environment that can host WASM
+Deferred beyond v1:
 
-3. **One language for everything**  
-   UPLim is used to build:
-   - backend microservices and APIs
-   - web applications (via WASM and UI frameworks)
-   - mobile apps (through native or WASM-based runtimes)
-   - desktop apps
-   - serverless functions
-   - batch jobs and automation
-   - games and interactive content
-   - embedded and IoT components (via LLVM/native targets)
+- full game engine ambitions
+- desktop frameworks
+- mobile-first platform tooling
+- broad embedded support
 
-4. **Safety and simplicity first**  
-   UPLim guarantees:
+### Implementation direction
+
+- Canonical production compiler: Rust
+- Current TypeScript packages: prototype and compatibility layer
+- Stable portable runtime layer: Wasm components plus WIT and WASI
+- Default runtime: Wasmtime
+- First production backend: Cranelift
+- Deferred native backend: LLVM
+- Built-in AI surface: `std/ai`, structured outputs, tool calling, and MCP integration
+
+## 3. Core Principles
+
+1. **Safety first**
    - strong static typing
-   - memory safety and thread safety enforced by the compiler
-   - clear and readable syntax inspired by TypeScript and Rust, but simpler
-   - no uncontrolled implicit behaviour
-   - explicit concurrency and resource handling
+   - ownership and borrows
+   - no implicit unsafe behavior
+   - explicit capability boundaries
 
-5. **Self-improving engine (meta layer)**  
-   UPLim includes a self-improving Engine that:
-   - analyzes language behaviour
-   - benchmarks generated code
-   - evaluates safety patterns
-   - proposes language and compiler improvements
-   - can optionally integrate with AI (OpenAI or others)
-   The Engine does not replace the language. It improves its internals and tooling.
+2. **Predictable compilation**
+   - deterministic parser and diagnostics
+   - explicit lowering pipeline
+   - no AI in the semantic core
 
----
+3. **Portable execution**
+   - one codebase for web plus backend first
+   - Wasm components as the default portable artifact
+   - host integration through WIT and WASI
+   - built-in AI runtime access through capability-gated providers
 
-## 3. Universal Compilation Model
+4. **Human-readable syntax**
+   - inspired by Rust and TypeScript
+   - formal grammar and clear errors
+   - minimal ambiguity
 
-### 3.1. Primary target: WebAssembly
+5. **Tooling-friendly design**
+   - strong LSP support
+   - formatter, diagnostics, benchmarks, security analysis
+   - Tree-sitter support for editors
 
-- All UPLim projects can be compiled to WebAssembly.
-- This makes UPLim universal for:
-  - all modern browsers
-  - many servers (via WASM runtimes)
-  - sandboxed execution environments
+## 4. Compilation Pipeline
 
-Benefits:
-- same UPLim code can run in browser and on server
-- safe, sandboxed execution
-- predictable performance
+The canonical pipeline is:
 
-### 3.2. Native targets via LLVM
+```text
+source
+  -> lexer/parser
+  -> AST
+  -> HIR
+  -> typed MIR
+  -> borrow-checked MIR
+  -> backend IR
+  -> target artifact
+```
 
-- UPLim compiler can emit LLVM IR.
-- From LLVM, UPLim supports:
-  - Linux (x86_64, ARM)
-  - macOS
-  - Windows
-  - iOS, Android (via native)
-  - embedded targets (depending on LLVM support)
+### Primary outputs
 
-This allows:
-- high performance native servers
-- native desktop apps
-- native mobile components
-- low-level systems programming where needed
+- Wasm component for portable execution
+- JS output only for playground and interoperability
 
-### 3.3. JavaScript / TypeScript fallback
+### Deferred output
 
-- For environments where WASM is limited or JS is required, UPLim can:
-  - transpile UIR → idiomatic JS/TS
-  - provide a runtime shim for specific APIs
+- LLVM native binary
 
-Use cases:
-- scripts in existing JS ecosystems
-- integration with Node.js or Deno
-- rapid prototyping
+## 5. Runtime Model
 
----
+UPLim v1 uses a small host ABI rather than a large framework runtime.
 
-## 4. Interoperability (FFI and Host Integration)
+Runtime surface includes:
 
-UPLim provides a unified FFI layer:
+- filesystem
+- clocks
+- environment
+- process
+- HTTP
+- async task primitives
+- structured logging
+- typed host errors
+- AI model access
+- typed tool calling
+- MCP client access
 
-- **C ABI bridge** for low-level libraries and OS integration
-- **JS bridge** for browsers and Node/Deno
-- optional **JVM bridge** (bytecode wrappers)
-- optional **.NET bridge** (IL wrappers)
+Runtime surface excludes from v1:
 
-The goal:
-- UPLim can call existing libraries
-- existing ecosystems can embed and call UPLim modules
+- JVM bridge
+- .NET bridge
+- implicit ambient authority
 
----
+## 6. Safety Model
 
-## 5. Language Properties
+UPLim adopts ownership and borrows as the long-term memory model.
 
-1. **Strong static typing**  
-   - types inferred where possible but always explicit in behaviour  
-   - no implicit `any` or unsafe casts
+Compiler responsibilities:
 
-2. **Deterministic syntax**  
-   - minimal symbols
-   - no ambiguous constructs
-   - everything is predictable and easy to parse
+- detect invalid moves
+- detect invalid aliasing
+- reject unsafe mutable and immutable borrow combinations
+- make resource cleanup explicit
+- keep concurrency explicit and verifiable
 
-3. **Expressive but compact**  
-   - functional-style helpers where useful
-   - clear async/concurrency model
-   - modules, types, generics, traits/interfaces
+## 7. Interoperability
 
-4. **Safe concurrency**  
-   - explicit concurrency primitives
-   - compiler-enforced race detection (where possible)
-   - recommended patterns for multi-core and async
+### v1
 
-5. **No hidden magic**  
-   - no global mutable state by default
-   - no uncontrolled reflection that breaks safety
-   - meta-programming is explicit and controlled
+- Wasm components
+- WIT interface definitions
+- WASI capability model
+- JS interop for tooling and browser integration where needed
+- provider-neutral AI integration
+- structured AI outputs
+- tool calling and MCP client support
 
----
+### later phases
 
-## 6. Integration with Editors (VS Code and others)
+- richer native FFI
+- LLVM-native interop surfaces
 
-UPLim is designed to be used from any modern editor through:
+## 8. Editor and Tooling Model
 
-- **Language Server Protocol (LSP)** implementation
-- syntax highlighting
-- IntelliSense/autocomplete
-- diagnostics (errors, warnings, security hints)
-- code formatting
-- quick fixes and refactoring tools
+- canonical compiler parser lives in Rust
+- Tree-sitter is editor-only
+- LSP diagnostics come from the compiler and semantic pipeline
+- formatter and quick-fix systems must rely on compiler-owned syntax and spans
 
-The Engine is integrated with the LSP server, so:
+## 9. File And Module Model
 
-- editors get real-time feedback from:
-  - compiler
-  - static analysis
-  - security analysis
-  - performance hints
-  - optional AI suggestions
+UPLim source files use the `.upl` extension.
 
----
+Canonical semantic filenames:
 
-## 7. AI Integration (Optional)
+- `main.upl`
+- `page.upl`
+- `layout.upl`
+- `route.upl`
+- `server.upl`
+- `mod.upl`
 
-UPLim can use AI for:
+Module resolution rules:
 
-- advanced static analysis
-- pattern recognition in large codebases
-- high-level suggestions for:
-  - refactoring
-  - performance improvements
-  - language evolution ideas
+- imports are module-based, not raw path-string based
+- dotted module paths resolve to `.upl` files through manifest-defined roots
+- `mod.upl` acts as the directory module root where needed
+- app segments may use `page.upl` and `layout.upl` for route-facing structure
+- the compiler should avoid ambiguous or multi-path lookup heuristics
 
-Technical model:
+## 10. AI-Native Boundary
 
-- Engine has an `ai` module that can call external LLMs (OpenAI or others).
-- API keys and provider details are provided by the user.
-- AI never changes code automatically:
-  - it only produces suggestions
-  - the developer stays in full control
+AI is a built-in runtime subsystem of UPLim.
 
----
+AI is allowed in:
 
-## 8. Design Rules Summary
+- `std/ai`
+- structured generation into typed values
+- typed tool calling
+- MCP-connected resources and tools
+- analysis
+- refactoring suggestions
+- benchmarking assistance
+- architecture and evolution recommendations
 
-When implementing or extending UPLim:
+AI must not be required for:
 
-1. Always target **universality**:
-   - at least WASM and LLVM
-   - JS/TS fallback as needed
+- parsing
+- type checking
+- borrow checking
+- code generation correctness
 
-2. Always preserve **safety and simplicity**:
-   - no "clever" syntax that confuses readability
-   - no unsafe defaults
+AI behavior must remain:
 
-3. Always keep **one-language philosophy**:
-   - backend, frontend, mobile, desktop, server, embedded – all in UPLim
+- capability-gated
+- explicit in user code
+- typed at the boundary
+- replaceable across providers
 
-4. Always keep **compatibility**:
-   - do not break existing UPLim code without a migration path
+## 11. Compatibility Rules
 
-5. Always keep **AI optional**:
-   - UPLim and its compiler must work without AI
-   - AI is an accelerator, not a requirement
+- existing TypeScript prototype packages remain useful for experimentation and migration
+- new language semantics must be defined against the Rust core
+- any compatibility layer must not block the production compiler roadmap
 
-6. Always be **editor-friendly**:
-   - LSP support
-   - predictable diagnostics
-   - clean error messages
+## 12. Canonical Supporting Docs
 
----
+- `docs/production-architecture.md`
+- `docs/toolchain-contracts.md`
+- `docs/ai-native-architecture.md`
+- `docs/file-and-module-conventions.md`
+- `docs/gap-analysis.md`
+- `docs/execution-roadmap.md`
 
-## 9. High-Level Example (Conceptual)
+These documents should be treated as the current architecture baseline for implementation.
 
-```uplim
-module App.Main
-
-import Net.Http
-import UI.Component
-
-type User {
-  id: Id
-  name: String
-}
-
-fn fetch_user(id: Id): Result<User> {
-  let res = Http.get("/api/user/" + id.to_string())
-  return res.decode_json<User>()
-}
-
-component UserCard(props: { id: Id }) {
-  let user = fetch_user(props.id)
-
-  render {
-    if user.is_ok() {
-      <div>
-        <h1>{ user.value.name }</h1>
-      </div>
-    } else {
-      <div>Error loading user</div>
-    }
-  }
-}
+These documents should be treated as the current architecture baseline for implementation.
