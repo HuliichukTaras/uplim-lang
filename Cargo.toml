@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "crates/uplimc",
+  "crates/uplim_manifest",
+  "crates/uplim_parser",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["UPLim"]
+
+[workspace.metadata.uplim]
+description = "Canonical Rust workspace for the UPLim production compiler path"

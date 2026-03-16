@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "uplim-frontend": "workspace:*",
+    "uplim-compiler-js": "workspace:*",
     "uplim-runtime": "workspace:*"
   },
   "devDependencies": {

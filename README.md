@@ -4,6 +4,8 @@ UPLim is a programming language project aimed at a human-readable, safe, high-pe
 
 The repository currently contains an active TypeScript prototype stack for parsing, interpretation, JavaScript emission, LSP, and website tooling. That stack remains useful for experimentation and compatibility, but it is not the long-term production compiler core.
 
+The Rust production path now has a canonical workspace scaffold in `crates/` with `uplimc`, `uplim_manifest`, and `uplim_parser`.
+
 ## Current Direction
 
 - Production core: Rust-based compiler and runtime architecture
@@ -31,6 +33,10 @@ packages/
   core/               uplim-engine compatibility facade
   cli/                uplim command line interface
   lsp/                Language Server implementation
+crates/
+  uplimc/             Rust compiler CLI scaffold
+  uplim_manifest/     Rust uplim.toml parser and validator
+  uplim_parser/       Rust lexer/parser/diagnostics scaffold
 engine/               Historical engine prototype kept as reference
 legacy/               Historical prototypes and experiments
 ```
@@ -44,6 +50,7 @@ Source-of-truth documents for the current strategy:
 - [Gap Analysis](docs/gap-analysis.md)
 - [Execution Roadmap](docs/execution-roadmap.md)
 - [Core Specification](docs/uplim-core-specification.md)
+- [Licensing](docs/license.md)
 
 ## Quick Start
 
@@ -57,6 +64,24 @@ Run the TypeScript prototype CLI:
 
 ```bash
 npx tsx packages/cli/src/cli.ts run examples/hello_world.upl
+```
+
+Build a full UPLim project from `uplim.toml`:
+
+```bash
+npx tsx packages/cli/src/cli.ts build examples/web_app
+```
+
+Render the generated HTML shell for a route:
+
+```bash
+npx tsx packages/cli/src/cli.ts render examples/web_app --route /dashboard --stdout
+```
+
+Start the external compatibility engine and serve the built project:
+
+```bash
+npx tsx packages/cli/src/cli.ts serve examples/web_app --port 3000
 ```
 
 Build the active TypeScript workspace:
@@ -83,6 +108,8 @@ npx pnpm test
 - Recursive descent parser and AST in `packages/frontend`
 - Reference interpreter in `packages/runtime`
 - JavaScript emitter in `packages/compiler-js`
+- Project-aware build, render, and serve pipeline in `packages/tooling` and `packages/cli`
+- Rust workspace scaffold for `uplimc`, manifest validation, and Phase 1 parsing in `crates/`
 - CLI and LSP in `packages/cli` and `packages/lsp`
 - Research and architecture docs for the Rust-first production direction in `docs/`
 
@@ -91,7 +118,6 @@ npx pnpm test
 - Rust compiler frontend
 - HIR and typed MIR pipeline
 - Borrow checker
-- Stable `uplim.toml` manifest implementation
 - Wasm component backend
 - Wasmtime-based production runtime
 - Cranelift codegen pipeline
@@ -113,4 +139,4 @@ The notebook contains internal UPLim docs plus official sources for LLVM, Cranel
 - Do not design new language features around the long-term TypeScript runtime.
 - Treat AI as a first-class runtime capability, not as nondeterministic compiler behavior.
 
-License: MIT
+License: [MIT](/Users/tarashuliichuk/MyProjects/UPLim/LICENSE)

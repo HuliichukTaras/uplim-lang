@@ -3,7 +3,7 @@ import {
     Parser, ASTNode, Program, Expression, Statement,
     VariableDeclaration, FunctionDeclaration, IfStatement, ReturnStatement,
     BinaryExpression, UnaryExpression, CallExpression, Literal, Identifier,
-    BlockStatement, WhileStatement, AssignmentExpression,
+    BlockStatement, WhileStatement, ForInStatement, AssignmentExpression,
     StructDeclaration, EnumDeclaration, ModelDeclaration, ImportDeclaration,
     AwaitExpression, SayStatement, ExpressionStatement,
     PipelineExpression, RangeExpression, ListComprehension,
@@ -18,14 +18,20 @@ import type { IncomingMessage, ServerResponse } from 'http'
 export class Environment {
     public values = new Map<string, any>() // Made public
     public exports = new Map<string, any>() // Exported values
+    public constBindings = new Set<string>()
     public parent?: Environment
     
     constructor(parent?: Environment) {
         this.parent = parent
     }
     
-    define(name: string, value: any) {
+    define(name: string, value: any, options: { constant?: boolean } = {}) {
         this.values.set(name, value)
+        if (options.constant) {
+            this.constBindings.add(name)
+        } else {
+            this.constBindings.delete(name)
+        }
     }
     
     get(name: string): any {
@@ -36,6 +42,9 @@ export class Environment {
 
     assign(name: string, value: any) {
          if (this.values.has(name)) { // Fixed 'values' vs 'vars' from previous edit context
+             if (this.constBindings.has(name)) {
+                 throw new Error(`Cannot assign to constant '${name}'`)
+             }
              this.values.set(name, value)
              return
          }
@@ -245,6 +254,8 @@ export class Interpreter {
                 return this.visitIfStatement(stmt as IfStatement, env)
             case 'WhileStatement':
                 return this.visitWhileStatement(stmt as WhileStatement, env)
+            case 'ForInStatement':
+                return this.visitForInStatement(stmt as ForInStatement, env)
             case 'ExpressionStatement':
                 return this.visitExpression(stmt as ExpressionStatement, env)
             case 'BlockStatement':
@@ -289,9 +300,10 @@ export class Interpreter {
     
     private visitVariableDeclaration(node: VariableDeclaration, env: Environment) {
         const value = this.evaluateExpression(node.value, env)
+        const constant = node.kind === 'const'
         
         if (node.pattern.type === 'Identifier') {
-            env.define((node.pattern as Identifier).name, value)
+            env.define((node.pattern as Identifier).name, value, { constant })
         } else if (node.pattern.type === 'ObjectPattern') {
             // Assume value is object
             if (typeof value !== 'object' || value === null) throw new Error("Destructuring error: value is not an object")
@@ -299,16 +311,16 @@ export class Interpreter {
             const safeValue = value as Record<string, any>;
             for (const prop of (node.pattern as ObjectPattern).properties) {
                 // Assuming prop.key is the property name in the object and prop.value is the variable name
-                env.define(prop.value, safeValue[prop.key])
+                env.define(prop.value, safeValue[prop.key], { constant })
             }
         } else if (node.pattern.type === 'ArrayPattern') {
             if (!Array.isArray(value)) throw new Error("Destructuring error: value is not an array")
             for (let i = 0; i < (node.pattern as ArrayPattern).elements.length; i++) {
                 const variableName = (node.pattern as ArrayPattern).elements[i]
                 if (i < value.length) {
-                    env.define(variableName, value[i])
+                    env.define(variableName, value[i], { constant })
                 } else {
-                    env.define(variableName, undefined)
+                    env.define(variableName, undefined, { constant })
                 }
             }
         } else {
@@ -335,6 +347,19 @@ export class Interpreter {
         while (this.isTruthy(this.evaluateExpression(stmt.test, env))) {
             this.execute(stmt.body, env)
         }
+    }
+
+    private visitForInStatement(stmt: ForInStatement, env: Environment) {
+        const source = this.evaluateExpression(stmt.source, env)
+        if (!Array.isArray(source)) throw new Error("For-in source must evaluate to an array")
+
+        let result: any = null
+        for (const item of source) {
+            const iterationEnv = new Environment(env)
+            iterationEnv.define(stmt.iterator, item)
+            result = this.execute(stmt.body, iterationEnv)
+        }
+        return result
     }
     
     private visitIfStatement(stmt: IfStatement, env: Environment) {
@@ -363,6 +388,14 @@ export class Interpreter {
                 return env.get((expr as Identifier).name)
             case 'BinaryExpression':
                 return this.visitBinaryExpression(expr as BinaryExpression, env)
+            case 'UnaryExpression': {
+                const unary = expr as UnaryExpression
+                const value = this.evaluateExpression(unary.argument, env)
+                switch (unary.operator) {
+                    case '-': return -value
+                    default: throw new Error(`Unknown unary operator: ${unary.operator}`)
+                }
+            }
             case 'CallExpression':
                 return this.visitCallExpression(expr as CallExpression, env)
             case 'PipelineExpression': {

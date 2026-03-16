@@ -7,6 +7,7 @@
   },
   "references": [
     { "path": "../frontend" },
+    { "path": "../compiler-js" },
     { "path": "../runtime" }
   ],
   "include": ["src/**/*.ts"],

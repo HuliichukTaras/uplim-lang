@@ -21,6 +21,37 @@ export type {
   CompileResult
 } from './compiler/api/compiler-api'
 
+export {
+  parseManifestString,
+  loadManifestFile,
+  validateManifest,
+  formatManifestDiagnostics,
+} from './manifest'
+export type {
+  UplimManifest,
+  UplimPackageConfig,
+  UplimBuildConfig,
+  UplimCapabilitiesConfig,
+  UplimAIConfig,
+  UplimFeaturesConfig,
+  ManifestDiagnostic,
+  ManifestParseResult,
+} from './manifest'
+
+export {
+  loadProject,
+  renderProject,
+  buildProject,
+  serveProject,
+} from './project'
+export type {
+  UplimProject,
+  ProjectPageArtifact,
+  ProjectRouteArtifact,
+  ProjectBuildArtifact,
+  ProjectServerHandle,
+} from './project'
+
 export type {
   ProjectHandle,
   EngineConfig,

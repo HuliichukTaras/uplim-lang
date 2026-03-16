@@ -13,6 +13,8 @@ This directory defines the current source of truth for the UPLim project.
 - [Gap Analysis](gap-analysis.md): delta between the current TypeScript prototype and the production language target.
 - [Execution Roadmap](execution-roadmap.md): phased delivery plan from repo normalization to Wasm and native backends.
 - [Core Specification](uplim-core-specification.md): product and language-level direction for UPLim v1.
+- [Licensing](license.md): canonical licensing policy for the language, compiler, runtime, docs, and examples.
+- The active prototype now includes a manifest-backed `build`, `render`, and `serve` pipeline for `.upl` projects via `packages/tooling` and `packages/cli`.
 
 ## Active Code
 
@@ -28,6 +30,12 @@ The active implementation work in this repository is currently centered on:
 - `/apps/vscode-extension`
 
 These packages form the live prototype stack and should be treated as the current executable baseline.
+
+The canonical production path now starts in:
+
+- `/crates/uplimc`
+- `/crates/uplim_manifest`
+- `/crates/uplim_parser`
 
 ## Reference-Only Areas
 

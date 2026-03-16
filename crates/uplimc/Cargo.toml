@@ -1,0 +1,9 @@
+[package]
+name = "uplimc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+uplim_manifest = { path = "../uplim_manifest" }
+uplim_parser = { path = "../uplim_parser" }

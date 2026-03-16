@@ -1,0 +1,40 @@
+[package]
+name = "ai-service"
+version = "0.1.0"
+edition = "v1"
+description = "Example UPLim AI-native service manifest"
+
+[build]
+entry = "app/main.upl"
+profile = "wasm-component"
+output = "dist/"
+app_root = "app"
+module_roots = ["modules", "components", "types"]
+test_roots = ["tests"]
+
+[capabilities]
+filesystem_read = false
+filesystem_write = false
+network_client = true
+network_server = true
+clock_wall = true
+clock_monotonic = true
+env_read = false
+process_spawn = false
+ai_remote = true
+ai_local = false
+ai_embedding = true
+ai_tool_call = true
+mcp_client = true
+
+[ai]
+provider = "openai"
+model = "gpt-4o-mini"
+mode = "structured"
+allow_tool_calls = true
+allow_mcp = true
+temperature = 0.2
+endpoint = "https://api.openai.com/v1/responses"
+
+[features]
+default = ["http", "ai"]

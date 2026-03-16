@@ -2,10 +2,17 @@
 
 import { Parser } from 'uplim-frontend'
 import { Compiler } from 'uplim-compiler-js'
-import { UPLimEngine } from 'uplim-tooling'
+import {
+  UPLimEngine,
+  loadManifestFile,
+  formatManifestDiagnostics,
+  buildProject,
+  renderProject,
+  serveProject,
+} from 'uplim-tooling'
 import * as fs from 'fs'
 import * as path from 'path'
-type CommandName = 'analyze' | 'run' | 'compile' | 'ai' | 'check' | 'fmt'
+type CommandName = 'analyze' | 'run' | 'compile' | 'build' | 'render' | 'serve' | 'ai' | 'check' | 'fmt' | 'manifest'
 
 function printUsage() {
   console.log(`UPLim CLI
@@ -14,8 +21,12 @@ Usage:
   uplim analyze [path] [--ai]
   uplim run <file>
   uplim compile <file> [-o output] [--stdout]
+  uplim build [path]
+  uplim render [path] [--stdout] [--route /path]
+  uplim serve [path] [--port 3000] [--host 127.0.0.1]
   uplim ai <prompt> [-m model]
   uplim check <file>
+  uplim manifest [path]
   uplim fmt <file> [-w]
 `)
 }
@@ -141,6 +152,55 @@ function compileCommand(args: string[]) {
   console.log(`Compiled to ${finalOutputPath}`)
 }
 
+function buildCommand(args: string[]) {
+  const target = args.find(arg => !arg.startsWith('-')) ?? '.'
+  const artifact = buildProject(target)
+
+  console.log(`✓ Project built`)
+  console.log(`  root:     ${artifact.project.rootDir}`)
+  console.log(`  output:   ${artifact.outputDir}`)
+  console.log(`  entry JS: ${artifact.compiledEntryPath}`)
+  console.log(`  server:   ${artifact.serverPath}`)
+  console.log(`  pages:    ${artifact.pages.filter(page => page.kind === 'page').length}`)
+  console.log(`  routes:   ${artifact.routes.length}`)
+}
+
+function renderCommand(args: string[]) {
+  const target = args.find(arg => !arg.startsWith('-')) ?? '.'
+  const stdout = args.includes('--stdout')
+  const routeFlagIndex = args.findIndex(arg => arg === '--route')
+  const routeFilter = routeFlagIndex >= 0 ? args[routeFlagIndex + 1] : undefined
+  const artifact = renderProject(target)
+  const pages = artifact.pages.filter(page => page.kind === 'page')
+  const selectedPage = routeFilter
+    ? pages.find(page => page.route === routeFilter)
+    : pages[0]
+
+  if (stdout && selectedPage) {
+    console.log(selectedPage.html)
+    return
+  }
+
+  console.log(`✓ Render complete`)
+  for (const page of pages) {
+    console.log(`  html  ${page.route} -> ${page.outputPath}`)
+  }
+  for (const route of artifact.routes) {
+    console.log(`  route ${route.route} -> ${route.outputPath}`)
+  }
+}
+
+async function serveCommand(args: string[]) {
+  const target = args.find(arg => !arg.startsWith('-')) ?? '.'
+  const portFlagIndex = args.findIndex(arg => arg === '--port')
+  const hostFlagIndex = args.findIndex(arg => arg === '--host')
+  const port = portFlagIndex >= 0 ? Number(args[portFlagIndex + 1]) : undefined
+  const host = hostFlagIndex >= 0 ? args[hostFlagIndex + 1] : undefined
+  const serverHandle = await serveProject(target, { port, host })
+
+  console.log(`UPLim dev server running at http://${serverHandle.host}:${serverHandle.port}`)
+}
+
 async function aiCommand(args: string[]) {
   const modelFlagIndex = args.findIndex(arg => arg === '-m' || arg === '--model')
   const model = modelFlagIndex >= 0 ? args[modelFlagIndex + 1] : 'codellama:13b'
@@ -219,6 +279,35 @@ function fmtCommand(args: string[]) {
   console.log(`Formatting ${file}... (Placeholder: implementation coming in v0.2)`)
 }
 
+function manifestCommand(args: string[]) {
+  const target = args[0] ?? '.'
+  const result = loadManifestFile(target)
+
+  if (result.diagnostics.length > 0) {
+    console.error('Manifest validation failed:')
+    for (const line of formatManifestDiagnostics(result.diagnostics)) {
+      console.error(`  ${line}`)
+    }
+    process.exit(1)
+  }
+
+  if (!result.manifest) {
+    console.error('Manifest validation failed with unknown error.')
+    process.exit(1)
+  }
+
+  console.log('✓ Manifest valid')
+  console.log(`  package: ${result.manifest.package.name}@${result.manifest.package.version}`)
+  console.log(`  entry:   ${result.manifest.build.entry}`)
+  console.log(`  profile: ${result.manifest.build.profile}`)
+
+  const enabledCapabilities = Object.entries(result.manifest.capabilities)
+    .filter(([, enabled]) => enabled)
+    .map(([key]) => key)
+
+  console.log(`  capabilities: ${enabledCapabilities.length > 0 ? enabledCapabilities.join(', ') : '(none)'}`)
+}
+
 async function main() {
   const [, , rawCommand, ...args] = process.argv
 
@@ -245,6 +334,15 @@ async function main() {
       case 'compile':
         compileCommand(args)
         return
+      case 'build':
+        buildCommand(args)
+        return
+      case 'render':
+        renderCommand(args)
+        return
+      case 'serve':
+        await serveCommand(args)
+        return
       case 'ai':
         await aiCommand(args)
         return
@@ -253,6 +351,9 @@ async function main() {
         return
       case 'fmt':
         fmtCommand(args)
+        return
+      case 'manifest':
+        manifestCommand(args)
         return
       default:
         printUsage()

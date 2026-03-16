@@ -1,0 +1,31 @@
+[package]
+name = "uplim-web-app"
+version = "0.1.0"
+edition = "v1"
+description = "Project build, render, and serve smoke fixture"
+
+[build]
+entry = "app/main.upl"
+profile = "js-interop"
+output = "dist"
+app_root = "app"
+module_roots = ["modules", "components", "types"]
+test_roots = ["tests"]
+
+[capabilities]
+filesystem_read = false
+filesystem_write = true
+network_client = false
+network_server = true
+clock_wall = false
+clock_monotonic = false
+env_read = false
+process_spawn = false
+ai_remote = false
+ai_local = false
+ai_embedding = false
+ai_tool_call = false
+mcp_client = false
+
+[features]
+default = ["http", "render"]

@@ -26,6 +26,7 @@ export type {
   StructInstantiation,
   UnaryExpression,
   WhileStatement,
+  ForInStatement,
   Statement,
   PipelineExpression,
   RangeExpression,

@@ -39,6 +39,37 @@ export type {
   CompileResult
 } from 'uplim-tooling'
 
+export {
+  parseManifestString,
+  loadManifestFile,
+  validateManifest,
+  formatManifestDiagnostics,
+} from 'uplim-tooling'
+export type {
+  UplimManifest,
+  UplimPackageConfig,
+  UplimBuildConfig,
+  UplimCapabilitiesConfig,
+  UplimAIConfig,
+  UplimFeaturesConfig,
+  ManifestDiagnostic,
+  ManifestParseResult,
+} from 'uplim-tooling'
+
+export {
+  loadProject,
+  renderProject,
+  buildProject,
+  serveProject,
+} from 'uplim-tooling'
+export type {
+  UplimProject,
+  ProjectPageArtifact,
+  ProjectRouteArtifact,
+  ProjectBuildArtifact,
+  ProjectServerHandle,
+} from 'uplim-tooling'
+
 export { Analyzer } from 'uplim-tooling'
 export type {
   AnalysisDiagnostic,

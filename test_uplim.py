@@ -148,5 +148,81 @@ let res_err = 10 |> x  # Error: x is not a function
         self.assertNotEqual(result.returncode, 0, "Should have failed with non-zero exit code")
         self.assertIn("'x' is not a function", result.stderr)
 
+    def test_const_and_range_step(self):
+        """Test const bindings and range expressions with explicit step."""
+        file_path = os.path.abspath('examples/test_const_range.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+const limit = 6
+say limit
+let evens = 0..6 by 2
+say evens
+let countdown = 3..0 by -1
+say countdown
+            """)
+
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        self.assertIn("6", result.stdout)
+        self.assertIn("[ 0, 2, 4, 6 ]", result.stdout)
+        self.assertIn("[ 3, 2, 1, 0 ]", result.stdout)
+
+        output_file = 'test_const_range_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("6", node_result.stdout)
+        self.assertIn("[ 0, 2, 4, 6 ]", node_result.stdout)
+        self.assertIn("[ 3, 2, 1, 0 ]", node_result.stdout)
+
+    def test_for_in_loop(self):
+        """Test for-in loops in runtime and JS transpilation."""
+        file_path = os.path.abspath('examples/test_for_in.upl')
+        with open(file_path, 'w') as f:
+            f.write("""
+let items = 1..3
+for item in items {
+  say item
+}
+            """)
+
+        result = self.run_uplim(file_path)
+        self.assertEqual(result.returncode, 0, f"Execution failed: {result.stderr}")
+        self.assertIn("1", result.stdout)
+        self.assertIn("2", result.stdout)
+        self.assertIn("3", result.stdout)
+
+        output_file = 'test_for_in_gen.js'
+        compile_result = subprocess.run(
+            NPX_CMD + ['compile', file_path, '-o', output_file],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+        self.assertEqual(compile_result.returncode, 0, f"Compilation failed: {compile_result.stderr}")
+
+        expected_output_path = os.path.join(os.getcwd(), output_file)
+        node_result = subprocess.run(
+            ['node', expected_output_path],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(node_result.returncode, 0, f"Generated JS failed: {node_result.stderr}")
+        self.assertIn("1", node_result.stdout)
+        self.assertIn("2", node_result.stdout)
+        self.assertIn("3", node_result.stdout)
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,8 @@
+
+const limit = 6
+say limit
+let evens = 0..6 by 2
+say evens
+let countdown = 3..0 by -1
+say countdown
+            

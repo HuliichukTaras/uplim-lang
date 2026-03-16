@@ -2,9 +2,17 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    return null
+  }
+
+  return new Resend(apiKey)
+}
 
 export async function POST(req: NextRequest) {
+  const resend = getResendClient()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY || "",
@@ -17,6 +25,10 @@ export async function POST(req: NextRequest) {
   )
 
   try {
+    if (!resend) {
+      return NextResponse.json({ error: "RESEND_API_KEY is not configured" }, { status: 500 })
+    }
+
     // Отримуємо всі pending emails
     const { data: emails, error: fetchError } = await supabase
       .from("email_queue")

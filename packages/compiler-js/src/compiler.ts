@@ -8,6 +8,7 @@ import {
     BlockStatement,
     ExpressionStatement,
     BinaryExpression,
+    UnaryExpression,
     CallExpression,
     Literal,
     Identifier,
@@ -19,7 +20,8 @@ import {
     ArrayLiteral,
     ObjectLiteral,
     FunctionExpression,
-    ReturnStatement
+    ReturnStatement,
+    ForInStatement
 } from 'uplim-frontend'
 
 export class Compiler {
@@ -38,11 +40,13 @@ export class Compiler {
             case 'SayStatement': return this.compileSayStatement(node as SayStatement)
             case 'IfStatement': return this.compileIfStatement(node as IfStatement)
             case 'BlockStatement': return this.compileBlockStatement(node as BlockStatement)
+            case 'ForInStatement': return this.compileForInStatement(node as ForInStatement)
             case 'ExpressionStatement': return this.compileExpressionStatement(node as ExpressionStatement)
             case 'BinaryExpression': return this.compileBinaryExpression(node as BinaryExpression)
             case 'CallExpression': return this.compileCallExpression(node as CallExpression)
             case 'Literal': return this.compileLiteral(node as Literal)
             case 'Identifier': return this.compileIdentifier(node as Identifier)
+            case 'UnaryExpression': return this.compileUnaryExpression(node as UnaryExpression)
             case 'PipelineExpression': return this.compilePipelineExpression(node as PipelineExpression)
             case 'RangeExpression': return this.compileRangeExpression(node as RangeExpression)
             case 'ListComprehension': return this.compileListComprehension(node as ListComprehension)
@@ -56,16 +60,17 @@ export class Compiler {
 
     private compileVariableDeclaration(node: VariableDeclaration): string {
         const val = this.compileNode(node.value)
+        const declarationKind = node.kind === 'const' ? 'const' : 'let'
         if (node.pattern.type === 'Identifier') {
-            return `let ${node.pattern.name} = ${val};`
+            return `${declarationKind} ${node.pattern.name} = ${val};`
         } else if (node.pattern.type === 'ObjectPattern') {
             const props = node.pattern.properties.map(p => {
                 return p.key === p.value ? p.key : `${p.key}: ${p.value}`
             }).join(', ')
-            return `let { ${props} } = ${val};`
+            return `${declarationKind} { ${props} } = ${val};`
         } else if (node.pattern.type === 'ArrayPattern') {
             const elems = node.pattern.elements.join(', ')
-            return `let [ ${elems} ] = ${val};`
+            return `${declarationKind} [ ${elems} ] = ${val};`
         }
         return `// Unknown pattern type`
     }
@@ -99,6 +104,12 @@ export class Compiler {
         return `{\n${body}\n}`
     }
 
+    private compileForInStatement(node: ForInStatement): string {
+        const source = this.compileNode(node.source)
+        const body = this.compileNode(node.body)
+        return `for (const ${node.iterator} of ${source}) ${body}`
+    }
+
     private compileExpressionStatement(node: ExpressionStatement): string {
         const expr = this.compileNode(node.expression)
         return `${expr};`
@@ -127,6 +138,11 @@ export class Compiler {
         return node.name
     }
 
+    private compileUnaryExpression(node: UnaryExpression): string {
+        const argument = this.compileNode(node.argument)
+        return `${node.operator}${argument}`
+    }
+
     private compileReturnStatement(node: ReturnStatement): string {
         if (node.argument) {
             return `return ${this.compileNode(node.argument)};`
@@ -150,8 +166,8 @@ export class Compiler {
     private compileRangeExpression(node: RangeExpression): string {
         const start = this.compileNode(node.start)
         const end = this.compileNode(node.end)
-        // Simple IIFE for range
-        return `(() => { const r = []; for(let i=${start}; i<=${end}; i++) r.push(i); return r; })()`
+        const step = node.step ? this.compileNode(node.step) : '1'
+        return `(() => { const r = []; const __start = ${start}; const __end = ${end}; const __step = ${step}; if (__step === 0) throw new Error("Range step cannot be zero."); if (__step > 0) { for (let i = __start; i <= __end; i += __step) r.push(i); } else { for (let i = __start; i >= __end; i += __step) r.push(i); } return r; })()`
     }
 
     private compileListComprehension(node: ListComprehension): string {

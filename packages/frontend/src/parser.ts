@@ -157,6 +157,13 @@ export interface WhileStatement extends ASTNode {
     body: BlockStatement
 }
 
+export interface ForInStatement extends ASTNode {
+    type: 'ForInStatement'
+    iterator: string
+    source: Expression
+    body: BlockStatement
+}
+
 export type Statement = 
     | VariableDeclaration
     | FunctionDeclaration
@@ -170,6 +177,7 @@ export type Statement =
     | ImportDeclaration
     | SayStatement
     | WhileStatement
+    | ForInStatement
 
 export interface PipelineExpression extends ASTNode {
   type: 'PipelineExpression'
@@ -294,7 +302,7 @@ export class Parser {
   private parseStatement(): ASTNode | null {
     const token = this.current()
 
-    if (token.type === TokenType.LET || token.type === TokenType.VAR) {
+    if (token.type === TokenType.LET || token.type === TokenType.VAR || token.type === TokenType.CONST) {
       return this.parseVariableDeclaration()
     }
     if (token.type === TokenType.FUNC || token.type === TokenType.MAKE ||
@@ -316,6 +324,9 @@ export class Parser {
     if (token.type === TokenType.WHILE) {
         return this.parseWhileStatement()
     }
+    if (token.type === TokenType.FOR) {
+        return this.parseForInStatement()
+    }
     if (token.type === TokenType.LBRACE) {
         return this.parseBlock()
     }
@@ -331,7 +342,8 @@ export class Parser {
     const startToken = this.current()
     if (startToken.type === TokenType.LET) this.advance()
     else if (startToken.type === TokenType.VAR) this.advance()
-    else throw new Error("Expected let or var")
+    else if (startToken.type === TokenType.CONST) this.advance()
+    else throw new Error("Expected let, var, or const")
 
     let pattern: Pattern
     if (this.match(TokenType.LBRACE)) {
@@ -389,7 +401,7 @@ export class Parser {
 
     return {
       type: 'VariableDeclaration',
-      kind: startToken.type === TokenType.VAR ? 'var' : 'let',
+      kind: startToken.type === TokenType.VAR ? 'var' : startToken.type === TokenType.CONST ? 'const' : 'let',
       pattern,
       typeAnnotation,
       value,
@@ -733,6 +745,21 @@ export class Parser {
           location: startToken
       }
   }
+
+  private parseForInStatement(): ForInStatement {
+      const startToken = this.consume(TokenType.FOR)
+      const iterator = this.consume(TokenType.IDENTIFIER, "Expected iterator name after 'for'").value
+      this.consume(TokenType.IN, "Expected 'in' after iterator name")
+      const source = this.parseExpression()
+      const body = this.parseBlock()
+      return {
+          type: 'ForInStatement',
+          iterator,
+          source,
+          body,
+          location: startToken
+      }
+  }
   
   private parseBlock(): BlockStatement {
       const startToken = this.consume(TokenType.LBRACE, "Expected '{'")
@@ -853,6 +880,16 @@ export class Parser {
   }
 
   private parseUnary(): Expression {
+      if (this.current().type === TokenType.MINUS) {
+           const token = this.advance()
+           const arg = this.parseUnary()
+           return {
+               type: 'UnaryExpression',
+               operator: '-',
+               argument: arg,
+               location: token
+           } as UnaryExpression
+      }
       if (this.current().type === TokenType.AWAIT) {
            const token = this.advance()
            const arg = this.parseUnary()
